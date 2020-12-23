@@ -1,0 +1,9 @@
+*.json
+pegasus-traces-master
+fits
+datasets
+.idea
+__pycache__/
+*.csv
+*.zip
+helpers/githubHeft
