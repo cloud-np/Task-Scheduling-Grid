@@ -1,18 +1,6 @@
 import copy
-from classes.Task import Task
-from classes.Machine import Machine
-from heft_paper.calculate_task_ranks import calculate_upward_ranks, calculate_downward_ranks
-from heft_paper.schedule_tasks import *
-
-
-def create_parents(task_dag):
-    parents = copy.deepcopy(task_dag)
-
-    for i in range(len(task_dag)):
-        for j in range(len(task_dag[i])):
-            parents[j][i] = task_dag[i][j]
-
-    return parents
+from algos.calculate_task_ranks import calculate_upward_ranks, calculate_downward_ranks
+from algos.schedule_tasks import *
 
 
 def heft(tasks, machines):

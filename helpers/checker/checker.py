@@ -8,9 +8,9 @@ def schedule_checker(tasks, machines):
     # NOTE: The tasks should be in the order the got
     # added otherwise this would return an error!
     for machine in machines:
-        prev_task = machine.tasks[0]
+        prev_task = machine.tasks_id[0]
         total_len = 0
-        for task in machine.tasks:
+        for task in machine.tasks_id:
             if task.end < total_len:
                 return error(task, total_len, prev_task)
             else:

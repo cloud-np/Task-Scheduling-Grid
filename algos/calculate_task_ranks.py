@@ -1,5 +1,3 @@
-import copy
-import math
 from colorama import Fore, Back, Style
 
 
@@ -49,8 +47,9 @@ def calculate_downward_ranks(tasks):
         all_ranks_of_curr_node = list()
         for parent_edge in curr_task.parents_edges:
             # Showing path/steps for debugging
-            # print(f'{Back.CYAN if tasks[i].is_exit_node else Back.RESET}'
-            #       f'{Fore.RED}{i + 1}{Fore.RESET}{Back.RESET} ')
+            # print(f'{Back.CYAN if parent_edge.node.is_entry_task else Back.RESET}'
+            #       f'{Fore.RED}{parent_edge.node.id}{Fore.RESET}{Back.RESET} ->', end=" ")
+
             # Calc rank_u
             rank = parent_edge.weight + recursive_downward_ranks(parent_edge.node) + avg(parent_edge.node.costs)
             all_ranks_of_curr_node.append(rank)

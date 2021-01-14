@@ -1,5 +1,6 @@
 from colorama import Fore, Back, Style
 from random import randint
+from typing import List
 from math import floor, ceil
 
 NETWORK_KBPS = 12000
@@ -8,30 +9,57 @@ CORE_SPEED = 1200
 
 class Machine:
 
-    def __init__(self, id_, name, n_cpu=None, speed=None, network_speed=None):
+    def __init__(self, id_, name, n_cpu=None, speed=None, network_speed=None, memory=None, cpti=None):
         self.schedule_len = 0
-        self.id = id_
+        self.id: int = id_
         self.name = name
         self.n_cpu = n_cpu
+        self.memory = memory
+        # cost per time interval
+        self.cpti = cpti
         self.speed = speed
         self.network_speed = network_speed
-        self.tasks = list()
+        self.tasks: List = list()
 
     def add_task(self, task):
         self.tasks.append(task)
-        self.schedule_len = task.end
+        if self.schedule_len <= task.end:
+            self.schedule_len = task.end
 
     def __str__(self):
-        tmp_str = f'Machine [{Fore.GREEN}{self.id}{Fore.RESET}]\n'
+        tmp_str = f'{Fore.YELLOW}Machine{Fore.RESET} [{Fore.GREEN}{self.id}{Fore.RESET}]\n'
         for task in self.tasks:
-            if task.id == -1:
-                continue
-            tmp_str += f'T[{Fore.GREEN}{task.id}{Fore.RESET}] ' \
-                       f'{task.start_str()} ' \
-                       f'{task.end_str()}\n'
-
-        tmp_str += f'TOTAL LEN: {self.schedule_len}'
+            if task.name.startswith("Dummy"):
+                tmp_str += f'{Fore.CYAN}{task.name}{Fore.RESET} '
+            else:
+                tmp_str += f'{task.id_str()} '
+            tmp_str += f'{task.start_str()} {task.end_str()}\n'
+        tmp_str += f'{Fore.BLUE}TOTAL LEN:{Fore.RESET} {self.schedule_len}'
         return tmp_str
+
+    def convert_tasks_to_str(self):
+        tmp_str = f'{self.tasks[0]}'
+        for i in range(1, len(self.tasks)):
+            tmp_str += '-' + str(self.tasks[i].id)
+        return tmp_str
+
+    def clear(self):
+        self.tasks = list()
+        self.schedule_len = 0
+
+    def update_schedule(self, task):
+        self.schedule_len = task.end if self.schedule_len <= task.end else self.schedule_len
+
+    def remove_task(self, task):
+        # Check if that task is the last on the schedule
+        if self.schedule_len == task.end:
+            if task.slowest_parent['parent_task'].machine_id.id == task.machine_id.id:
+                communication_time = 0
+            else:
+                communication_time = task.slowest_parent['communication_time']
+            self.schedule_len = task.start - communication_time
+            print(f"{task} changed was the last task in the list")
+            self.tasks.remove(task)
 
     def machine_details(self):
         return f'ID[{Fore.GREEN}{self.id}{Fore.RESET}] ' \
@@ -79,5 +107,5 @@ class Machine:
                 cost = machine.__generate_cost_for_task(task.runtime)
                 task.costs.append(cost)
 
-    def calc_communication_cost(self, cost):
+    def calc_com_cost(self, cost):
         return cost / self.network_speed
