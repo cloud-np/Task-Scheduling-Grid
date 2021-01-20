@@ -4,26 +4,9 @@ from colorama import Fore, Back, Style
 from helpers.data_parser.data_parser import get_tasks_from_json_file
 from algos.example_data import *
 from helpers.checker.checker import schedule_checker
+from random import choice
 
-# class GeneticWorkflow:
-#     def __init_(self, id_, deadline, tasks, machines, name=None):
-#         self.id = id_
-#         self.tasks = tasks
-#         self.machines = machines
-#         self.deadline = deadline
-#         self.name = name
-#
-#     def get_machine(self, index):
-#         return self.machines[index]
-#
-#     def get_task(self, index):
-#         return self.tasks[index]
-#
-#     def get_machines_mapping(self):
-#         return [task.machine_id for task in self.tasks if task.machine_id is not None]
-#
-#     def id_str(self):
-#         return f"{Back.RED}WORKFLOW    ID = {self.id}{Back.RESET}"
+WF_TYPES = ['cycles', 'epigenomics', 'genome', 'montage', 'seismology', 'soykbr']
 
 
 # Each Workflow has each very own Tasks and Machines
@@ -34,7 +17,7 @@ from helpers.checker.checker import schedule_checker
 # in any CASE tho tasks and machines lists should NEVER change
 # at all. I should try to make them immutable later on.
 class Workflow:
-    def __init__(self, id_, name=None, wf_type=None, file_data=None, deadline=None, example_data='deadline-constrain',
+    def __init__(self, id_, name=None, wf_type=None, file_path=None, deadline=None, example_data='deadline-constrain',
                  tasks=None, machines=None):
         self.id = id_
         # This should be describing the type of the workflow e.g: LIGO, Montage, etc
@@ -48,14 +31,14 @@ class Workflow:
         self.machine_map = list()
 
         if tasks is None or machines is None:
-            if file_data is None:
+            if file_path is None:
                 self.setup_data_example(example_data)
                 self.type = "Heft paper example."
             else:
                 # 1. Generate machines
                 self.machines = Machine.get_4_machines()
                 # # 2. Parse the workflow tasks
-                self.tasks = get_tasks_from_json_file(file_data)
+                self.tasks = get_tasks_from_json_file(file_path)
                 # # 3. Calculate the runtime cost for every machine
                 Machine.assign_tasks_with_costs(self.machines, self.tasks)
 
@@ -74,6 +57,19 @@ class Workflow:
         return f"{self.id_str()}\n " \
                f"{Fore.BLUE}WK-LEN:{Fore.RESET} {self.get_workflow_len()} \n" \
                f"{Fore.GREEN}Fitness:{Fore.RESET} {self.fitness}"
+
+    @staticmethod
+    def generate_multiple_workflows(n_wfs: int, n_tasks: int, path: str = './datasets'):
+        workflows = list()
+        for i in range(n_wfs):
+            wf_type = choice(WF_TYPES)
+            # We can't have these type of workflows with less than that tasks.
+            if (wf_type == 'montage' and n_tasks < 133) or (wf_type == 'soykbr' and n_tasks < 14):
+                i -= 1
+                continue
+            workflows.append(Workflow(id_=i, file_path=f'{path}/{wf_type}/{wf_type}_{n_tasks}'))
+
+        return [Workflow(id_=i, file_path=f'{n_tasks}') for i in range(n_wfs)]
 
     def get_workflow_len(self):
         return max(self.machines, key=lambda m: m.schedule_len).schedule_len
@@ -101,7 +97,10 @@ class Workflow:
         return [task.machine_id for task in self.tasks if task.machine_id != -1]
 
     def recipe(self):
-        return ''.join([f"T{task.id}M{self.machines[self.tasks.machine_id].id}" for task in self.tasks])
+        return [{"id": task,
+                 "start": task.start,
+                 "end": task.end,
+                 "machine_id": task.machine_id} for task in self.tasks]
 
     # This method is needed to "clean" the workflow to prepare it most likely for next
     # workflow recipe to take in place. This is a must in our method to use in genetic algos.

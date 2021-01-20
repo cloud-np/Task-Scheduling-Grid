@@ -1,27 +1,61 @@
 from workflowhub import Trace, TraceAnalyzer, WorkflowGenerator
-from workflowhub.generator import SeismologyRecipe, MontageRecipe, EpigenomicsRecipe
-from classes.Task import Task
-import json
-from os import listdir
-from os.path import isfile, join
-file_name = 'dataset/epigenomics-workflow.json'
+from workflowhub.generator import SeismologyRecipe, MontageRecipe, EpigenomicsRecipe, CyclesRecipe, GenomeRecipe, SoyKBRecipe
+
+# To create a folder as well
+# import os
+# from time import gmtime, strftime
+# file_path = f'{path}/{wf_type} {strftime("%Y-%m-%d %H_%M_%S", gmtime())}' if unique_file else f'{path}/{wf_type}'
+# os.makedirs(file_path)
+WF_TYPES = ['cycles', 'epigenomics', 'genome', 'montage', 'seismology', 'soykbr']
+
+
+def create_wfs(wf_type: str, path: str = './datasets', num_tasks: int = 200):
+
+    if wf_type not in WF_TYPES:
+        raise Exception('Not a valid name for a recipe!')
+
+    file_name = f'{path}/{wf_type}/{wf_type}_{num_tasks}.json'
+
+    if wf_type == 'cycles':
+        recipe = CyclesRecipe.from_num_tasks(num_tasks=num_tasks)
+    elif wf_type == 'epigenomics':
+        recipe = EpigenomicsRecipe.from_num_tasks(num_tasks=num_tasks)
+    elif wf_type == 'genome':
+        recipe = GenomeRecipe.from_num_tasks(num_tasks=num_tasks)
+    elif wf_type == 'montage':
+        recipe = MontageRecipe.from_num_tasks(num_tasks=num_tasks)
+    elif wf_type == 'seismology':
+        recipe = SeismologyRecipe.from_num_tasks(num_tasks=num_tasks)
+    elif wf_type == 'soykbr':
+        recipe = SoyKBRecipe.from_num_tasks(num_tasks=num_tasks)
+    else:
+        raise Exception('Not a valid name for a recipe!')
+    generator = WorkflowGenerator(recipe)
+    workflow = generator.build_workflow()
+    workflow.write_json(file_name)
+    print(f"Created -> {file_name}")
+
+
+create_wfs(wf_type="montage", num_tasks=200)
+
+# file_name = 'datasets/epigenomics-wf.json'
 # creating a Seismology workflow recipe based on the number
 # of pair of signals to estimate earthquake STFs
 # recipe = MontageRecipe.from_num_tasks(num_tasks=10)
 # recipe = SeismologyRecipe.from_num_pairs(num_pairs=5)
-recipe = EpigenomicsRecipe.from_num_tasks(num_tasks=50)
+# recipe = EpigenomicsRecipe.from_num_tasks(num_tasks=50)
 
 # recipe = MontageRecipe.from_num_pairs(num_pairs=10)
 
 # creating an instance of the workflow generator with the
 # Seismology workflow recipe
-generator = WorkflowGenerator(recipe)
+# generator = WorkflowGenerator(recipe)
 
 # generating a synthetic workflow trace of the Seismology workflow
-workflow = generator.build_workflow()
+# workflow = generator.build_workflow()
 
 # writing the synthetic workflow trace into a JSON file
-workflow.write_json(file_name)
+# workflow.write_json(file_name)
 
 #########################################################################
 # TRACES
