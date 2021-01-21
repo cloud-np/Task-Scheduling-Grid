@@ -16,27 +16,32 @@ def create_wfs(wf_type: str, path: str = './datasets', num_tasks: int = 200):
 
     file_name = f'{path}/{wf_type}/{wf_type}_{num_tasks}.json'
 
-    if wf_type == 'cycles':
-        recipe = CyclesRecipe.from_num_tasks(num_tasks=num_tasks)
-    elif wf_type == 'epigenomics':
-        recipe = EpigenomicsRecipe.from_num_tasks(num_tasks=num_tasks)
-    elif wf_type == 'genome':
-        recipe = GenomeRecipe.from_num_tasks(num_tasks=num_tasks)
-    elif wf_type == 'montage':
-        recipe = MontageRecipe.from_num_tasks(num_tasks=num_tasks)
-    elif wf_type == 'seismology':
-        recipe = SeismologyRecipe.from_num_tasks(num_tasks=num_tasks)
-    elif wf_type == 'soykbr':
-        recipe = SoyKBRecipe.from_num_tasks(num_tasks=num_tasks)
-    else:
-        raise Exception('Not a valid name for a recipe!')
-    generator = WorkflowGenerator(recipe)
-    workflow = generator.build_workflow()
-    workflow.write_json(file_name)
-    print(f"Created -> {file_name}")
+
+    try:
+        if wf_type == 'cycles':
+            recipe = CyclesRecipe.from_num_tasks(num_tasks=num_tasks)
+        elif wf_type == 'epigenomics':
+            recipe = EpigenomicsRecipe.from_num_tasks(num_tasks=num_tasks)
+        elif wf_type == 'genome':
+            recipe = GenomeRecipe.from_num_tasks(num_tasks=num_tasks)
+        elif wf_type == 'montage':
+            recipe = MontageRecipe.from_num_tasks(num_tasks=num_tasks)
+        elif wf_type == 'seismology':
+            recipe = SeismologyRecipe.from_num_tasks(num_tasks=num_tasks)
+        elif wf_type == 'soykbr':
+            recipe = SoyKBRecipe.from_num_tasks(num_tasks=num_tasks)
+        else:
+            raise Exception('Not a valid name for a recipe!')
+        generator = WorkflowGenerator(recipe)
+        workflow = generator.build_workflow()
+        workflow.write_json(file_name)
+        print(f"Created -> {file_name}")
+    except ValueError:
+        print(f"Low tasks for {wf_type}. (n >= 133 for montage and n >= 14 for soykbr)")
 
 
-create_wfs(wf_type="montage", num_tasks=200)
+for wf_type in WF_TYPES:
+    create_wfs(wf_type=wf_type, num_tasks=20)
 
 # file_name = 'datasets/epigenomics-wf.json'
 # creating a Seismology workflow recipe based on the number
