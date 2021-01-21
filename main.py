@@ -14,7 +14,7 @@ if __name__ == "__main__":
         print(wf)
     # wf = Workflow(id_=0, file_data='datasets/epigenomics-workflow.json')
 
-    workflows = bga()
+    # workflows = bga()
     # cpop(wf.tasks, wf.machines)
     # for wf in workflows:
     #     wf.print_info(True)

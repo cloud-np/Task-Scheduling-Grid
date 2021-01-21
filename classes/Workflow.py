@@ -17,7 +17,7 @@ WF_TYPES = ['cycles', 'epigenomics', 'genome', 'montage', 'seismology', 'soykbr'
 # in any CASE tho tasks and machines lists should NEVER change
 # at all. I should try to make them immutable later on.
 class Workflow:
-    def __init__(self, id_, name=None, wf_type=None, file_path=None, deadline=None, example_data='deadline-constrain',
+    def __init__(self, id_, wf_type, name=None, file_path=None, deadline=None, example_data='deadline-constrain',
                  tasks=None, machines=None):
         self.id = id_
         # This should be describing the type of the workflow e.g: LIGO, Montage, etc
@@ -26,9 +26,7 @@ class Workflow:
         self.tasks = tasks
         self.machines = machines
         self.deadline = deadline
-        self.fitness = -1
         # This var actually shows how the workflow is going to get executed
-        self.machine_map = list()
 
         if tasks is None or machines is None:
             if file_path is None:
@@ -42,21 +40,12 @@ class Workflow:
                 # # 3. Calculate the runtime cost for every machine
                 Machine.assign_tasks_with_costs(self.machines, self.tasks)
 
-    @staticmethod
-    def print_workflow(wf):
-        print(f"\t\t\t{Back.RED}WORKFLOW    ID = {wf.id}{Back.RESET}")
-        for task in wf.tasks:
-            if task.priority is not None:
-                print(f"p: {task.priority} {task}")
-            else:
-                print(task)
-        for machine in wf.machines:
-            print(machine)
-
     def __str__(self):
-        return f"{self.id_str()}\n " \
-               f"{Fore.BLUE}WK-LEN:{Fore.RESET} {self.get_workflow_len()} \n" \
-               f"{Fore.GREEN}Fitness:{Fore.RESET} {self.fitness}"
+        return f"{self.id_str()}\n" \
+               f"{Fore.BLUE}Type:{Fore.RESET} {self.type} \n" \
+               f"{Fore.MAGENTA}Num-tasks:{Fore.RESET} {len(self.tasks)}\n" \
+               f"{Fore.RED}Len:{Fore.RESET} {self.get_workflow_len()}" \
+
 
     @staticmethod
     def generate_multiple_workflows(n_wfs: int, n_tasks: int, path: str = './datasets'):
@@ -67,9 +56,8 @@ class Workflow:
             if (wf_type == 'montage' and n_tasks < 133) or (wf_type == 'soykbr' and n_tasks < 14):
                 i -= 1
                 continue
-            workflows.append(Workflow(id_=i, file_path=f'{path}/{wf_type}/{wf_type}_{n_tasks}'))
-
-        return [Workflow(id_=i, file_path=f'{n_tasks}') for i in range(n_wfs)]
+            workflows.append(Workflow(id_=i, file_path=f'{path}/{wf_type}/{wf_type}_{n_tasks}.json', wf_type=wf_type))
+        return workflows
 
     def get_workflow_len(self):
         return max(self.machines, key=lambda m: m.schedule_len).schedule_len
@@ -85,16 +73,12 @@ class Workflow:
                 print(f"{machine.convert_tasks_to_str()}")
 
         print(f"{Fore.BLUE}WK-LEN:{Fore.RESET} {self.get_workflow_len()}")
-        print(f"{Fore.GREEN}Fitness:{Fore.RESET} {self.fitness}")
 
     def get_machine(self, index):
         return self.machines[index]
 
     def get_task(self, index):
         return self.tasks[index]
-
-    def get_machines_mapping(self):
-        return [task.machine_id for task in self.tasks if task.machine_id != -1]
 
     def recipe(self):
         return [{"id": task,
