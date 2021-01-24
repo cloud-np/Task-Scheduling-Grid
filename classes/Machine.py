@@ -1,7 +1,6 @@
 from colorama import Fore, Back, Style
 from random import randint
 from typing import List
-from math import floor, ceil
 
 NETWORK_KBPS = 12000
 CORE_SPEED = 1200
@@ -9,16 +8,15 @@ CORE_SPEED = 1200
 
 class Machine:
 
-    def __init__(self, id_, name, n_cpu=None, speed=None, network_speed=None, memory=None, cpti=None):
+    def __init__(self, id_, name, n_cpu=None, speed=None, memory=None, cpti=None):
         self.schedule_len = 0
         self.id: int = id_
-        self.name = name
-        self.n_cpu = n_cpu
+        self.name: str = name
+        self.n_cpu: int = n_cpu
         self.memory = memory
-        # cost per time interval
-        self.cpti = cpti
+        self.cpti = cpti  # cost per time interval
         self.speed = speed
-        self.network_speed = network_speed
+        # self.network_speed = network_speed
         self.tasks: List = list()
 
     def add_task(self, task):
@@ -64,8 +62,7 @@ class Machine:
     def machine_details(self):
         return f'ID[{Fore.GREEN}{self.id}{Fore.RESET}] ' \
                f'{Fore.RED}n_cpu:{Fore.RESET} {Fore.YELLOW}{self.n_cpu}{Fore.RESET} ' \
-               f'{Fore.RED}speed:{Fore.RESET} {Fore.YELLOW}{self.speed}{Fore.RESET} ' \
-               f'{Fore.RED}network_speed:{Fore.RESET} {Fore.YELLOW}{self.network_speed}{Fore.RESET}'
+               f'{Fore.RED}speed:{Fore.RESET} {Fore.YELLOW}{self.speed}{Fore.RESET} '
 
     @staticmethod
     def generate_rand_machines(n_machines):
@@ -77,7 +74,6 @@ class Machine:
                     name=f'M-{i}',
                     n_cpu=randint(1, 4),
                     speed=CORE_SPEED - randint(100, 400),
-                    network_speed=NETWORK_KBPS - randint(0, 3500)
                 )
             )
         return machines
@@ -85,10 +81,10 @@ class Machine:
     @staticmethod
     def get_4_machines():
         machines = [
-            Machine(id_=0, name="M-0", n_cpu=2, speed=CORE_SPEED - 200, network_speed=NETWORK_KBPS),
-            Machine(id_=1, name="M-1", n_cpu=1, speed=CORE_SPEED - 100, network_speed=NETWORK_KBPS),
-            Machine(id_=2, name="M-2", n_cpu=4, speed=CORE_SPEED - 300, network_speed=NETWORK_KBPS),
-            Machine(id_=3, name="M-3", n_cpu=2, speed=CORE_SPEED - 400, network_speed=NETWORK_KBPS)
+            Machine(id_=0, name="M-0", n_cpu=2, speed=CORE_SPEED - 200),
+            Machine(id_=1, name="M-1", n_cpu=1, speed=CORE_SPEED - 100),
+            Machine(id_=2, name="M-2", n_cpu=4, speed=CORE_SPEED - 300),
+            Machine(id_=3, name="M-3", n_cpu=2, speed=CORE_SPEED - 400)
         ]
         return machines
 
@@ -107,5 +103,6 @@ class Machine:
                 cost = machine.__generate_cost_for_task(task.runtime)
                 task.costs.append(cost)
 
+    # Atm it just returns the cost back. Maybe we may add something depending the problem.
     def calc_com_cost(self, cost):
-        return cost / self.network_speed
+        return cost

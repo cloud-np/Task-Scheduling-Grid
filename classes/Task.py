@@ -1,8 +1,6 @@
 from colorama import Fore
-from helpers.helpers import get_id_from_name
-from typing import List
+from typing import Set
 from algos.calc_ex_time import compute_execution_time
-import copy
 
 DEBUG = False
 ROUND_DIGIT = 2
@@ -28,13 +26,13 @@ class Edge:
 
     def __str__(self):
         return f'--- {Fore.YELLOW}{self.weight}{Fore.RESET} --> {self.node.id_str()}'
-    # Can't use this yet because Task __eq__ checks based the
-    # rank attribute. It should be changed to name or id_
+    # can't use this yet because task __eq__ checks based the
+    # rank attribute. it should be changed to name or id_
     # def __eq__(self, other):
-    #     if isinstance(other, Edge):
+    #     if isinstance(other, edge):
     #         return self.node == other.node
     #     else:
-    #         return NotImplemented
+    #         return notimplemented
 
 
 class Task:
@@ -55,8 +53,8 @@ class Task:
         self.children_till_ready = 0
         self.parents_names = parents_names
         self.parents_till_ready = 0
-        self.children_edges: List[Edge] = list()
-        self.parents_edges: List[Edge] = list()
+        self.children_edges: Set[Edge] = set()
+        self.parents_edges: Set[Edge] = set()
 
         # This should be updated by the slowest parent.
         # This isn't needed but it should make it a bit faster if used
@@ -93,7 +91,7 @@ class Task:
     # def avg_ect(self):
     #     return sum(self.costs)
 
-    def clear(self):
+    def reset(self):
         self.start = None
         self.end = None
         self.machine_id = -1
@@ -173,15 +171,15 @@ class Task:
                 return task
         return None
 
-    @staticmethod
-    def create_parents(task_dag):
-        parents = copy.deepcopy(task_dag)
-
-        for i in range(len(task_dag)):
-            for j in range(len(task_dag[i])):
-                parents[j][i] = task_dag[i][j]
-
-        return parents
+    # @staticmethod
+    # def create_parents(task_dag):
+    #     parents = copy.deepcopy(task_dag)
+    #
+    #     for i in range(len(task_dag)):
+    #         for j in range(len(task_dag[i])):
+    #             parents[j][i] = task_dag[i][j]
+    #
+    #     return parents
 
     def get_tasks_from_names(self, tasks, is_child_tasks: bool):
         adj_tasks = list()
@@ -289,7 +287,7 @@ class Task:
             children_names=None
         )
         for entry_node in entry_nodes:
-            dummy_in.children_edges.append(Edge(0, entry_node))
+            dummy_in.children_edges.add(Edge(0, entry_node))
         tasks.insert(0, dummy_in)
 
         dummy_out = Task(
@@ -302,5 +300,5 @@ class Task:
             children_names=None
         )
         for exit_node in exit_nodes:
-            dummy_out.parents_edges.append(Edge(0, exit_node))
+            dummy_out.parents_edges.add(Edge(0, exit_node))
         tasks.append(dummy_out)

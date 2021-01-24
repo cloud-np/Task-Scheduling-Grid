@@ -1,12 +1,13 @@
 from classes.Machine import Machine
 from classes.Task import Task
-from colorama import Fore, Back, Style
-from helpers.data_parser.data_parser import get_tasks_from_json_file
+from colorama import Fore, Back
+from helpers.data_parser import get_tasks_from_json_file
 from algos.example_data import *
-from helpers.checker.checker import schedule_checker
+from helpers.checker import schedule_checker
 from random import choice
 
 WF_TYPES = ['cycles', 'epigenomics', 'genome', 'montage', 'seismology', 'soykbr']
+NUM_TASKS = [10, 14, 20, 30, 50, 100, 133, 200, 300, 400, 500, 1000]
 
 
 # Each Workflow has each very own Tasks and Machines
@@ -47,16 +48,29 @@ class Workflow:
                f"{Fore.RED}Len:{Fore.RESET} {self.get_workflow_len()}" \
 
 
+    # TODO: If we end up using the same workflow for multiple workflows we should preload tasks and machines
+    #       and just deepcopy these. Even that should be faster. This is not something that will effect us a lot but ok
+    '''
+        Generates multiple workflows randomly based on number of tasks and the workflows you need.
+        It doesn't actually create them although I could do that but I found it kinda pointless atm.
+        So it picks from some random pre-made ones.
+    '''
     @staticmethod
-    def generate_multiple_workflows(n_wfs: int, n_tasks: int, path: str = './datasets'):
+    def generate_multiple_workflows(n_wfs: int, user_set_tasks: int = 0, path: str = './datasets'):
         workflows = list()
-        for i in range(n_wfs):
+        i = 0
+        while len(workflows) < n_wfs:
             wf_type = choice(WF_TYPES)
+            if user_set_tasks < 1:
+                n_tasks = choice(NUM_TASKS)
+            else:
+                n_tasks = user_set_tasks
+
             # We can't have these type of workflows with less than that tasks.
-            if (wf_type == 'montage' and n_tasks < 133) or (wf_type == 'soykbr' and n_tasks < 14):
-                i -= 1
-                continue
-            workflows.append(Workflow(id_=i, file_path=f'{path}/{wf_type}/{wf_type}_{n_tasks}.json', wf_type=wf_type))
+            if not ((wf_type == 'montage' and n_tasks < 133) or (wf_type == 'soykbr' and n_tasks < 14)):
+                i += 1
+                workflows.append(Workflow(id_=i, file_path=f'{path}/{wf_type}/{wf_type}_{n_tasks}.json',
+                                          wf_type=wf_type))
         return workflows
 
     def get_workflow_len(self):
@@ -74,6 +88,9 @@ class Workflow:
 
         print(f"{Fore.BLUE}WK-LEN:{Fore.RESET} {self.get_workflow_len()}")
 
+    def avg_com_cost(self):
+        pass
+
     def get_machine(self, index):
         return self.machines[index]
 
@@ -88,11 +105,11 @@ class Workflow:
 
     # This method is needed to "clean" the workflow to prepare it most likely for next
     # workflow recipe to take in place. This is a must in our method to use in genetic algos.
-    def clear_workflow(self, sort_tasks: bool = False):
+    def reset_workflow(self, sort_tasks: bool = False):
         for task in self.tasks:
-            task.clear()
+            task.reset()
         for machine in self.machines:
-            machine.clear()
+            machine.reset()
 
         if sort_tasks is True:
             self.tasks.sort(key=lambda t: t.id)
@@ -143,7 +160,7 @@ class Workflow:
         # This is really important so we can start scheduling correctly the tasks
         tasks[0].status = 1
 
-        self.machines = [Machine(i, f'M-{i}', network_speed=1) for i in range(len(costs[0]))]
+        self.machines = [Machine(i, f'M-{i}') for i in range(len(costs[0]))]
         self.tasks = tasks
 
 

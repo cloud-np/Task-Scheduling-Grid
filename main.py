@@ -9,9 +9,12 @@ if __name__ == "__main__":
     # # 5. Get the schedule from preferred algorithm.
     # schedule = heft(tasks, machines)
     # schedule = example_heft()
-    workflows = Workflow.generate_multiple_workflows(n_wfs=10, n_tasks=20)
+    # workflows = Workflow.generate_multiple_workflows(n_wfs=20, user_set_tasks=20)
+    workflows = Workflow.generate_multiple_workflows(n_wfs=20)
     for wf in workflows:
         print(wf)
+
+    print(len(workflows))
     # wf = Workflow(id_=0, file_data='datasets/epigenomics-workflow.json')
 
     # workflows = bga()
