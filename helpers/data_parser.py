@@ -4,7 +4,7 @@ from classes.Task import *
 from helpers.helpers import get_id_from_name
 
 
-def get_tasks_from_json_file(file_name):
+def get_tasks_from_json_file(file_name, wf_id):
     with open(file_name) as f:
         data = json.load(f)
 
@@ -28,6 +28,7 @@ def get_tasks_from_json_file(file_name):
         tasks.append(
             Task(
                 id_=job_id,
+                wf_id=wf_id,
                 name=job['name'],
                 costs=list(),
                 runtime=job['runtime'],

@@ -18,35 +18,34 @@ NUM_TASKS = [10, 14, 20, 30, 50, 100, 133, 200, 300, 400, 500, 1000]
 # in any CASE tho tasks and machines lists should NEVER change
 # at all. I should try to make them immutable later on.
 class Workflow:
-    def __init__(self, id_, wf_type, name=None, file_path=None, deadline=None, example_data='deadline-constrain',
-                 tasks=None, machines=None):
+    def __init__(self, id_, wf_type, machines, name=None, file_path=None, deadline=None,
+                 example_data='deadline-constrain', tasks=None):
         self.id = id_
         # This should be describing the type of the workflow e.g: LIGO, Montage, etc
         self.type = wf_type
         self.name = name
         self.tasks = tasks
-        self.machines = machines
         self.deadline = deadline
+        self.avg_comp_cost: float = -1.0
+        self.avg_com_cost: float = -1.0
+        self.ccr: float = -1.0
         # This var actually shows how the workflow is going to get executed
 
-        if tasks is None or machines is None:
+        if tasks is None:
             if file_path is None:
                 self.setup_data_example(example_data)
                 self.type = "Heft paper example."
             else:
-                # 1. Generate machines
-                self.machines = Machine.get_4_machines()
-                # # 2. Parse the workflow tasks
-                self.tasks = get_tasks_from_json_file(file_path)
-                # # 3. Calculate the runtime cost for every machine
-                Machine.assign_tasks_with_costs(self.machines, self.tasks)
+                # 1. Parse the workflow tasks
+                self.tasks = get_tasks_from_json_file(file_path, id_)
+                # 2. Calculate the runtime cost for every machine
+                Machine.assign_tasks_with_costs(tasks=self.tasks, machines=machines)
 
     def __str__(self):
         return f"{self.id_str()}\n" \
                f"{Fore.BLUE}Type:{Fore.RESET} {self.type} \n" \
                f"{Fore.MAGENTA}Num-tasks:{Fore.RESET} {len(self.tasks)}\n" \
-               f"{Fore.RED}Len:{Fore.RESET} {self.get_workflow_len()}" \
-
+               # f"{Fore.RED}Len:{Fore.RESET} {self.get_workflow_len()}" \
 
     # TODO: If we end up using the same workflow for multiple workflows we should preload tasks and machines
     #       and just deepcopy these. Even that should be faster. This is not something that will effect us a lot but ok
@@ -56,7 +55,7 @@ class Workflow:
         So it picks from some random pre-made ones.
     '''
     @staticmethod
-    def generate_multiple_workflows(n_wfs: int, user_set_tasks: int = 0, path: str = './datasets'):
+    def generate_multiple_workflows(n_wfs: int, machines, user_set_tasks: int = 0, path: str = './datasets'):
         workflows = list()
         i = 0
         while len(workflows) < n_wfs:
@@ -70,11 +69,23 @@ class Workflow:
             if not ((wf_type == 'montage' and n_tasks < 133) or (wf_type == 'soykbr' and n_tasks < 14)):
                 i += 1
                 workflows.append(Workflow(id_=i, file_path=f'{path}/{wf_type}/{wf_type}_{n_tasks}.json',
-                                          wf_type=wf_type))
+                                          wf_type=wf_type, machines=machines))
         return workflows
 
-    def get_workflow_len(self):
-        return max(self.machines, key=lambda m: m.schedule_len).schedule_len
+    @staticmethod
+    def load_example_workflows(machines, path: str = './datasets'):
+        n = 10
+        workflows = list()
+        num_tasks = [10, 50, 20, 500, 30, 100, 14, 50, 400, 200]
+        wf_types = ['cycles', 'genome', 'seismology', 'montage', 'soykbr', 'epigenomics',
+                    'genome', 'cycles', 'seismology', 'montage']
+        for i in range(n):
+            workflows.append(Workflow(id_=i, file_path=f"{path}/{wf_types[i]}/{wf_types[i]}_{num_tasks[i]}.json",
+                                      wf_type=wf_types[i], machines=machines))
+        return workflows
+
+    # def get_workflow_len(self):
+    #     return max(self.machines, key=lambda m: m.schedule_len).schedule_len
 
     def id_str(self):
         return f"{Back.RED}WORKFLOW    ID = {self.id}{Back.RESET}"
@@ -88,8 +99,22 @@ class Workflow:
 
         print(f"{Fore.BLUE}WK-LEN:{Fore.RESET} {self.get_workflow_len()}")
 
-    def avg_com_cost(self):
-        pass
+    def calc_avg_comp_cost(self):
+        self.avg_comp_cost = sum([task.avg_cost() for task in self.tasks])
+        return self.avg_comp_cost
+        
+    def calc_avg_com_cost(self):
+        self.avg_com_cost = sum([task.avg_com_cost() for task in self.tasks])
+        return self.avg_com_cost
+
+    # ccr = Communication to computation ratio.
+    def calc_ccr(self):
+        if self.avg_comp_cost == -1:
+            self.calc_avg_comp_cost()
+        if self.avg_com_cost == -1:
+            self.calc_avg_com_cost()
+        self.ccr = self.avg_com_cost / self.avg_comp_cost
+        return self.ccr
 
     def get_machine(self, index):
         return self.machines[index]

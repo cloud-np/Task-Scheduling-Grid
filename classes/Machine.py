@@ -1,9 +1,11 @@
 from colorama import Fore, Back, Style
 from random import randint
-from typing import List
+from typing import Set
 
 NETWORK_KBPS = 12000
 CORE_SPEED = 1200
+MINIMUM_GAP = 3
+DEBUG = True
 
 
 class Machine:
@@ -16,11 +18,25 @@ class Machine:
         self.memory = memory
         self.cpti = cpti  # cost per time interval
         self.speed = speed
+        self.holes: Set = set()
         # self.network_speed = network_speed
-        self.tasks: List = list()
+        self.tasks: Set = set()
 
+    # TODO: Adding a task generates a hole most of the time. We need to keep
+    #       a track of it.
     def add_task(self, task):
-        self.tasks.append(task)
+        if DEBUG and task.start < self.schedule_len:
+            raise ValueError(f"Something went wrong task.start it shouldn't be lower than the"
+                             f" machine[{self.id}] schedule\n {task}")
+        elif DEBUG and task in self.tasks:
+            raise Exception(f"The task is already added. In machine {self.id}\n {task}")
+        elif (task.start - self.schedule_len) <= MINIMUM_GAP:
+            # This translates to hole = { diff: [start, end] }
+            self.holes.add({task.start - self.schedule_len: [self.schedule_len, task.start]})
+            self.__add_task_to_end(task)
+
+    def __add_task_to_end(self, task):
+        self.tasks.add(task)
         if self.schedule_len <= task.end:
             self.schedule_len = task.end
 
