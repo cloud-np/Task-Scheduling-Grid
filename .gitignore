@@ -3,6 +3,7 @@ pegasus-traces-master
 fits
 datasets
 .idea
+.vscode
 __pycache__/
 *.csv
 *.zip

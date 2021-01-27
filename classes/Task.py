@@ -36,7 +36,7 @@ class Edge:
 
 
 class Task:
-    def __init__(self, id_, name, costs, runtime, files, children_names, parents_names):
+    def __init__(self, id_, wf_id, name, costs, runtime, files, children_names, parents_names):
         self.costs = costs
         self.id = id_
         self.name = name
@@ -48,6 +48,7 @@ class Task:
         self.priority = None
         self.runtime = runtime
         self.files = files
+        self.wf_id = wf_id
         self.status = TaskStatus.UNSCHEDULED
         self.children_names = children_names
         self.children_till_ready = 0
@@ -58,7 +59,8 @@ class Task:
 
         # This should be updated by the slowest parent.
         # This isn't needed but it should make it a bit faster if used
-        self.slowest_parent: dict = {'parent_task': None, 'communication_time': 0}
+        self.slowest_parent: dict = {
+            'parent_task': None, 'communication_time': 0}
 
         # This if should be removed this serves as a "protection" from
         # the example_heft..
@@ -85,7 +87,8 @@ class Task:
             self.up_rank = self.down_rank = 0
             self.end = 0
             self.start = 0
-            self.slowest_parent = {'parent_task': None, 'communication_time': 0}
+            self.slowest_parent = {
+                'parent_task': None, 'communication_time': 0}
 
     # We keep the execution times in the machines separately
     # def avg_ect(self):
@@ -137,6 +140,14 @@ class Task:
         else:
             return NotImplemented
 
+    def avg_com_cost(self):
+        size = 1 if len(self.children_edges) == 0 else len(self.children_edges)
+        return sum([child.weight for child in self.children_edges]) / size
+
+    def avg_cost(self):
+        # len(self.costs) cannot be 0 or it least it shouldn't
+        return sum(self.costs) / len(self.costs)
+
     def change_machine(self, new_machine_id):
         if new_machine_id == self.machine_id:
             return
@@ -160,7 +171,8 @@ class Task:
         for child_edge in self.children_edges:
             child = child_edge.node
             if self.is_slowest_parent(child):
-                child.slowest_parent = {'parent_task': self, 'communication_time': child_edge.weight}
+                child.slowest_parent = {'parent_task': self,
+                                        'communication_time': child_edge.weight}
                 # child.machine_id.update_schedule(child)
                 child.__update_children_tree()
 
@@ -201,7 +213,8 @@ class Task:
             if self.name.startswith('Dummy') is False:
                 for i in range(len(children_edges)):
                     if children_edges[i].weight == 0 or parents_edges[i].weight == 0:
-                        raise Exception("\nError when parsing edges an Edge weight is 0\n")
+                        raise Exception(
+                            "\nError when parsing edges an Edge weight is 0\n")
             print(f'Edges Parsed correctly {self.id_str()}')
         self.children_edges = children_edges
         self.parents_edges = parents_edges
@@ -215,7 +228,8 @@ class Task:
     # This function runs once the task gets scheduled
     def update_children_and_self_status(self):
         if self.status == TaskStatus.SCHEDULED:
-            raise Exception(f"\nError this task is already scheduled it should not run this function again! {self}\n")
+            raise Exception(
+                f"\nError this task is already scheduled it should not run this function again! {self}\n")
         else:
             self.status = TaskStatus.SCHEDULED
 
@@ -226,7 +240,8 @@ class Task:
                 continue
             # Update the child parent only if you are the slowest parent atm.
             if self.is_slowest_parent(child_edge.node):
-                child_edge.node.slowest_parent = {'parent_task': self, 'communication_time': child_edge.weight}
+                child_edge.node.slowest_parent = {
+                    'parent_task': self, 'communication_time': child_edge.weight}
             # Update the child's counter for parents once that value
             # goes to 0 the child can start the schedule machine itself
             # be careful the same parents should run this function once!
