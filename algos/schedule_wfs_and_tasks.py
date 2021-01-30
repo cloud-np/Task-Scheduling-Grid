@@ -1,7 +1,7 @@
 from classes.Task import TaskStatus
 from algos.calculate_task_ranks import calculate_upward_ranks
 from random import randint
-from algos.calc_ex_time import compute_execution_time, compute_execution_time_genetics
+from algos.calc_ex_time import compute_execution_time
 
 
 def pick_machine_for_task(task, machines):
@@ -11,35 +11,48 @@ def pick_machine_for_task(task, machines):
     return machine, tmp_time
 
 
-def get_best_machine_for_task(task, machines):
+def get_finish_time(task, machines, is_eft):
     times = list()
     for machine in machines:
         tmp_time = compute_execution_time(task, machine)
         times.append((machine, tmp_time))
-    min_time = min(times, key=lambda tup: tup[1][1])
-    return min_time[0], min_time[1]
+
+    time = min(times, key=lambda tup: tup[1][1]) if is_eft else max(times, key=lambda tup: tup[1][1])
+    return time[0], time[1]
 
 
-def schedule_workflow(wf, machines):
-    schedule_tasks_for_heft(wf.tasks, machines)
+def schedule_workflow_eft(wf, machines):
+    schedule_tasks_heft(wf.tasks, machines)
 
 
-def schedule_tasks_for_heft(unscheduled, machines):
-    i = 0
-    for task in unscheduled:
-        time_and_machine = get_best_machine_for_task(task, machines)
+def schedule_workflow_lft(wf, machines):
+    for task in wf.tasks:
+        if task.status == TaskStatus.SCHEDULED:
+            continue
+        time_and_machine = get_finish_time(task, machines, is_eft=False)
         # min_time[0] -> Machine
         # min_time[1] -> (start_time, end_time)
         schedule_task({'start': time_and_machine[1][0],
                        'end': time_and_machine[1][1]}, task,
                       machine=time_and_machine[0])
-        i += 1
+
+
+def schedule_tasks_heft(unscheduled, machines):
+    for task in unscheduled:
+        if task.status == TaskStatus.SCHEDULED:
+            continue
+        time_and_machine = get_finish_time(task, machines, is_eft=True)
+        # min_time[0] -> Machine
+        # min_time[1] -> (start_time, end_time)
+        schedule_task({'start': time_and_machine[1][0],
+                       'end': time_and_machine[1][1]}, task,
+                      machine=time_and_machine[0])
 
     # for task in unscheduled:
     #     print(f'{task} --- p: {task.parent_node.id}')
 
 
-def schedule_tasks_for_cpop(machines, queue, critical_info):
+def schedule_tasks_cpop(machines, queue, critical_info):
     critical_path = critical_info[0]
     critical_machine_id = critical_info[1]
 
@@ -53,14 +66,14 @@ def schedule_tasks_for_cpop(machines, queue, critical_info):
                 break
         if mpt in critical_path:
             # Here we send on purpose only the critical_machine
-            schedule_tasks_for_heft([mpt], [machines[critical_machine_id]])
+            schedule_tasks_heft([mpt], [machines[critical_machine_id]])
             # start = machines[critical_machine_id].schedule_len
             # end = start + mpt.costs[critical_machine_id]
             # schedule_task({'start': start, 'end': end}, mpt, machines[critical_machine_id])
 
         else:
             # You run schedule_tasks and you simply send just one task so it works fine.
-            schedule_tasks_for_heft([mpt], machines)
+            schedule_tasks_heft([mpt], machines)
         for child_edge in mpt.children_edges:
             child = child_edge.node
             # The status of the child gets updated by the parent. In more details the every task
@@ -70,13 +83,15 @@ def schedule_tasks_for_cpop(machines, queue, critical_info):
                 queue.append(child)
 
 
-def schedule_task(min_time, task, machine):
+# This function schedules the task and returns the new
+def schedule_task(sch_time, task, machine):
     task.machine_id = machine.id
-    task.start = min_time['start']
-    task.end = min_time['end']
-    task.update_children_and_self_status()
+    task.start = sch_time['start']
+    task.end = sch_time['end']
+    new_ready_tasks = task.update_children_and_self_status()
 
     machine.add_task(task)
+    return new_ready_tasks
 
 
 def pick_machine_for_critical_path(critical_path, machines):

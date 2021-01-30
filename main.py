@@ -14,7 +14,13 @@ if __name__ == "__main__":
     machines = Machine.get_4_machines()
     workflows = Workflow.load_example_workflows(machines=machines)
 
+    # for wf in workflows:
+    #     for child in wf.tasks[0].children_edges:
+    #         op.append(child.node)
+
     multiple_workflows_scheduling(workflows, machines)
+    for machine in machines:
+        machine.print_info()
     # for wf in sorted(workflows, key=lambda wf_: wf_.calc_ccr()):
     #     print(f"id: {wf.id} crc: {wf.calc_ccr()}")
 

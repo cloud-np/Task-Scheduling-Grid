@@ -1,5 +1,5 @@
 from colorama import Fore
-from typing import Set
+from typing import List, Set
 from algos.calc_ex_time import compute_execution_time
 
 DEBUG = False
@@ -54,8 +54,8 @@ class Task:
         self.children_till_ready = 0
         self.parents_names = parents_names
         self.parents_till_ready = 0
-        self.children_edges: Set[Edge] = set()
-        self.parents_edges: Set[Edge] = set()
+        self.children_edges: List[Edge] = list()
+        self.parents_edges: List[Edge] = list()
 
         # This should be updated by the slowest parent.
         # This isn't needed but it should make it a bit faster if used
@@ -103,18 +103,20 @@ class Task:
         self.priority = priority_value
 
     def __str__(self):
-        up_rank = self.up_rank if self.up_rank is not None else 0
-        down_rank = self.down_rank if self.down_rank is not None else 0
-        tmp_str = ''
-        if self.name.startswith("Dummy"):
-            tmp_str += f'{Fore.CYAN}{self.name}{Fore.RESET} '
-        else:
-            tmp_str += f'{self.id_str()} '
+        up_rank = f'up-rank: {Fore.YELLOW}{round(self.up_rank, ROUND_DIGIT)}{Fore.RESET}' \
+            if self.up_rank is not None else ''
+        down_rank = f'down_rank: {Fore.YELLOW}{round(self.down_rank, ROUND_DIGIT)}{Fore.RESET} ' \
+            if self.down_rank is not None else ''
 
-        tmp_str += f'cost: {Fore.RED}{[round(cost, ROUND_DIGIT) for cost in self.costs]}{Fore.RESET} ' \
-                   f'up-rank: {Fore.YELLOW}{round(up_rank, ROUND_DIGIT)}{Fore.RESET} ' \
-                   f'down_rank: {Fore.YELLOW}{round(down_rank, ROUND_DIGIT)}{Fore.RESET} machine: {self.machine_id}'
-        return tmp_str
+        format_str = ''
+        # format_str += f'cost: {Fore.RED}{[round(cost, ROUND_DIGIT) for cost in self.costs]}{Fore.RESET} '
+
+        format_str += f'{Fore.CYAN}{self.name}{Fore.RESET} ' if self.name.startswith("Dummy") else f'{self.id_str()} '
+
+        format_str += f'WF[{Fore.GREEN}{self.wf_id}{Fore.RESET}] '
+        format_str += f'{up_rank} {down_rank} ' \
+                      f'machine: {self.machine_id} '
+        return format_str
 
     def start_str(self):
         return f'{Fore.RED}start:{Fore.RESET} {Fore.YELLOW}{round(self.start, ROUND_DIGIT)}{Fore.RESET}'
@@ -122,9 +124,15 @@ class Task:
     def end_str(self):
         return f'{Fore.RED}end:{Fore.RESET} {Fore.YELLOW}{round(self.end, ROUND_DIGIT)}{Fore.RESET}'
 
+    def __key(self):
+        return tuple([self.id, self.wf_id])
+
+    def __hash__(self):
+        return hash(self.__key())
+
     def __eq__(self, other):
         if isinstance(other, Task):
-            return self.id == other.id
+            return self.__key() == other.__key()
         else:
             return NotImplemented
 
@@ -183,15 +191,8 @@ class Task:
                 return task
         return None
 
-    # @staticmethod
-    # def create_parents(task_dag):
-    #     parents = copy.deepcopy(task_dag)
-    #
-    #     for i in range(len(task_dag)):
-    #         for j in range(len(task_dag[i])):
-    #             parents[j][i] = task_dag[i][j]
-    #
-    #     return parents
+    def str_times(self):
+        return f"{Fore.MAGENTA}[{self.start} - {self.end}]{Fore.RESET}"
 
     def get_tasks_from_names(self, tasks, is_child_tasks: bool):
         adj_tasks = list()
@@ -227,6 +228,8 @@ class Task:
 
     # This function runs once the task gets scheduled
     def update_children_and_self_status(self):
+        new_ready_tasks: Set[Task] = set()
+
         if self.status == TaskStatus.SCHEDULED:
             raise Exception(
                 f"\nError this task is already scheduled it should not run this function again! {self}\n")
@@ -252,6 +255,10 @@ class Task:
                 child_edge.node.parents_till_ready -= 1
                 if child_edge.node.parents_till_ready == 0:
                     child_edge.node.status = TaskStatus.READY
+            if child_edge.node.status == TaskStatus.READY:
+                new_ready_tasks.add(child_edge.node)
+
+        return new_ready_tasks
 
     def print_children(self):
         tmp_str = self.id_str()
@@ -268,9 +275,6 @@ class Task:
                 return True
         return False
 
-    # TODO:
-    # These two should be swapped or deleted since we
-    # should use the same logic for everything
     def add_parent(self, cost, task):
         # if self.name.startswith('Dummy'):
         #     self.is_entry_node = False
@@ -302,7 +306,7 @@ class Task:
             children_names=None
         )
         for entry_node in entry_nodes:
-            dummy_in.children_edges.add(Edge(0, entry_node))
+            dummy_in.children_edges.append(Edge(0, entry_node))
         tasks.insert(0, dummy_in)
 
         dummy_out = Task(
@@ -315,5 +319,5 @@ class Task:
             children_names=None
         )
         for exit_node in exit_nodes:
-            dummy_out.parents_edges.add(Edge(0, exit_node))
+            dummy_out.parents_edges.append(Edge(0, exit_node))
         tasks.append(dummy_out)
