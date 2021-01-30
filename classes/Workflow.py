@@ -1,5 +1,6 @@
 from classes.Machine import Machine
 from classes.Task import Task
+from typing import Set
 from colorama import Fore, Back
 from helpers.data_parser import get_tasks_from_json_file
 from algos.example_data import *
@@ -29,7 +30,7 @@ class Workflow:
         self.avg_comp_cost: float = -1.0
         self.avg_com_cost: float = -1.0
         self.ccr: float = -1.0
-        # This var actually shows how the workflow is going to get executed
+        # self.ready_tasks: Set[Task] = set()
 
         if tasks is None:
             if file_path is None:
@@ -38,7 +39,9 @@ class Workflow:
             else:
                 # 1. Parse the workflow tasks
                 self.tasks = get_tasks_from_json_file(file_path, id_)
-                # 2. Calculate the runtime cost for every machine
+                # 2. Add Dummy Nodes
+                self.__add_dummy_nodes()
+                # 3. Calculate the runtime cost for every machine
                 Machine.assign_tasks_with_costs(tasks=self.tasks, machines=machines)
 
     def __str__(self):
@@ -46,6 +49,34 @@ class Workflow:
                f"{Fore.BLUE}Type:{Fore.RESET} {self.type} \n" \
                f"{Fore.MAGENTA}Num-tasks:{Fore.RESET} {len(self.tasks)}\n" \
                # f"{Fore.RED}Len:{Fore.RESET} {self.get_workflow_len()}" \
+
+    def __add_dummy_nodes(self):
+        self.tasks.insert(0, Task(id_=0,
+                          wf_id=self.id,
+                          name="Dummy-In",
+                          costs=list(),
+                          runtime=0,
+                          files=None,
+                          children_names=None,
+                          parents_names=None))
+        self.tasks.append(Task(id_=len(self.tasks),
+                               wf_id=self.id,
+                               name="Dummy-Out",
+                               costs=list(),
+                               runtime=0,
+                               files=None,
+                               children_names=None,
+                               parents_names=None))
+
+        dummy_in = self.tasks[0]
+        dummy_out = self.tasks[len(self.tasks) - 1]
+        for task in self.tasks:
+            if task.is_entry_task:
+                dummy_in.add_child(0, task)
+                task.add_parent(0, dummy_in)
+            if task.is_exit_task:
+                dummy_out.add_parent(0, task)
+                task.add_child(0, dummy_out)
 
     # TODO: If we end up using the same workflow for multiple workflows we should preload tasks and machines
     #       and just deepcopy these. Even that should be faster. This is not something that will effect us a lot but ok
@@ -84,20 +115,18 @@ class Workflow:
                                       wf_type=wf_types[i], machines=machines))
         return workflows
 
-    # def get_workflow_len(self):
-    #     return max(self.machines, key=lambda m: m.schedule_len).schedule_len
+    # Gets the starting tasks which are the entry tasks to begin with.
+    def starting_ready_tasks(self):
+        ready_tasks = list()
+        for child in self.tasks[0].children_edges:
+            # TODO: This is should be always true anyway but check it
+            #       but for now just to be sure.
+            if child.node.status == 1:
+                ready_tasks.append(child.node)
+        return ready_tasks
 
     def id_str(self):
         return f"{Back.RED}WORKFLOW    ID = {self.id}{Back.RESET}"
-
-    def print_info(self, show_tasks=False):
-        print(f"\t\t\t{self.id_str()}")
-
-        if show_tasks:
-            for machine in self.machines:
-                print(f"{machine.convert_tasks_to_str()}")
-
-        print(f"{Fore.BLUE}WK-LEN:{Fore.RESET} {self.get_workflow_len()}")
 
     def calc_avg_comp_cost(self):
         self.avg_comp_cost = sum([task.avg_cost() for task in self.tasks])
@@ -116,8 +145,8 @@ class Workflow:
         self.ccr = self.avg_com_cost / self.avg_comp_cost
         return self.ccr
 
-    def get_machine(self, index):
-        return self.machines[index]
+    # def get_machine(self, index):
+    #     return self.machines[index]
 
     def get_task(self, index):
         return self.tasks[index]
@@ -133,12 +162,13 @@ class Workflow:
     def reset_workflow(self, sort_tasks: bool = False):
         for task in self.tasks:
             task.reset()
-        for machine in self.machines:
-            machine.reset()
+        # for machine in self.machines:
+        #     machine.reset()
 
         if sort_tasks is True:
             self.tasks.sort(key=lambda t: t.id)
 
+    # TODO: Needs rework
     def setup_data_example(self, example):
         if example == 'heft':
             names = NAMES
@@ -185,7 +215,7 @@ class Workflow:
         # This is really important so we can start scheduling correctly the tasks
         tasks[0].status = 1
 
-        self.machines = [Machine(i, f'M-{i}') for i in range(len(costs[0]))]
+        # self.machines = [Machine(i, f'M-{i}') for i in range(len(costs[0]))]
         self.tasks = tasks
 
 

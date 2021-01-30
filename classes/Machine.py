@@ -1,6 +1,9 @@
 from colorama import Fore, Back, Style
+from algos.schedule_wfs_and_tasks import schedule_task
+from algos.calc_ex_time import compute_execution_time
+from classes.Task import Task
 from random import randint
-from typing import Set
+from typing import Set, List
 
 NETWORK_KBPS = 12000
 CORE_SPEED = 1200
@@ -18,27 +21,71 @@ class Machine:
         self.memory = memory
         self.cpti = cpti  # cost per time interval
         self.speed = speed
-        self.holes: Set = set()
+        self.holes: List = list()
         # self.network_speed = network_speed
         self.tasks: Set = set()
 
     # TODO: Adding a task generates a hole most of the time. We need to keep
     #       a track of it.
     def add_task(self, task):
-        if DEBUG and task.start < self.schedule_len:
+        if DEBUG and (task.start < self.schedule_len):
             raise ValueError(f"Something went wrong task.start it shouldn't be lower than the"
                              f" machine[{self.id}] schedule\n {task}")
-        elif DEBUG and task in self.tasks:
+        elif DEBUG and (task in self.tasks):
             raise Exception(f"The task is already added. In machine {self.id}\n {task}")
-        elif (task.start - self.schedule_len) <= MINIMUM_GAP:
-            # This translates to hole = { diff: [start, end] }
-            self.holes.add({task.start - self.schedule_len: [self.schedule_len, task.start]})
+        elif (task.start - self.schedule_len) >= MINIMUM_GAP:
+            # This translates to hole = { "gap": gap, "times": [start, end] }
+            self.holes.append({"gap": task.start - self.schedule_len, "times": (self.schedule_len, task.start)})
             self.__add_task_to_end(task)
 
     def __add_task_to_end(self, task):
         self.tasks.add(task)
         if self.schedule_len <= task.end:
             self.schedule_len = task.end
+
+    @staticmethod
+    def fill_holes_best_fit(machines, ready_tasks):
+        for machine in machines:
+            machine.best_fit_holes(ready_tasks)
+
+    def best_fit_holes(self, ready_tasks):
+        # For every hole
+        for hole in self.holes:
+            # next(iter(ready_tasks)): gets the first entry key of the ready_tasks dictionary
+            # since we do not know which wf_id/key got removed and we need the first entry of the dict.
+            key = next(iter(ready_tasks))
+            best_fit = {"gap_left": ready_tasks[key][0].costs[self.id], "task": ready_tasks[key][0]}
+            found_best = False
+            # For every task
+            for wf_id, tasks in ready_tasks.items():
+                for task in tasks:
+                    cost = task.costs[self.id]
+                    gap_left = hole["gap"] - cost
+                    if gap_left <= MINIMUM_GAP:
+                        if self.try_feeling_hole(task, cost, hole):
+                            found_best = True
+                            break
+                    elif best_fit["gap_left"] > gap_left:
+                        best_fit = {"gap_left": gap_left, "task": task}
+                if found_best is True:
+                    break
+
+    # If this returns false it means that the task is trying to finish or start after the gap e.g:
+    # task_times = (12, 25)  gap = (10, 22)
+    def try_feeling_hole(self, task, cost, hole):
+        # Check when if the parent end interfere with the child start
+        # pred: predicted
+        [pred_start, pred_end] = compute_execution_time(task, self)
+        # TODO: Remove the first check since this gets generated from the machine itself
+        #       there should be no way a task can try to start earlier.
+        if (hole["times"][0] <= pred_start) and ((pred_start + cost) <= pred_end):
+            schedule_task({'start': pred_start, 'end': pred_start + cost},
+                          task, self)
+            self.holes.remove(hole)
+            return True
+        else:
+            raise Exception(f"{task.str_times()} {hole} {self}")
+            return False
 
     def __str__(self):
         tmp_str = f'{Fore.YELLOW}Machine{Fore.RESET} [{Fore.GREEN}{self.id}{Fore.RESET}]\n'
@@ -51,11 +98,16 @@ class Machine:
         tmp_str += f'{Fore.BLUE}TOTAL LEN:{Fore.RESET} {self.schedule_len}'
         return tmp_str
 
-    def convert_tasks_to_str(self):
-        tmp_str = f'{self.tasks[0]}'
-        for i in range(1, len(self.tasks)):
-            tmp_str += '-' + str(self.tasks[i].id)
-        return tmp_str
+    def print_info(self):
+        for task in self.tasks:
+            print(f"{task.id_str()} {task.str_times()} ")
+
+
+    # def convert_tasks_to_str(self):
+    #     tmp_str = f'{self.tasks[0]}'
+    #     for i in range(1, len(self.tasks)):
+    #         tmp_str += '-' + str(self.tasks[i].id)
+    #     return tmp_str
 
     def clear(self):
         self.tasks = list()
@@ -116,8 +168,11 @@ class Machine:
     def assign_tasks_with_costs(machines, tasks):
         for machine in machines:
             for task in tasks:
-                cost = machine.__generate_cost_for_task(task.runtime)
-                task.costs.append(cost)
+                if task.name.startswith("Dummy"):
+                    task.costs.append(0)
+                else:
+                    cost = machine.__generate_cost_for_task(task.runtime)
+                    task.costs.append(cost)
 
     # Atm it just returns the cost back. Maybe we may add something depending the problem.
     def calc_com_cost(self, cost):

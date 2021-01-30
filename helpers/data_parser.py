@@ -12,8 +12,7 @@ def get_tasks_from_json_file(file_name, wf_id):
     # create_csv_file_to_visualize_graph(data['workflow']['jobs'])
     tasks = list()
 
-    n_tasks = len(data['workflow']['jobs'])
-
+    # n_tasks = len(data['workflow']['jobs'])
     # 1) Parse first the machines you have to do the workflow. ( we create our machines )
     # 2) Parse the data for the tasks in the: data['workflow']['jobs'] ---> job['files']
     #       For the above dictionary you should sum the file sizes together
