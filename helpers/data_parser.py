@@ -1,6 +1,7 @@
 import csv
 import json
 from classes.Task import *
+from classes.Machine import NETWORK_KBPS
 from helpers.helpers import get_id_from_name
 
 
@@ -52,10 +53,12 @@ def get_tasks_from_json_file(file_name, wf_id):
                 for i in range(len(children)):
                     if children[i].is_file_in_task(file):
                         children_edges[i].weight += file['size']
+                    children_edges[i].weight = children_edges[i].weight / NETWORK_KBPS
             elif file['link'] == 'input':
                 for i in range(len(parents)):
                     if parents[i].is_file_in_task(file):
                         parents_edges[i].weight += file['size']
+                    parents_edges[i].weight = parents_edges[i].weight / NETWORK_KBPS
         # We use this function to check if everything went smoothly in the parsing
         task.set_edges(children_edges, parents_edges)
 

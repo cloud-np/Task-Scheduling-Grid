@@ -1,55 +1,90 @@
 from classes.Task import TaskStatus
-from algos.calculate_task_ranks import calculate_upward_ranks
-from random import randint
+from enum import Enum
 from algos.calc_ex_time import compute_execution_time
+
+
+class TimeType(Enum):
+    EST = 0
+    EFT = 1
+    LST = 2
+    LFT = 3
 
 
 def pick_machine_for_task(task, machines):
     # We pick the "first" available machine
     machine = min(machines, key=lambda m: m.schedule_len)
-    tmp_time = compute_execution_time(task, machine)
+    tmp_time = compute_execution_time(task, machine.id, machine.schedule_len)
     return machine, tmp_time
 
 
-def get_finish_time(task, machines, is_eft):
+def is_hole_fillable(task, m_id, hole):
+    # Check if the parent end interfere with the child start
+    # pred: predicted
+    [pred_start, pred_end] = compute_execution_time(task, m_id, hole.start)
+    if (pred_start + task.costs[m_id]) <= pred_end:
+        return True, [pred_start, pred_end]
+    else:
+        return False
+
+
+def comp_st(times):
+    return times[1]["start"]
+
+
+def comp_ft(times):
+    return times[1]["end"]
+
+
+def get_machine_and_time(task, machines, time_type, try_fill_holes=False):
+    holes_times = list()
     times = list()
+    no_valid_holes = True
     for machine in machines:
-        tmp_time = compute_execution_time(task, machine)
-        times.append((machine, tmp_time))
+        if try_fill_holes:
+            for hole in machine.holes:
+                [is_fill_able, tmp_hole_time] = is_hole_fillable(task, machine.id, hole)
+                if is_fill_able:
+                    holes_times.append((machine, {"start": tmp_hole_time[0], "end": tmp_hole_time[1], "hole": hole}))
+                    no_valid_holes = False
 
-    time = min(times, key=lambda tup: tup[1][1]) if is_eft else max(times, key=lambda tup: tup[1][1])
-    return time[0], time[1]
+        if no_valid_holes:
+            [start, end] = compute_execution_time(task, machine.id, machine.schedule_len)
+            times.append((machine, {"start": start, "end": end}))
+
+    # Prioritize to fill the holes first.
+    if time_type == TimeType.EST:
+        time = min(holes_times, key=comp_st) if holes_times else min(times, key=comp_st)
+    elif time_type == TimeType.EFT:
+        time = min(holes_times, key=comp_ft) if holes_times else min(times, key=comp_ft)
+    elif time_type == TimeType.LST:
+        time = max(holes_times, key=comp_st) if holes_times else max(times, key=comp_st)
+    elif time_type == TimeType.LFT:
+        time = max(holes_times, key=comp_ft) if holes_times else max(times, key=comp_ft)
+    else:
+        raise ValueError(f"Please enter a valid time-type e.g: TimeType.EST")
+
+    hole = time[1]["hole"] if no_valid_holes is False else None
+    return time, hole
 
 
-def schedule_workflow_eft(wf, machines):
-    schedule_tasks_heft(wf.tasks, machines)
-
-
-def schedule_workflow_lft(wf, machines):
+def schedule_workflow(wf, machines, time_type, try_fill_holes):
     for task in wf.tasks:
-        if task.status == TaskStatus.SCHEDULED:
-            continue
-        time_and_machine = get_finish_time(task, machines, is_eft=False)
+        time_and_machine, hole = get_machine_and_time(task, machines, time_type, try_fill_holes)
         # min_time[0] -> Machine
         # min_time[1] -> (start_time, end_time)
-        schedule_task({'start': time_and_machine[1][0],
-                       'end': time_and_machine[1][1]}, task,
-                      machine=time_and_machine[0])
+        schedule_task({'start': time_and_machine[1]["start"],
+                       'end': time_and_machine[1]["end"]}, task,
+                      machine=time_and_machine[0], hole=hole)
 
 
 def schedule_tasks_heft(unscheduled, machines):
     for task in unscheduled:
-        if task.status == TaskStatus.SCHEDULED:
-            continue
-        time_and_machine = get_finish_time(task, machines, is_eft=True)
+        time_and_machine = get_machine_and_time(task, machines, TimeType.EFT, try_fill_holes=False)
         # min_time[0] -> Machine
         # min_time[1] -> (start_time, end_time)
         schedule_task({'start': time_and_machine[1][0],
                        'end': time_and_machine[1][1]}, task,
                       machine=time_and_machine[0])
-
-    # for task in unscheduled:
-    #     print(f'{task} --- p: {task.parent_node.id}')
 
 
 def schedule_tasks_cpop(machines, queue, critical_info):
@@ -84,12 +119,14 @@ def schedule_tasks_cpop(machines, queue, critical_info):
 
 
 # This function schedules the task and returns the new
-def schedule_task(sch_time, task, machine):
+def schedule_task(sch_time, task, machine, hole=None):
     task.machine_id = machine.id
     task.start = sch_time['start']
     task.end = sch_time['end']
     new_ready_tasks = task.update_children_and_self_status()
 
+    if hole is not None:
+        machine.remove_hole(hole)
     machine.add_task(task)
     return new_ready_tasks
 

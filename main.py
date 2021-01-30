@@ -15,12 +15,18 @@ if __name__ == "__main__":
     workflows = Workflow.load_example_workflows(machines=machines)
 
     # for wf in workflows:
-    #     for child in wf.tasks[0].children_edges:
-    #         op.append(child.node)
+    # for task in workflows[3].tasks:
+    #     for child in task.children_edges:
+    #         print(f"{task} child --> {child.node} weight: {child.weight}")
+    #
 
     multiple_workflows_scheduling(workflows, machines)
+    max_machine = max(machines, key=lambda m: m.schedule_len)
     for machine in machines:
-        machine.print_info()
+        print(machine)
+
+    print(f'\n\n\n{max_machine.str_id()}\n{max_machine.str_schedule_len()}')
+        # machine.print_info()
     # for wf in sorted(workflows, key=lambda wf_: wf_.calc_ccr()):
     #     print(f"id: {wf.id} crc: {wf.calc_ccr()}")
 

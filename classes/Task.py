@@ -1,6 +1,5 @@
 from colorama import Fore
 from typing import List, Set
-from algos.calc_ex_time import compute_execution_time
 
 DEBUG = False
 ROUND_DIGIT = 2
@@ -25,7 +24,7 @@ class Edge:
         self.node = node
 
     def __str__(self):
-        return f'--- {Fore.YELLOW}{self.weight}{Fore.RESET} --> {self.node.id_str()}'
+        return f'--- {Fore.YELLOW}{self.weight}{Fore.RESET} --> {self.node.str_id()}'
     # can't use this yet because task __eq__ checks based the
     # rank attribute. it should be changed to name or id_
     # def __eq__(self, other):
@@ -103,26 +102,24 @@ class Task:
         self.priority = priority_value
 
     def __str__(self):
+        format_str = ''
+        times = f"{Fore.MAGENTA}times -> {self.start, self.end}{Fore.RESET}" \
+            if self.start is not None and self.end is not None else ''
         up_rank = f'up-rank: {Fore.YELLOW}{round(self.up_rank, ROUND_DIGIT)}{Fore.RESET}' \
             if self.up_rank is not None else ''
         down_rank = f'down_rank: {Fore.YELLOW}{round(self.down_rank, ROUND_DIGIT)}{Fore.RESET} ' \
             if self.down_rank is not None else ''
 
-        format_str = ''
+        format_str += f'{Fore.CYAN}{self.name}{Fore.RESET} ' if self.name.startswith("Dummy") else f'{self.str_id()} '
         # format_str += f'cost: {Fore.RED}{[round(cost, ROUND_DIGIT) for cost in self.costs]}{Fore.RESET} '
 
-        format_str += f'{Fore.CYAN}{self.name}{Fore.RESET} ' if self.name.startswith("Dummy") else f'{self.id_str()} '
-
-        format_str += f'WF[{Fore.GREEN}{self.wf_id}{Fore.RESET}] '
-        format_str += f'{up_rank} {down_rank} ' \
-                      f'machine: {self.machine_id} '
+        format_str += self.str_wf_id()
+        format_str += f'{times} {up_rank} {down_rank} '
+        format_str += f'{self.machine_id}' if self.machine_id != -1 else ''
         return format_str
 
-    def start_str(self):
-        return f'{Fore.RED}start:{Fore.RESET} {Fore.YELLOW}{round(self.start, ROUND_DIGIT)}{Fore.RESET}'
-
-    def end_str(self):
-        return f'{Fore.RED}end:{Fore.RESET} {Fore.YELLOW}{round(self.end, ROUND_DIGIT)}{Fore.RESET}'
+    def str_wf_id(self):
+        return f'WF[{Fore.GREEN}{self.wf_id}{Fore.RESET}] '
 
     def __key(self):
         return tuple([self.id, self.wf_id])
@@ -156,34 +153,6 @@ class Task:
         # len(self.costs) cannot be 0 or it least it shouldn't
         return sum(self.costs) / len(self.costs)
 
-    def change_machine(self, new_machine_id):
-        if new_machine_id == self.machine_id:
-            return
-        else:
-            # 1) Update the old machine
-            # self.machine_id.remove_task(self)
-            # 2) Update the new machine
-            times = compute_execution_time(self, new_machine_id)
-            self.start = times[0]
-            self.end = times[1]
-            self.machine_id = new_machine_id
-            # self.machine_id.add_task(self)
-            # 3) Update children and they should update their children and so on
-            self.__update_children_tree()
-
-    # This method updates all the children below
-    # the task we changed. Because changing a machine
-    # can make a domino effect and we have to change
-    # a whole schedule at times.
-    def __update_children_tree(self):
-        for child_edge in self.children_edges:
-            child = child_edge.node
-            if self.is_slowest_parent(child):
-                child.slowest_parent = {'parent_task': self,
-                                        'communication_time': child_edge.weight}
-                # child.machine_id.update_schedule(child)
-                child.__update_children_tree()
-
     @staticmethod
     def find_task_by_name(tasks, name):
         for task in tasks:
@@ -192,7 +161,7 @@ class Task:
         return None
 
     def str_times(self):
-        return f"{Fore.MAGENTA}[{self.start} - {self.end}]{Fore.RESET}"
+        return f"{Fore.MAGENTA}[{round(self.start, ROUND_DIGIT)} - {round(self.end, ROUND_DIGIT)}]{Fore.RESET}"
 
     def get_tasks_from_names(self, tasks, is_child_tasks: bool):
         adj_tasks = list()
@@ -205,7 +174,7 @@ class Task:
                 adj_tasks.append(tmp)
         return adj_tasks
 
-    def id_str(self):
+    def str_id(self):
         return f'T[{Fore.GREEN}{self.id}{Fore.RESET}]'
 
     def set_edges(self, children_edges, parents_edges):
@@ -216,7 +185,7 @@ class Task:
                     if children_edges[i].weight == 0 or parents_edges[i].weight == 0:
                         raise Exception(
                             "\nError when parsing edges an Edge weight is 0\n")
-            print(f'Edges Parsed correctly {self.id_str()}')
+            print(f'Edges Parsed correctly {self.str_id()}')
         self.children_edges = children_edges
         self.parents_edges = parents_edges
 
@@ -255,13 +224,15 @@ class Task:
                 child_edge.node.parents_till_ready -= 1
                 if child_edge.node.parents_till_ready == 0:
                     child_edge.node.status = TaskStatus.READY
+
+            # If the child gets a ready status add it in the Set
             if child_edge.node.status == TaskStatus.READY:
                 new_ready_tasks.add(child_edge.node)
 
         return new_ready_tasks
 
     def print_children(self):
-        tmp_str = self.id_str()
+        tmp_str = self.str_id()
         for child in self.children_edges:
             tmp_str += f' --> weight: {child.weight}  child: {child.node}  '
         return tmp_str
