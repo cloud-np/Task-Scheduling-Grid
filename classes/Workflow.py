@@ -19,7 +19,7 @@ NUM_TASKS = [10, 14, 20, 30, 50, 100, 133, 200, 300, 400, 500, 1000]
 # in any CASE tho tasks and machines lists should NEVER change
 # at all. I should try to make them immutable later on.
 class Workflow:
-    def __init__(self, id_, wf_type, machines, name=None, file_path=None, deadline=None,
+    def __init__(self, id_, wf_type, machines, is_our_method, name=None, file_path=None, deadline=None,
                  example_data='deadline-constrain', tasks=None):
         self.id = id_
         # This should be describing the type of the workflow e.g: LIGO, Montage, etc
@@ -39,8 +39,9 @@ class Workflow:
             else:
                 # 1. Parse the workflow tasks
                 self.tasks = get_tasks_from_json_file(file_path, id_)
-                # 2. Add Dummy Nodes
-                self.__add_dummy_nodes()
+                if is_our_method:
+                    # 2. add dummy nodes
+                    self.__add_dummy_nodes()
                 # 3. Calculate the runtime cost for every machine
                 Machine.assign_tasks_with_costs(tasks=self.tasks, machines=machines)
 
@@ -51,22 +52,8 @@ class Workflow:
                # f"{Fore.RED}Len:{Fore.RESET} {self.get_workflow_len()}" \
 
     def __add_dummy_nodes(self):
-        self.tasks.insert(0, Task(id_=0,
-                          wf_id=self.id,
-                          name="Dummy-In",
-                          costs=list(),
-                          runtime=0,
-                          files=None,
-                          children_names=None,
-                          parents_names=None))
-        self.tasks.append(Task(id_=len(self.tasks),
-                               wf_id=self.id,
-                               name="Dummy-Out",
-                               costs=list(),
-                               runtime=0,
-                               files=None,
-                               children_names=None,
-                               parents_names=None))
+        self.tasks.insert(0, Task.make_dummy_node(0, self.id, "Dummy-In"))
+        self.tasks.append(Task.make_dummy_node(len(self.tasks), self.id, "Dummy-Out"))
 
         dummy_in = self.tasks[0]
         dummy_out = self.tasks[len(self.tasks) - 1]
@@ -86,7 +73,22 @@ class Workflow:
         So it picks from some random pre-made ones.
     '''
     @staticmethod
-    def generate_multiple_workflows(n_wfs: int, machines, user_set_tasks: int = 0, path: str = './datasets'):
+    def connect_wfs(workflows):
+        dummy_in = Task.make_dummy_node(-1, -1, "Dummy-In")
+        all_tasks = [dummy_in]
+
+        for wf in workflows:
+            for task in wf.tasks:
+                if task.is_entry_task:
+                    dummy_in.add_child(0, task)
+                    task.add_parent(0, dummy_in)
+                all_tasks.append(task)
+
+        return all_tasks
+
+    @staticmethod
+    def generate_multiple_workflows(n_wfs: int, machines: [Machine], is_our_method: bool,
+                                    user_set_tasks: int = 0, path: str = './datasets'):
         workflows = list()
         i = 0
         while len(workflows) < n_wfs:
@@ -100,11 +102,11 @@ class Workflow:
             if not ((wf_type == 'montage' and n_tasks < 133) or (wf_type == 'soykbr' and n_tasks < 14)):
                 i += 1
                 workflows.append(Workflow(id_=i, file_path=f'{path}/{wf_type}/{wf_type}_{n_tasks}.json',
-                                          wf_type=wf_type, machines=machines))
+                                          wf_type=wf_type, machines=machines, is_our_method=is_our_method))
         return workflows
 
     @staticmethod
-    def load_example_workflows(machines, path: str = './datasets'):
+    def load_example_workflows(machines: [Machine], is_our_method: bool, path: str = './datasets'):
         n = 10
         workflows = list()
         num_tasks = [10, 50, 20, 500, 30, 100, 14, 50, 400, 200]
@@ -112,15 +114,13 @@ class Workflow:
                     'genome', 'cycles', 'seismology', 'montage']
         for i in range(n):
             workflows.append(Workflow(id_=i, file_path=f"{path}/{wf_types[i]}/{wf_types[i]}_{num_tasks[i]}.json",
-                                      wf_type=wf_types[i], machines=machines))
+                                      wf_type=wf_types[i], machines=machines, is_our_method=is_our_method))
         return workflows
 
     # Gets the starting tasks which are the entry tasks to begin with.
     def starting_ready_tasks(self):
         ready_tasks = list()
         for child in self.tasks[0].children_edges:
-            # TODO: This is should be always true anyway but check it
-            #       but for now just to be sure.
             if child.node.status == 1:
                 ready_tasks.append(child.node)
         return ready_tasks

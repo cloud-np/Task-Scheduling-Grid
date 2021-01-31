@@ -58,8 +58,7 @@ class Task:
 
         # This should be updated by the slowest parent.
         # This isn't needed but it should make it a bit faster if used
-        self.slowest_parent: dict = {
-            'parent_task': None, 'communication_time': 0}
+        self.slowest_parent: dict = {'parent_task': None, 'communication_time': 0}
 
         # This if should be removed this serves as a "protection" from
         # the example_heft..
@@ -92,6 +91,16 @@ class Task:
     # We keep the execution times in the machines separately
     # def avg_ect(self):
     #     return sum(self.costs)
+    @staticmethod
+    def make_dummy_node(id_, wf_id, name):
+        return Task(id_=id_,
+                    wf_id=wf_id,
+                    name=name,
+                    costs=list(),
+                    runtime=0,
+                    files=None,
+                    children_names=None,
+                    parents_names=None)
 
     def reset(self):
         self.start = None

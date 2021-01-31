@@ -21,10 +21,10 @@ def is_hole_fillable(task, m_id, hole):
     # Check if the parent end interfere with the child start
     # pred: predicted
     [pred_start, pred_end] = compute_execution_time(task, m_id, hole.start)
-    if (pred_start + task.costs[m_id]) <= pred_end:
+    if pred_end <= hole.end:
         return True, [pred_start, pred_end]
     else:
-        return False
+        return False, [-1 , -1]
 
 
 def comp_st(times):
@@ -35,15 +35,15 @@ def comp_ft(times):
     return times[1]["end"]
 
 
-def get_machine_and_time(task, machines, time_type, try_fill_holes=False):
+def get_machine_and_time(task, machines, time_type, try_fill_hole=False):
     holes_times = list()
     times = list()
     no_valid_holes = True
     for machine in machines:
-        if try_fill_holes:
+        if try_fill_hole:
             for hole in machine.holes:
-                [is_fill_able, tmp_hole_time] = is_hole_fillable(task, machine.id, hole)
-                if is_fill_able:
+                [is_fillable, tmp_hole_time] = is_hole_fillable(task, machine.id, hole)
+                if is_fillable:
                     holes_times.append((machine, {"start": tmp_hole_time[0], "end": tmp_hole_time[1], "hole": hole}))
                     no_valid_holes = False
 
@@ -67,9 +67,9 @@ def get_machine_and_time(task, machines, time_type, try_fill_holes=False):
     return time, hole
 
 
-def schedule_workflow(wf, machines, time_type, try_fill_holes):
+def schedule_workflow(wf, machines, time_type, try_fill_hole):
     for task in wf.tasks:
-        time_and_machine, hole = get_machine_and_time(task, machines, time_type, try_fill_holes)
+        time_and_machine, hole = get_machine_and_time(task, machines, time_type, try_fill_hole)
         # min_time[0] -> Machine
         # min_time[1] -> (start_time, end_time)
         schedule_task({'start': time_and_machine[1]["start"],
@@ -79,7 +79,7 @@ def schedule_workflow(wf, machines, time_type, try_fill_holes):
 
 def schedule_tasks_heft(unscheduled, machines):
     for task in unscheduled:
-        time_and_machine, hole = get_machine_and_time(task, machines, TimeType.EFT, try_fill_holes=False)
+        time_and_machine, hole = get_machine_and_time(task, machines, TimeType.EFT, try_fill_hole=False)
         # min_time[0] -> Machine
         # min_time[1] -> (start_time, end_time)
         schedule_task({'start': time_and_machine[1]["start"],
@@ -128,7 +128,7 @@ def schedule_task(sch_time, task, machine, hole=None):
     if hole is None:
         machine.add_task(task)
     else:
-        machine.add_task_to_hole(hole)
+        machine.add_task_to_hole(task, hole)
 
 
 def pick_machine_for_critical_path(critical_path, machines):

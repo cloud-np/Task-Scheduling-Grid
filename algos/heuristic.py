@@ -1,6 +1,6 @@
 from algos.calculate_task_ranks import calculate_downward_ranks, calculate_upward_ranks
 from classes.Workflow import Workflow
-from typing import Set, List
+from typing import List
 from algos.schedule_wfs_and_tasks import *
 
 
@@ -15,14 +15,19 @@ def heft(tasks, machines):
     return {'tasks': tasks, 'machines': machines}
 
 
-# TODO: NEEDS WORK
+# TODO: NOT READY YET
+def multiple_workflows_scheduling_heft(workflows, machines):
+    all_tasks = Workflow.connect_wfs(workflows)
+    return heft(all_tasks, machines)
+
+
 def multiple_workflows_scheduling(workflows, machines):
     sorted_wfs: List[Workflow] = sorted(workflows, key=lambda wf_: wf_.calc_ccr())
 
     j = len(sorted_wfs) - 1
     for i in range(int(len(sorted_wfs) / 2)):
-        schedule_workflow(sorted_wfs[i], machines, TimeType.EFT, try_fill_holes=True)
-        schedule_workflow(sorted_wfs[j], machines, TimeType.EST, try_fill_holes=True)
+        schedule_workflow(sorted_wfs[i], machines, TimeType.EFT, try_fill_hole=True)
+        schedule_workflow(sorted_wfs[j], machines, TimeType.EST, try_fill_hole=True)
         j -= 1
 
     # for i in range(len(sorted_wfs)):

@@ -7,13 +7,12 @@ from typing import Set, List
 
 NETWORK_KBPS = 20000
 CORE_SPEED = 1200
-MIN_GAP_SIZE = 300
+MIN_GAP_SIZE = 3
 DEBUG = True
-# 3, 200, 2000
 
 
 class Hole:
-    def __init__(self, gap, start, end):
+    def __init__(self, start, end, gap):
         self.gap = gap
         self.start = start
         self.end = end
@@ -42,6 +41,7 @@ class Machine:
         self.cpti = cpti  # cost per time interval
         self.speed = speed
         self.holes: Set = set()
+        self.holes_filled = 0
         # self.network_speed = network_speed
         self.tasks: Set = set()
 
@@ -49,6 +49,11 @@ class Machine:
         if DEBUG and (task in self.tasks):
             raise Exception(f"The task is already added. In machine {self.id}\n {task}")
         self.tasks.add(task)
+        gap = task.start - self.schedule_len
+
+        if gap >= MIN_GAP_SIZE:
+            self.holes.add(Hole(start=self.schedule_len, end=task.start, gap=gap))
+
         if self.schedule_len <= task.end:
             self.schedule_len = task.end
 
@@ -64,6 +69,7 @@ class Machine:
         self.remove_hole(hole)
 
     def remove_hole(self, hole):
+        self.holes_filled += 1
         self.holes.remove(hole)
 
     # If this returns false it means that the task is trying to finish or start after the gap e.g:
