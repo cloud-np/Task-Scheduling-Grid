@@ -79,11 +79,11 @@ def schedule_workflow(wf, machines, time_type, try_fill_holes):
 
 def schedule_tasks_heft(unscheduled, machines):
     for task in unscheduled:
-        time_and_machine = get_machine_and_time(task, machines, TimeType.EFT, try_fill_holes=False)
+        time_and_machine, hole = get_machine_and_time(task, machines, TimeType.EFT, try_fill_holes=False)
         # min_time[0] -> Machine
         # min_time[1] -> (start_time, end_time)
-        schedule_task({'start': time_and_machine[1][0],
-                       'end': time_and_machine[1][1]}, task,
+        schedule_task({'start': time_and_machine[1]["start"],
+                       'end': time_and_machine[1]["end"]}, task,
                       machine=time_and_machine[0])
 
 
@@ -123,12 +123,12 @@ def schedule_task(sch_time, task, machine, hole=None):
     task.machine_id = machine.id
     task.start = sch_time['start']
     task.end = sch_time['end']
-    new_ready_tasks = task.update_children_and_self_status()
+    task.update_children_and_self_status()
 
-    if hole is not None:
-        machine.remove_hole(hole)
-    machine.add_task(task)
-    return new_ready_tasks
+    if hole is None:
+        machine.add_task(task)
+    else:
+        machine.add_task_to_hole(hole)
 
 
 def pick_machine_for_critical_path(critical_path, machines):

@@ -1,4 +1,5 @@
 from algos.heuristic import multiple_workflows_scheduling
+from classes.Task import TaskStatus
 from classes.Machine import Machine
 from classes.Workflow import Workflow
 
@@ -25,13 +26,12 @@ if __name__ == "__main__":
     for machine in machines:
         print(machine)
 
-    print(f'\n\n\n{max_machine.str_id()}\n{max_machine.str_schedule_len()}')
-        # machine.print_info()
-    # for wf in sorted(workflows, key=lambda wf_: wf_.calc_ccr()):
-    #     print(f"id: {wf.id} crc: {wf.calc_ccr()}")
+    print(f'\n\n{max_machine.str_id()}\n{max_machine.str_schedule_len()}')
 
-    # for task in workflows[0].tasks:
-    #     print(task.avg_cost())
+    # for wf in workflows:
+    #     for task in wf.tasks:
+    #         if task.machine_id == -1:
+    #             print(f"MACHINE_ID: {task}")
 
     # print(len(workflows))
     # wf = Workflow(id_=0, file_data='datasets/epigenomics-workflow.json')

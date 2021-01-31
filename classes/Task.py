@@ -197,8 +197,6 @@ class Task:
 
     # This function runs once the task gets scheduled
     def update_children_and_self_status(self):
-        new_ready_tasks: Set[Task] = set()
-
         if self.status == TaskStatus.SCHEDULED:
             raise Exception(
                 f"\nError this task is already scheduled it should not run this function again! {self}\n")
@@ -208,12 +206,12 @@ class Task:
         for child_edge in self.children_edges:
             # If dummy node does not update right away since the child has one parent only (the dummy)
             if self.name.startswith('Dummy'):
-                child_edge.node.status = TaskStatus.READY
-                continue
-            # Update the child parent only if you are the slowest parent atm.
-            if self.is_slowest_parent(child_edge.node):
+                pass
+            elif self.is_slowest_parent(child_edge.node):
+                # Update the child parent only if you are the slowest parent atm.
                 child_edge.node.slowest_parent = {
                     'parent_task': self, 'communication_time': child_edge.weight}
+
             # Update the child's counter for parents once that value
             # goes to 0 the child can start the schedule machine itself
             # be careful the same parents should run this function once!
@@ -224,12 +222,6 @@ class Task:
                 child_edge.node.parents_till_ready -= 1
                 if child_edge.node.parents_till_ready == 0:
                     child_edge.node.status = TaskStatus.READY
-
-            # If the child gets a ready status add it in the Set
-            if child_edge.node.status == TaskStatus.READY:
-                new_ready_tasks.add(child_edge.node)
-
-        return new_ready_tasks
 
     def print_children(self):
         tmp_str = self.str_id()
@@ -257,38 +249,3 @@ class Task:
         self.children_edges.append(Edge(cost, task))
         self.children_till_ready += 1
 
-    @staticmethod
-    def add_dummy_nodes(tasks, machines):
-        exit_nodes = list()
-        entry_nodes = list()
-        for task in tasks:
-            if task.is_exit_task:
-                exit_nodes.append(task)
-            if task.is_entry_task:
-                entry_nodes.append(task)
-
-        dummy_in = Task(
-            id_=0,
-            name='DummyIn_0',
-            costs=[0 for _ in machines],
-            runtime=0,
-            files=None,
-            parents_names=None,
-            children_names=None
-        )
-        for entry_node in entry_nodes:
-            dummy_in.children_edges.append(Edge(0, entry_node))
-        tasks.insert(0, dummy_in)
-
-        dummy_out = Task(
-            id_=len(tasks),
-            name=f'DummyOut_{len(tasks)}',
-            costs=[0 for _ in machines],
-            runtime=0,
-            files=None,
-            parents_names=None,
-            children_names=None
-        )
-        for exit_node in exit_nodes:
-            dummy_out.parents_edges.append(Edge(0, exit_node))
-        tasks.append(dummy_out)

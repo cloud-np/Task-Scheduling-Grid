@@ -7,8 +7,9 @@ from typing import Set, List
 
 NETWORK_KBPS = 20000
 CORE_SPEED = 1200
-MINIMUM_GAP = 3
+MIN_GAP_SIZE = 300
 DEBUG = True
+# 3, 200, 2000
 
 
 class Hole:
@@ -44,21 +45,23 @@ class Machine:
         # self.network_speed = network_speed
         self.tasks: Set = set()
 
-    # TODO: Adding a task generates a hole most of the time. We need to keep
-    #       a track of it.
     def add_task(self, task):
-        # This is not valid check since holes are behind schedule_len
-        # if DEBUG and (task.start < self.schedule_len):
-        #     raise ValueError(f"Something went wrong task.start it shouldn't be lower than the"
-        #                      f" machine[{self.id}] schedule: {self.schedule_len}\n {task}")
         if DEBUG and (task in self.tasks):
             raise Exception(f"The task is already added. In machine {self.id}\n {task}")
-        elif (task.start - self.schedule_len) >= MINIMUM_GAP:
-            # This translates to hole = { "gap": gap, "times": [start, end] }
-            self.holes.add(Hole(task.start - self.schedule_len, self.schedule_len, task.start))
-            self.tasks.add(task)
-            if self.schedule_len <= task.end:
-                self.schedule_len = task.end
+        self.tasks.add(task)
+        if self.schedule_len <= task.end:
+            self.schedule_len = task.end
+
+    def add_task_to_hole(self, task, hole):
+        before_start_gap = task.start - hole.start
+        after_end_gap = hole.end - task.end
+
+        if before_start_gap >= MIN_GAP_SIZE:
+            self.holes.add(Hole(start=hole.start, end=task.start, gap=before_start_gap))
+        elif after_end_gap >= MIN_GAP_SIZE:
+            self.holes.add(Hole(start=task.end, end=hole.end, gap=after_end_gap))
+
+        self.remove_hole(hole)
 
     def remove_hole(self, hole):
         self.holes.remove(hole)
@@ -87,7 +90,7 @@ class Machine:
         tmp_str = f'{self.str_id()}\n'
         for task in self.tasks:
             if task.name.startswith("Dummy"):
-                tmp_str += f'{Fore.CYAN}{task.name}{Fore.RESET} '
+                tmp_str += f'{Fore.CYAN}{task.name}{Fore.RESET} {task.str_wf_id()}'
             else:
                 tmp_str += f'{task.str_id()} {task.str_wf_id()}'
             tmp_str += f"{task.str_times()}\n"

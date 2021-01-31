@@ -19,17 +19,17 @@ def heft(tasks, machines):
 def multiple_workflows_scheduling(workflows, machines):
     sorted_wfs: List[Workflow] = sorted(workflows, key=lambda wf_: wf_.calc_ccr())
 
-    # ready_tasks has this format:   { 0: set(wk_0_ready_tasks), 1: set(wk_1_ready_tasks, ... }
-    ready_tasks: dict = {i: sorted_wfs[i].starting_ready_tasks() for i in range(len(sorted_wfs))}
-    for i in range(len(sorted_wfs)):
-        if i % 2 == 0:
-            schedule_workflow(sorted_wfs[i], machines, TimeType.EFT, try_fill_holes=True)
-        else:
-            schedule_workflow(sorted_wfs[i], machines, TimeType.EST, try_fill_holes=True)
-            # schedule_workflow_lft(sorted_workflows[i], machines)
-        # We remove everytime ALL the tasks from the scheduled wf since
-        # every task on that specific wf has status SCHEDULED already
-        del ready_tasks[i]
+    j = len(sorted_wfs) - 1
+    for i in range(int(len(sorted_wfs) / 2)):
+        schedule_workflow(sorted_wfs[i], machines, TimeType.EFT, try_fill_holes=True)
+        schedule_workflow(sorted_wfs[j], machines, TimeType.EST, try_fill_holes=True)
+        j -= 1
+
+    # for i in range(len(sorted_wfs)):
+    #     if i % 2 == 0:
+    #         schedule_workflow(sorted_wfs[i], machines, TimeType.EFT, try_fill_holes=True)
+    #     else:
+    #         schedule_workflow(sorted_wfs[i], machines, TimeType.EST, try_fill_holes=True)
 
 
 def cpop(tasks, machines):
