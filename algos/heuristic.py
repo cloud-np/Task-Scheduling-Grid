@@ -15,14 +15,13 @@ def heft(tasks, machines):
     return {'tasks': tasks, 'machines': machines}
 
 
-# TODO: NOT READY YET
 def multiple_workflows_scheduling_heft(workflows, machines):
     all_tasks = Workflow.connect_wfs(workflows)
     return heft(all_tasks, machines)
 
 
 def multiple_workflows_scheduling(workflows, machines):
-    sorted_wfs: List[Workflow] = sorted(workflows, key=lambda wf_: wf_.calc_ccr())
+    sorted_wfs: List[Workflow] = sorted(workflows, key=lambda wf_: wf_.calc_ccr(), reverse=True)
 
     j = len(sorted_wfs) - 1
     for i in range(int(len(sorted_wfs) / 2)):

@@ -6,7 +6,7 @@ from classes.Workflow import Workflow
 if __name__ == "__main__":
     # # 4. Add the dummy nodes properly
     # Task.add_dummy_nodes(tasks, machines)
-    is_our_method = False
+    is_our_method = True
     # # 5. Get the schedule from preferred algorithm.
     # schedule = heft(tasks, machines)
     # schedule = example_heft()
@@ -30,8 +30,9 @@ if __name__ == "__main__":
     for machine in machines:
         print(machine)
 
-    for machine in machines:
-        print(f'{machine.str_id()} filled_holes: {machine.holes_filled}')
+    if is_our_method:
+        for machine in machines:
+            print(f'{machine.str_id()} filled_holes: {machine.holes_filled}')
     print(f'\n\n{max_machine.str_id()}\n{max_machine.str_schedule_len()}')
 
     # for wf in workflows:

@@ -24,7 +24,8 @@ def calculate_upward_ranks(tasks):
             # Calc rank_u
             rank = child.weight + recursive_upward_ranks(child.node)
             all_ranks_of_curr_node.append(rank)
-        max_rank = avg(curr_task.costs) + max(all_ranks_of_curr_node)
+        task_costs = 0 if curr_task.name.startswith("Dummy") else avg(curr_task.costs)
+        max_rank = task_costs + max(all_ranks_of_curr_node)
 
         # Set to the task their rank
         curr_task.up_rank = max_rank
