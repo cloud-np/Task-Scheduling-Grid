@@ -35,6 +35,76 @@ def comp_ft(times):
     return times[1]["end"]
 
 
+def schedule_workflow(wf, machines, time_type, try_fill_hole):
+    for task in wf.tasks:
+        schedule_task_to_best_machine(task, machines, time_type, try_fill_hole)
+
+
+# TimeType.EFT
+def schedule_tasks_round_robin_heft(unscheduled, machines, n_wfs):
+    diff_wfs = set()
+
+    skip_robin = False
+    while unscheduled:
+        old_len = len(unscheduled)
+        for task in unscheduled:
+            # Task is not ready yet
+            if task.parents_till_ready != 0:
+                continue
+
+            if skip_robin or (task.wf_id not in diff_wfs):
+                schedule_task_to_best_machine(task, machines, TimeType.EFT)
+                if not task.name.startswith("Dummy"):
+                    diff_wfs.add(task.wf_id)
+                print(f"Scheduled: {task}")
+                unscheduled.remove(task)
+            # If we end up looping through all the workflows
+            # then go ahead and reset the set.
+            if len(diff_wfs) == n_wfs:
+                diff_wfs = set()
+
+        if old_len == len(unscheduled):
+            skip_robin = True
+        else:
+            skip_robin = False
+
+
+def schedule_tasks_heft(unscheduled, machines):
+    for task in unscheduled:
+        schedule_task_to_best_machine(task, machines, TimeType.EFT)
+
+
+def schedule_tasks_cpop(machines, queue, critical_info):
+    critical_path = critical_info[0]
+    critical_machine_id = critical_info[1]
+
+    while queue:
+        # mpt -> max priority task
+        # probably can make these two together later on
+        mpt = max(queue, key=lambda t: t.priority)
+        for i in range(len(queue)):
+            if queue[i].id == mpt.id:
+                queue.pop(i)
+                break
+        if mpt in critical_path:
+            # Here we send on purpose only the critical_machine
+            schedule_tasks_heft([mpt], [machines[critical_machine_id]])
+            # start = machines[critical_machine_id].schedule_len
+            # end = start + mpt.costs[critical_machine_id]
+            # schedule_task({'start': start, 'end': end}, mpt, machines[critical_machine_id])
+
+        else:
+            # You run schedule_tasks and you simply send just one task so it works fine.
+            schedule_tasks_heft([mpt], machines)
+        for child_edge in mpt.children_edges:
+            child = child_edge.node
+            # The status of the child gets updated by the parent. In more details the every task
+            # has a counter called "parents_till_ready" every parent that gets scheduled reduce
+            # this value by once for his children.
+            if child.status == TaskStatus.READY:
+                queue.append(child)
+
+
 def get_machine_and_time(task, machines, time_type, try_fill_hole=False):
     holes_times = list()
     times = list()
@@ -67,55 +137,13 @@ def get_machine_and_time(task, machines, time_type, try_fill_hole=False):
     return time, hole
 
 
-def schedule_workflow(wf, machines, time_type, try_fill_hole):
-    for task in wf.tasks:
-        time_and_machine, hole = get_machine_and_time(task, machines, time_type, try_fill_hole)
-        # min_time[0] -> Machine
-        # min_time[1] -> (start_time, end_time)
-        schedule_task({'start': time_and_machine[1]["start"],
-                       'end': time_and_machine[1]["end"]}, task,
-                      machine=time_and_machine[0], hole=hole)
-
-
-def schedule_tasks_heft(unscheduled, machines):
-    for task in unscheduled:
-        time_and_machine, hole = get_machine_and_time(task, machines, TimeType.EFT, try_fill_hole=False)
-        # min_time[0] -> Machine
-        # min_time[1] -> (start_time, end_time)
-        schedule_task({'start': time_and_machine[1]["start"],
-                       'end': time_and_machine[1]["end"]}, task,
-                      machine=time_and_machine[0])
-
-
-def schedule_tasks_cpop(machines, queue, critical_info):
-    critical_path = critical_info[0]
-    critical_machine_id = critical_info[1]
-
-    while queue:
-        # mpt -> max priority task
-        # probably can make these two together later on
-        mpt = max(queue, key=lambda t: t.priority)
-        for i in range(len(queue)):
-            if queue[i].id == mpt.id:
-                queue.pop(i)
-                break
-        if mpt in critical_path:
-            # Here we send on purpose only the critical_machine
-            schedule_tasks_heft([mpt], [machines[critical_machine_id]])
-            # start = machines[critical_machine_id].schedule_len
-            # end = start + mpt.costs[critical_machine_id]
-            # schedule_task({'start': start, 'end': end}, mpt, machines[critical_machine_id])
-
-        else:
-            # You run schedule_tasks and you simply send just one task so it works fine.
-            schedule_tasks_heft([mpt], machines)
-        for child_edge in mpt.children_edges:
-            child = child_edge.node
-            # The status of the child gets updated by the parent. In more details the every task
-            # has a counter called "parents_till_ready" every parent that gets scheduled reduce
-            # this value by once for his children.
-            if child.status == TaskStatus.READY:
-                queue.append(child)
+def schedule_task_to_best_machine(task, machines, time_type, try_fill_hole=False):
+    time_and_machine, hole = get_machine_and_time(task, machines, time_type, try_fill_hole)
+    # min_time[0] -> Machine
+    # min_time[1] -> (start_time, end_time)
+    schedule_task({'start': time_and_machine[1]["start"],
+                   'end': time_and_machine[1]["end"]}, task,
+                  machine=time_and_machine[0], hole=hole)
 
 
 # This function schedules the task and returns the new

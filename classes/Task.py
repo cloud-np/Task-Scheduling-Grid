@@ -43,6 +43,7 @@ class Task:
         self.end = None
         self.machine_id: int = -1
         self.up_rank = None
+        self.level = None
         self.down_rank = None
         self.priority = None
         self.runtime = runtime
@@ -124,7 +125,7 @@ class Task:
 
         format_str += self.str_wf_id()
         format_str += f'{times} {up_rank} {down_rank} '
-        format_str += f'{self.machine_id}' if self.machine_id != -1 else ''
+        format_str += f'M[{self.machine_id}]' if self.machine_id != -1 else ''
         return format_str
 
     def str_wf_id(self):
@@ -237,9 +238,6 @@ class Task:
         for child in self.children_edges:
             tmp_str += f' --> weight: {child.weight}  child: {child.node}  '
         return tmp_str
-
-    def hello(self):
-        pass
 
     def is_file_in_task(self, search_file):
         for file in self.files:

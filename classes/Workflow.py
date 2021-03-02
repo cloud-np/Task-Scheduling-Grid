@@ -6,6 +6,7 @@ from helpers.data_parser import get_tasks_from_json_file
 from algos.example_data import *
 from helpers.checker import schedule_checker
 from random import choice
+from classes.Task import Edge
 
 WF_TYPES = ['cycles', 'epigenomics', 'genome', 'montage', 'seismology', 'soykbr']
 NUM_TASKS = [10, 14, 20, 30, 50, 100, 133, 200, 300, 400, 500, 1000]
@@ -19,8 +20,7 @@ NUM_TASKS = [10, 14, 20, 30, 50, 100, 133, 200, 300, 400, 500, 1000]
 # in any CASE tho tasks and machines lists should NEVER change
 # at all. I should try to make them immutable later on.
 class Workflow:
-    def __init__(self, id_, wf_type, machines, is_our_method, name=None, file_path=None, deadline=None,
-                 example_data='deadline-constrain', tasks=None):
+    def __init__(self, id_, wf_type, machines, is_our_method, file_path, name=None, deadline=None, tasks=None):
         self.id = id_
         # This should be describing the type of the workflow e.g: LIGO, Montage, etc
         self.type = wf_type
@@ -33,17 +33,13 @@ class Workflow:
         # self.ready_tasks: Set[Task] = set()
 
         if tasks is None:
-            if file_path is None:
-                self.setup_data_example(example_data)
-                self.type = "Heft paper example."
-            else:
-                # 1. Parse the workflow tasks
-                self.tasks = get_tasks_from_json_file(file_path, id_)
-                if is_our_method:
-                    # 2. add dummy nodes
-                    self.__add_dummy_nodes()
-                # 3. Calculate the runtime cost for every machine
-                Machine.assign_tasks_with_costs(tasks=self.tasks, machines=machines)
+            # 1. Parse the workflow tasks
+            self.tasks = get_tasks_from_json_file(file_path, id_)
+            if is_our_method:
+                # 2. add dummy nodes
+                self.__add_dummy_nodes()
+            # 3. Calculate the runtime cost for every machine
+            Machine.assign_tasks_with_costs(tasks=self.tasks, machines=machines)
 
     def __str__(self):
         return f"{self.id_str()}\n" \
@@ -85,6 +81,44 @@ class Workflow:
                 all_tasks.append(task)
 
         return all_tasks
+    
+    @staticmethod
+    def load_paper_example_workflows(machines: [Machine]):
+        names = [NAMES_A, NAMES_B]
+        ranks = [RANKS_A, RANKS_B]
+        costs = [COSTS_A, COSTS_B]
+        dags = [TASK_DAG_A, TASK_DAG_B]
+        parent_dags = [PARENTS_DAG_A, PARENTS_DAG_B]
+        tasks = [list(), list()]
+        for x in range(2):
+            tasks[x] = [Task(id_=i,
+                        wf_id=x,
+                        name=names[x][i],
+                        costs=costs[x][i],
+                        runtime=None,
+                        files=None,
+                        children_names=dags[x][i],
+                        parents_names=parent_dags[x][i]) for i in range(0, len(dags[x]))]
+
+            for task in tasks[x]:
+                children: list = task.get_tasks_from_names(tasks[x], is_child_tasks=True)
+                parents: list = task.get_tasks_from_names(tasks[x], is_child_tasks=False)
+                # We need at least -> len(Edges) == len(children)
+                children_edges = [Edge(weight=0, node=child) for child in children]
+                parents_edges = [Edge(weight=0, node=parent) for parent in parents]
+                # We use this function to check if everything went smoothly in the parsing
+                task.set_edges(children_edges, parents_edges)
+
+            # for task in tasks:
+            #     if len(task.children_edges) == 0:
+            #         task.is_exit_task = True
+
+        a_tasks = tasks[0]
+        b_tasks = tasks[1]
+        A = Workflow(0, "example", None, False, None, "A", tasks=a_tasks)
+        B = Workflow(1, "example", None, False, None, "B", tasks=b_tasks)
+
+        return [A, B] 
 
     @staticmethod
     def generate_multiple_workflows(n_wfs: int, machines: [Machine], is_our_method: bool,
@@ -145,8 +179,31 @@ class Workflow:
         self.ccr = self.avg_com_cost / self.avg_comp_cost
         return self.ccr
 
-    # def get_machine(self, index):
-    #     return self.machines[index]
+    @staticmethod
+    def level_order(tasks):
+        levels = dict()
+        level: int = 0
+
+        # Level 0
+        levels[level] = [tasks[0]]
+
+        while levels[level]:
+            current_level = level
+            for task in levels[current_level]:
+                # Check if we are on the first task
+                if task is levels[current_level][0]:
+                    level += 1
+                    # Set the next level
+                    levels[level] = list()
+
+                for child_edge in task.children_edges:
+                    child = child_edge.node
+                    if child not in levels[level]:
+                        child.level = level
+                        levels[level].append(child)
+                        # print(f'T[{child.id + 1}] {"A" if child.wf_id == 0 else "B"} --- level: {child.level}')
+
+        return levels
 
     def get_task(self, index):
         return self.tasks[index]
@@ -162,61 +219,9 @@ class Workflow:
     def reset_workflow(self, sort_tasks: bool = False):
         for task in self.tasks:
             task.reset()
-        # for machine in self.machines:
-        #     machine.reset()
 
         if sort_tasks is True:
             self.tasks.sort(key=lambda t: t.id)
-
-    # TODO: Needs rework
-    def setup_data_example(self, example):
-        if example == 'heft':
-            names = NAMES
-            costs = COSTS
-            task_dag = TASK_DAG
-        elif example == 'deadline-constrain':
-            names = NAMES_1
-            costs = COSTS_1
-            task_dag = TASK_DAG_1
-        else:
-            raise ValueError(f"There is not an example-data with the name: {example}")
-
-        tasks = [Task(id_=i,
-                      name=names[i],
-                      costs=costs[i],
-                      runtime=None,
-                      files=None,
-                      children_names=None,
-                      parents_names=None
-                      )
-                 for i in range(0, len(task_dag))]
-
-        for i in range(len(task_dag)):
-            for j in range(len(task_dag[i])):
-                if task_dag[i][j] != -1:
-                    tasks[i].add_child(task_dag[i][j], tasks[j])
-                    tasks[j].add_parent(task_dag[i][j], tasks[i])
-
-        for task in tasks:
-            if len(task.children_edges) == 0:
-                task.is_exit_task = True
-
-        # We just hardcode here to fix the entry/exit nodes
-        if example == 'heft':
-            tasks[1].is_entry_task = True
-        else:
-            # Entry nodes
-            for i in range(1, 5):
-                tasks[i].is_entry_task = True
-            # Exit nodes
-            for i in range(8, 12):
-                tasks[i].is_exit_task = True
-
-        # This is really important so we can start scheduling correctly the tasks
-        tasks[0].status = 1
-
-        # self.machines = [Machine(i, f'M-{i}') for i in range(len(costs[0]))]
-        self.tasks = tasks
 
 
 def check_workflow(workflow):

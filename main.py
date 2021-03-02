@@ -1,45 +1,42 @@
-from algos.heuristic import multiple_workflows_scheduling, multiple_workflows_scheduling_heft
+from algos.heuristic import multiple_workflows_scheduling, \
+    multiple_workflows_c1, \
+    multiple_workflows_c2, \
+    multiple_workflows_c3
 from classes.Task import TaskStatus
 from classes.Machine import Machine
 from classes.Workflow import Workflow
+from helpers.export_schedule import create_schedule_json
 
 if __name__ == "__main__":
-    # # 4. Add the dummy nodes properly
-    # Task.add_dummy_nodes(tasks, machines)
-    is_our_method = True
-    # # 5. Get the schedule from preferred algorithm.
-    # schedule = heft(tasks, machines)
-    # schedule = example_heft()
-    # workflows = Workflow.generate_multiple_workflows(n_wfs=20, user_set_tasks=20)
-    # workflows = Workflow.generate_multiple_workflows(n_wfs=20, machines=machines)
+
     machines = Machine.get_4_machines()
-    workflows = Workflow.load_example_workflows(machines=machines, is_our_method=is_our_method)
+    workflows = Workflow.load_paper_example_workflows(machines)
 
-    # for wf in workflows:
-    # for task in workflows[3].tasks:
-    #     for child in task.children_edges:
-    #         print(f"{task} child --> {child.node} weight: {child.weight}")
+    multiple_workflows_c3(workflows, machines)
 
-    if is_our_method:
-        multiple_workflows_scheduling(workflows, machines)
-    else:
-        multiple_workflows_scheduling_heft(workflows, machines)
+    # VISUAL SCHEDULE ----------
+    # schedule = {"tasks": all_tasks}
+    # create_schedule_json(schedule)
 
-    max_machine = max(machines, key=lambda m: m.schedule_len)
+    # FINAL TESTING -----------
+    # is_our_method = False
+    # machines = Machine.get_4_machines()
+    # workflows = Workflow.load_example_workflows(machines=machines, is_our_method=is_our_method)
 
-    for machine in machines:
-        print(machine)
 
-    if is_our_method:
-        for machine in machines:
-            print(f'{machine.str_id()} filled_holes: {machine.holes_filled}')
-    print(f'\n\n{max_machine.str_id()}\n{max_machine.str_schedule_len()}')
+    # all_tasks = Workflow.connect_wfs(workflows)
+    
+    # if is_our_method:
+    #     multiple_workflows_scheduling(workflows, machines)
+    # else:
+    #     multiple_workflows_c2(workflows, machines)
 
-    # for wf in workflows:
-    #     for task in wf.tasks:
-    #         if task.machine_id == -1:
-    #             print(f"MACHINE_ID: {task}")
+    # max_machine = max(machines, key=lambda m: m.schedule_len)
 
-    # for wf in workflows:
-    #     wf.avg_comp_cost()
-    #     check_workflow(wf)
+    # for machine in machines:
+    #     print(machine)
+
+    # if is_our_method:
+    #     for machine in machines:
+    #         print(f'{machine.str_id()} filled_holes: {machine.holes_filled}')
+    # print(f'\n\n{max_machine.str_id()}\n{max_machine.str_schedule_len()}')
