@@ -6,6 +6,8 @@ from random import randint
 from typing import Set, List
 
 NETWORK_KBPS = 20000
+# NETWORK_KBPS = 1
+HAS_NETWORK = True
 CORE_SPEED = 1200
 MIN_GAP_SIZE = 3
 DEBUG = True
@@ -47,7 +49,7 @@ class Machine:
 
     def add_task(self, task):
         if DEBUG and (task in self.tasks):
-            raise Exception(f"The task is already added. In machine {self.id}\n {task}")
+            raise Exception(f"The task has already been added. In machine {self.id}\n {task}")
         self.tasks.add(task)
         gap = task.start - self.schedule_len
 
@@ -89,22 +91,39 @@ class Machine:
     #         raise Exception(f"{task.str_times()} {hole} {self}")
     #         return False
 
-    def str_id(self):
+    def str_col_id(self):
         return f'{Fore.YELLOW}Machine{Fore.RESET} [{Fore.GREEN}{self.id}{Fore.RESET}]'
+
+    def str_id(self):
+        return f'Machine [{self.id}]'
+
+    def str_colored(self):
+        tmp_str = f'{self.str_col_id()}\n'
+        for task in self.tasks:
+            if task.name.startswith("Dummy"):
+                tmp_str += f'{Fore.CYAN}{task.name}{Fore.RESET} {task.str_col_wf_id()}'
+            else:
+                tmp_str += f'{task.str_col_id()} {task.str_col_wf_id()}'
+            tmp_str += f"{task.str_col_times()}\n"
+        tmp_str += self.str_col_schedule_len()
+        return tmp_str
 
     def __str__(self):
         tmp_str = f'{self.str_id()}\n'
         for task in self.tasks:
             if task.name.startswith("Dummy"):
-                tmp_str += f'{Fore.CYAN}{task.name}{Fore.RESET} {task.str_wf_id()}'
+                tmp_str += f'{task.name} {task.str_wf_id()}'
             else:
                 tmp_str += f'{task.str_id()} {task.str_wf_id()}'
             tmp_str += f"{task.str_times()}\n"
         tmp_str += self.str_schedule_len()
         return tmp_str
 
-    def str_schedule_len(self):
+    def str_col_schedule_len(self):
         return f'{Fore.BLUE}TOTAL LEN:{Fore.RESET} {self.schedule_len}'
+
+    def str_schedule_len(self):
+        return f'TOTAL LEN:{self.schedule_len}'
 
     # def print_info(self):
     #     for task in self.tasks:
@@ -171,15 +190,13 @@ class Machine:
     def __generate_cost_for_task(self, runtime):
         return runtime + 1500 - self.speed / self.n_cpu
 
-    @staticmethod
-    def assign_tasks_with_costs(machines, tasks):
-        for machine in machines:
-            for task in tasks:
-                if task.name.startswith("Dummy"):
-                    task.costs.append(0)
-                else:
-                    cost = machine.__generate_cost_for_task(task.runtime)
-                    task.costs.append(cost)
+    def assign_tasks_with_costs(self, tasks):
+        for task in tasks:
+            if task.name.startswith("Dummy"):
+                task.costs.append(0)
+            else:
+                cost = self.__generate_cost_for_task(task.runtime)
+                task.costs.append(cost)
 
     # Atm it just returns the cost back. Maybe we may add something depending the problem.
     def calc_com_cost(self, cost):

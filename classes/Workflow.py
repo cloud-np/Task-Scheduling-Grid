@@ -1,6 +1,8 @@
 from classes.Machine import Machine
 from classes.Task import Task
 from typing import Set
+from algos.calculate_task_ranks import calculate_downward_ranks, calculate_upward_ranks
+from algos.schedule_wfs_and_tasks import construct_critical_path
 from colorama import Fore, Back
 from helpers.data_parser import get_tasks_from_json_file
 from algos.example_data import *
@@ -20,33 +22,46 @@ NUM_TASKS = [10, 14, 20, 30, 50, 100, 133, 200, 300, 400, 500, 1000]
 # in any CASE tho tasks and machines lists should NEVER change
 # at all. I should try to make them immutable later on.
 class Workflow:
-    def __init__(self, id_, wf_type, machines, is_our_method, file_path, name=None, deadline=None, tasks=None):
+    def __init__(self, id_, wf_type, machines, add_dummies, file_path, name=None, deadline=None, tasks=None):
         self.id = id_
-        # This should be describing the type of the workflow e.g: LIGO, Montage, etc
-        self.type = wf_type
+        self.type = wf_type  # type of the workflow e.g: LIGO, Montage, etc
         self.name = name
         self.tasks = tasks
         self.deadline = deadline
         self.avg_comp_cost: float = -1.0
         self.avg_com_cost: float = -1.0
         self.ccr: float = -1.0
-        # self.ready_tasks: Set[Task] = set()
 
         if tasks is None:
             # 1. Parse the workflow tasks
             self.tasks = get_tasks_from_json_file(file_path, id_)
-            if is_our_method:
-                # 2. add dummy nodes
-                self.__add_dummy_nodes()
-            # 3. Calculate the runtime cost for every machine
-            Machine.assign_tasks_with_costs(tasks=self.tasks, machines=machines)
 
-    def __str__(self):
-        return f"{self.id_str()}\n" \
+            # 2. add dummy nodes
+            if add_dummies:
+                self.__add_dummy_nodes()
+
+            # 3. Calculate the runtime cost for every machine
+            for m in machines:
+                m.assign_tasks_with_costs(tasks=self.tasks)
+
+        # 4. Generate critical path, up_rank and down_rank
+        self.cp_info = {"critical_path": set(), "entry": None, "exit": None}
+        self.cp_info = self.create_critical_path()
+
+    def str_colored(self):
+        return f"{self.str_col_id()}\n" \
                f"{Fore.BLUE}Type:{Fore.RESET} {self.type} \n" \
                f"{Fore.MAGENTA}Num-tasks:{Fore.RESET} {len(self.tasks)}\n" \
-               # f"{Fore.RED}Len:{Fore.RESET} {self.get_workflow_len()}" \
+            # f"{Fore.RED}Len:{Fore.RESET} {self.get_workflow_len()}" \
 
+    def __str__(self):
+        return f"{self.str_col_id()}\n" \
+               f"Type: {self.type} \n" \
+               f"Num-tasks: {len(self.tasks)}\n" \
+               # f"Len: {self.get_workflow_len()}" \
+
+    # FIXME
+    # DO NOT CHANGE THE NAMING
     def __add_dummy_nodes(self):
         self.tasks.insert(0, Task.make_dummy_node(0, self.id, "Dummy-In"))
         self.tasks.append(Task.make_dummy_node(len(self.tasks), self.id, "Dummy-Out"))
@@ -57,9 +72,13 @@ class Workflow:
             if task.is_entry_task:
                 dummy_in.add_child(0, task)
                 task.add_parent(0, dummy_in)
+                task.is_entry_task = False
             if task.is_exit_task:
                 dummy_out.add_parent(0, task)
                 task.add_child(0, dummy_out)
+                task.is_exit_task = False
+        dummy_in.is_entry_task = True
+        dummy_out.is_exit_task = True
 
     # TODO: If we end up using the same workflow for multiple workflows we should preload tasks and machines
     #       and just deepcopy these. Even that should be faster. This is not something that will effect us a lot but ok
@@ -70,7 +89,7 @@ class Workflow:
     '''
     @staticmethod
     def connect_wfs(workflows):
-        dummy_in = Task.make_dummy_node(-1, -1, "Dummy-In")
+        dummy_in = Task.make_dummy_node(-1, -1, "Dummy-In-BIG")
         all_tasks = [dummy_in]
 
         for wf in workflows:
@@ -78,10 +97,35 @@ class Workflow:
                 if task.is_entry_task:
                     dummy_in.add_child(0, task)
                     task.add_parent(0, dummy_in)
+                    task.is_entry_task = False
                 all_tasks.append(task)
 
+        dummy_in.is_entry_task = True
         return all_tasks
-    
+
+    def create_critical_path(self):
+        # Calculate downward and upward ranks
+        calculate_upward_ranks(self.tasks)
+        calculate_downward_ranks(self.tasks)
+
+        for task in self.tasks:
+            task.set_priority(task.down_rank + task.up_rank)
+
+        if self.id == 3:
+            max_prio = max(self.tasks, key=lambda t: t.priority)
+            print(self.tasks[0])
+            # print(max_prio, max_prio.priority)
+
+        # priop = [round(task.priority) for task in self.tasks if self.id == 3]
+        for task in self.tasks:
+            # if task.wf_id == 3 and (round(max_prio.priority, 5) <= round(task.priority, 5) <= round(max_prio.priority, 5)):
+            if self.id == 3:
+                print(task, task.priority)
+
+        critical_path, [entry_task, exit_task] = construct_critical_path(self.tasks)
+        self.cp_info = {"critical_path": set(critical_path), "entry": entry_task, "exit": exit_task}
+        return critical_path, [entry_task, exit_task]
+
     @staticmethod
     def load_paper_example_workflows(machines: [Machine]):
         names = [NAMES_A, NAMES_B]
@@ -91,7 +135,8 @@ class Workflow:
         parent_dags = [PARENTS_DAG_A, PARENTS_DAG_B]
         tasks = [list(), list()]
         for x in range(2):
-            tasks[x] = [Task(id_=i,
+            # We do +1 because we usally add an entry node with id = 0
+            tasks[x] = [Task(id_=i + 1,
                         wf_id=x,
                         name=names[x][i],
                         costs=costs[x][i],
@@ -115,8 +160,8 @@ class Workflow:
 
         a_tasks = tasks[0]
         b_tasks = tasks[1]
-        A = Workflow(0, "example", None, False, None, "A", tasks=a_tasks)
-        B = Workflow(1, "example", None, False, None, "B", tasks=b_tasks)
+        A = Workflow(0, "example", machines, add_dummies=False, file_path=None, name="A", tasks=a_tasks)
+        B = Workflow(1, "example", machines, add_dummies=False, file_path=None, name="B", tasks=b_tasks)
 
         return [A, B] 
 
@@ -136,7 +181,7 @@ class Workflow:
             if not ((wf_type == 'montage' and n_tasks < 133) or (wf_type == 'soykbr' and n_tasks < 14)):
                 i += 1
                 workflows.append(Workflow(id_=i, file_path=f'{path}/{wf_type}/{wf_type}_{n_tasks}.json',
-                                          wf_type=wf_type, machines=machines, is_our_method=is_our_method))
+                                          wf_type=wf_type, machines=machines, add_dummies=is_our_method))
         return workflows
 
     @staticmethod
@@ -148,7 +193,7 @@ class Workflow:
                     'genome', 'cycles', 'seismology', 'montage']
         for i in range(n):
             workflows.append(Workflow(id_=i, file_path=f"{path}/{wf_types[i]}/{wf_types[i]}_{num_tasks[i]}.json",
-                                      wf_type=wf_types[i], machines=machines, is_our_method=is_our_method))
+                                      wf_type=wf_types[i], machines=machines, add_dummies=is_our_method))
         return workflows
 
     # Gets the starting tasks which are the entry tasks to begin with.
@@ -159,7 +204,10 @@ class Workflow:
                 ready_tasks.append(child.node)
         return ready_tasks
 
-    def id_str(self):
+    def str_id(self):
+        return f"WORKFLOW    ID = {self.id}"
+
+    def str_col_id(self):
         return f"{Back.RED}WORKFLOW    ID = {self.id}{Back.RESET}"
 
     def calc_avg_comp_cost(self):

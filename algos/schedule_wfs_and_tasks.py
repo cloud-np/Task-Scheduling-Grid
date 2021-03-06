@@ -41,27 +41,34 @@ def schedule_workflow(wf, machines, time_type, try_fill_hole):
 
 
 # TimeType.EFT
+# FIXME Way to slow.
 def schedule_tasks_round_robin_heft(unscheduled, machines, n_wfs):
     diff_wfs = set()
 
     skip_robin = False
+    i = 0
     while unscheduled:
         old_len = len(unscheduled)
-        for task in unscheduled:
-            # Task is not ready yet
-            if task.parents_till_ready != 0:
-                continue
+        task = unscheduled[i]
 
-            if skip_robin or (task.wf_id not in diff_wfs):
-                schedule_task_to_best_machine(task, machines, TimeType.EFT)
-                if not task.name.startswith("Dummy"):
-                    diff_wfs.add(task.wf_id)
-                print(f"Scheduled: {task}")
-                unscheduled.remove(task)
-            # If we end up looping through all the workflows
-            # then go ahead and reset the set.
-            if len(diff_wfs) == n_wfs:
-                diff_wfs = set()
+        # Task is not ready yet
+        if task.parents_till_ready != 0:
+            i += 1
+            continue
+
+        if skip_robin or (task.wf_id not in diff_wfs):
+            schedule_task_to_best_machine(task, machines, TimeType.EFT)
+            if task.name.startswith("Dummy"):
+                diff_wfs.add(task.wf_id)
+            print(f"Scheduled: {task}")
+            unscheduled.pop(i)
+            i -= 1
+
+        # If we end up looping through all the workflows
+        # then go ahead and reset the set.
+        if len(diff_wfs) == n_wfs:
+            i = 0
+            diff_wfs = set()
 
         if old_len == len(unscheduled):
             skip_robin = True
@@ -171,7 +178,7 @@ def pick_machine_for_critical_path(critical_path, machines):
     return min(machines_costs, key=lambda tup: tup[0])[1]
 
 
-def create_critical_path(tasks):
+def construct_critical_path(tasks):
     critical_path = list()
     entry_task = None
     # Find an entry task
@@ -192,7 +199,7 @@ def create_critical_path(tasks):
                 temp_task = child_edge.node
                 critical_path.append(child_edge.node)
                 break
-
+    exit_task = temp_task
     # The second return is supposed to be the initialised
-    return critical_path, [entry_task]
+    return critical_path, [entry_task, exit_task]
 

@@ -40,16 +40,31 @@ def multiple_workflows_c2(workflows, machines):
     # 3. Schedule based of the order of their level
     # Maybe we should run heft based of how many levels we have.
     for level, tasks in levels.items():
-        for task in tasks:
-            # HEFT
-            pass
+        heft(tasks, machines)
 
 
+# C3 From paper: Scheduling Multiple DAGs onto Heterogeneous Systems
 def multiple_workflows_c3(workflows, machines):
     # 1. Connect all workflows with one "BIG" entry node and one "BIG" exit node.
     all_tasks = Workflow.connect_wfs(workflows)
     # 2. Run HEFT in round-robin-fashion
     round_robin_heft(all_tasks, machines, len(workflows))
+
+
+# C4 From paper: Scheduling Multiple DAGs onto Heterogeneous Systems
+def multiple_workflows_c4(workflows, machines):
+    # Critical-path entry task
+    c_entries = sorted([
+        max(wf.tasks, key=lambda t: t.up_rank)
+        # max(wf.tasks, key=lambda t: t.up_rank)
+        for wf in workflows], key=lambda t: t.up_rank)
+
+    for cp in c_entries:
+        print(cp)
+
+    # Create the link
+
+    # lp_exit_node = wf.tasks[-1]  # This should be the dummy-out
 
 
 def multiple_workflows_scheduling(workflows, machines):
@@ -62,14 +77,8 @@ def multiple_workflows_scheduling(workflows, machines):
         j -= 1
 
 
-def cpop(tasks, machines):
-    # Calculate downward and upward ranks
-    calculate_downward_ranks(tasks)
-    calculate_upward_ranks(tasks)
-    for task in tasks:
-        task.set_priority(task.down_rank + task.up_rank)
-
-    critical_path, queue = create_critical_path(tasks)
-    critical_machine_id = pick_machine_for_critical_path(critical_path, machines)
-    schedule_tasks_cpop(machines, queue, (critical_path, critical_machine_id))
-    return {'tasks': tasks, 'machines': machines}
+def cpop(wf):
+    critical_path, [entry_node, exit_node] = wf.create_critical_path()
+    critical_machine_id = pick_machine_for_critical_path(critical_path, wf.machines)
+    schedule_tasks_cpop(wf.machines, [entry_node], (critical_path, critical_machine_id))
+    return {'tasks': wf.tasks, 'machines': wf.machines}

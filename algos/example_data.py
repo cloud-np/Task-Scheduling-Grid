@@ -1,8 +1,8 @@
 # MUTLIPLE WORKFLOW PAPER
 
-RANKS_A = [ 50, 42, 36, 20, 6 ] 
+RANKS_A = [50, 42, 36, 20, 6]
 
-RANKS_B = [ 200, 152, 122, 140, 45, 63, 13 ] 
+RANKS_B = [200, 152, 122, 140, 45, 63, 13]
 
 NAMES_A = ["A1", "A2", "A3", "A4", "A5"]
 
@@ -90,6 +90,7 @@ NAMES = [
     'NoName',
     'NoName'
 ]
+
 TASK_DAG = [
     # 0 Dummy In
     [-1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1],

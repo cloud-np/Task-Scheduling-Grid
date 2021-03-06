@@ -11,7 +11,7 @@ WF_TYPES = ['cycles', 'epigenomics', 'genome', 'montage', 'seismology', 'soykbr'
 NUM_TASKS = [10, 14, 20, 30, 50, 100, 133, 200, 300, 400, 500, 1000]
 
 
-def create_wfs(wf_type: str, path: str = './datasets', num_tasks: int = 200):
+def create_wfs(wf_type: str, path: str = '../datasets', num_tasks: int = 200):
 
     if wf_type not in WF_TYPES:
         raise Exception('Not a valid name for a recipe!')
