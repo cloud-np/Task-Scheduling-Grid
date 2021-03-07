@@ -111,17 +111,6 @@ class Workflow:
         for task in self.tasks:
             task.set_priority(task.down_rank + task.up_rank)
 
-        if self.id == 3:
-            max_prio = max(self.tasks, key=lambda t: t.priority)
-            print(self.tasks[0])
-            # print(max_prio, max_prio.priority)
-
-        # priop = [round(task.priority) for task in self.tasks if self.id == 3]
-        for task in self.tasks:
-            # if task.wf_id == 3 and (round(max_prio.priority, 5) <= round(task.priority, 5) <= round(max_prio.priority, 5)):
-            if self.id == 3:
-                print(task, task.priority)
-
         critical_path, [entry_task, exit_task] = construct_critical_path(self.tasks)
         self.cp_info = {"critical_path": set(critical_path), "entry": entry_task, "exit": exit_task}
         return critical_path, [entry_task, exit_task]
@@ -189,8 +178,8 @@ class Workflow:
         n = 10
         workflows = list()
         num_tasks = [10, 50, 20, 500, 30, 100, 14, 50, 400, 200]
-        wf_types = ['cycles', 'genome', 'seismology', 'montage', 'soykbr', 'epigenomics',
-                    'genome', 'cycles', 'seismology', 'montage']
+        wf_types = ['cycles', 'genome', 'seismology', 'cycles', 'soykbr', 'epigenomics',
+                    'genome', 'cycles', 'seismology', 'genome']
         for i in range(n):
             workflows.append(Workflow(id_=i, file_path=f"{path}/{wf_types[i]}/{wf_types[i]}_{num_tasks[i]}.json",
                                       wf_type=wf_types[i], machines=machines, add_dummies=is_our_method))
