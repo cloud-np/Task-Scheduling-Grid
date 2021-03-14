@@ -1,5 +1,5 @@
 from classes.Machine import Machine
-from classes.Task import Task
+from classes.Task import Task, TaskStatus
 from typing import Set
 from algos.calculate_task_ranks import calculate_downward_ranks, calculate_upward_ranks
 from algos.schedule_wfs_and_tasks import construct_critical_path
@@ -46,7 +46,7 @@ class Workflow:
 
         # 4. Generate critical path, up_rank and down_rank
         self.cp_info = {"critical_path": set(), "entry": None, "exit": None}
-        self.cp_info = self.create_critical_path()
+        self.create_critical_path()
 
     def str_colored(self):
         return f"{self.str_col_id()}\n" \
@@ -69,16 +69,17 @@ class Workflow:
         dummy_in = self.tasks[0]
         dummy_out = self.tasks[len(self.tasks) - 1]
         for task in self.tasks:
-            if task.is_entry_task:
+            if task.is_entry:
                 dummy_in.add_child(0, task)
                 task.add_parent(0, dummy_in)
-                task.is_entry_task = False
-            if task.is_exit_task:
+                task.is_entry = False
+            if task.is_exit:
                 dummy_out.add_parent(0, task)
                 task.add_child(0, dummy_out)
-                task.is_exit_task = False
-        dummy_in.is_entry_task = True
-        dummy_out.is_exit_task = True
+                task.is_exit = False
+        dummy_in.is_entry = True
+        dummy_in.status = TaskStatus.READY
+        dummy_out.is_exit = True
 
     # TODO: If we end up using the same workflow for multiple workflows we should preload tasks and machines
     #       and just deepcopy these. Even that should be faster. This is not something that will effect us a lot but ok
@@ -88,19 +89,33 @@ class Workflow:
         So it picks from some random pre-made ones.
     '''
     @staticmethod
-    def connect_wfs(workflows):
-        dummy_in = Task.make_dummy_node(-1, -1, "Dummy-In-BIG")
+    def connect_wfs(workflows, machines):
+        dummy_in = Task.make_dummy_node(id_=-1, wf_id=-1, name="Dummy-In-BIG")
+        # To find the dummy_out.id we need to calc all the tasks in all workflows
+        dummy_out = Task.make_dummy_node(id_=sum([len(wf.tasks) for wf in workflows]), wf_id=-1, name="Dummy-Out-BIG")
         all_tasks = [dummy_in]
+        dummy_in.costs = [0 for _ in machines]
 
         for wf in workflows:
             for task in wf.tasks:
-                if task.is_entry_task:
+                if task.is_entry:
                     dummy_in.add_child(0, task)
                     task.add_parent(0, dummy_in)
-                    task.is_entry_task = False
+                    task.is_entry = False
+                    task.status = TaskStatus.UNSCHEDULED
+                if task.is_exit:
+                    dummy_out.add_parent(0, task)
+                    task.add_child(0, dummy_out)
+                    task.is_exit = False
+                    
                 all_tasks.append(task)
 
-        dummy_in.is_entry_task = True
+        dummy_in.is_entry = True
+
+        all_tasks.append(dummy_out)
+        dummy_out.costs = [0 for _ in machines]
+        dummy_in.status = TaskStatus.READY
+        dummy_out.is_exit = True
         return all_tasks
 
     def create_critical_path(self):
@@ -109,14 +124,16 @@ class Workflow:
         calculate_downward_ranks(self.tasks)
 
         for task in self.tasks:
+            if task.down_rank is None:
+                print(task)
             task.set_priority(task.down_rank + task.up_rank)
 
         critical_path, [entry_task, exit_task] = construct_critical_path(self.tasks)
-        self.cp_info = {"critical_path": set(critical_path), "entry": entry_task, "exit": exit_task}
+        self.cp_info = {"critical_path": critical_path, "entry": entry_task, "exit": exit_task}
         return critical_path, [entry_task, exit_task]
 
     @staticmethod
-    def load_paper_example_workflows(machines: [Machine]):
+    def load_paper_example_workflows(machines):
         names = [NAMES_A, NAMES_B]
         ranks = [RANKS_A, RANKS_B]
         costs = [COSTS_A, COSTS_B]
@@ -155,7 +172,7 @@ class Workflow:
         return [A, B] 
 
     @staticmethod
-    def generate_multiple_workflows(n_wfs: int, machines: [Machine], is_our_method: bool,
+    def generate_multiple_workflows(n_wfs: int, machines, is_our_method: bool,
                                     user_set_tasks: int = 0, path: str = './datasets'):
         workflows = list()
         i = 0
@@ -174,15 +191,15 @@ class Workflow:
         return workflows
 
     @staticmethod
-    def load_example_workflows(machines: [Machine], is_our_method: bool, path: str = './datasets'):
-        n = 10
+    def load_example_workflows(machines, n, path: str = './datasets'):
         workflows = list()
-        num_tasks = [10, 50, 20, 500, 30, 100, 14, 50, 400, 200]
+        num_tasks = [10, 50, 20, 500, 30, 100, 14, 50, 400, 200, 500, 1000, 300, 500, 100, 50, 200, 300, 1000, 1000]
         wf_types = ['cycles', 'genome', 'seismology', 'cycles', 'soykbr', 'epigenomics',
-                    'genome', 'cycles', 'seismology', 'genome']
+                    'genome', 'cycles', 'seismology', 'genome', 'cycles', 'genome', 'epigenomics',
+                    'cycles', 'genome', 'epigenomics', 'seismology', 'genome', 'soykbr', 'soykbr']
         for i in range(n):
             workflows.append(Workflow(id_=i, file_path=f"{path}/{wf_types[i]}/{wf_types[i]}_{num_tasks[i]}.json",
-                                      wf_type=wf_types[i], machines=machines, add_dummies=is_our_method))
+                                      wf_type=wf_types[i], machines=machines, add_dummies=True))
         return workflows
 
     # Gets the starting tasks which are the entry tasks to begin with.
@@ -223,6 +240,7 @@ class Workflow:
 
         # Level 0
         levels[level] = [tasks[0]]
+        tasks[0].level = 0
 
         while levels[level]:
             current_level = level
@@ -236,11 +254,21 @@ class Workflow:
                 for child_edge in task.children_edges:
                     child = child_edge.node
                     if child not in levels[level]:
-                        child.level = level
                         levels[level].append(child)
+                        child.level = level
                         # print(f'T[{child.id + 1}] {"A" if child.wf_id == 0 else "B"} --- level: {child.level}')
+        
+        # Remove the "wrongly" placed tasks from higher levels.
+        visited = set()
+        filtered_levels = {level: list() for level in levels.keys()} 
+        for task in tasks:
+            if task not in visited:
+                # print(task.level)
+                filtered_levels[task.level].append(task)
+                visited.add(task)
+            # print(task.str_colored(), task.level)
 
-        return levels
+        return filtered_levels 
 
     def get_task(self, index):
         return self.tasks[index]

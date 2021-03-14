@@ -60,7 +60,7 @@ def schedule_tasks_round_robin_heft(unscheduled, machines, n_wfs):
             schedule_task_to_best_machine(task, machines, TimeType.EFT)
             if task.name.startswith("Dummy"):
                 diff_wfs.add(task.wf_id)
-            print(f"Scheduled: {task}")
+            # print(f"Scheduled: {task}")
             unscheduled.pop(i)
             i -= 1
 
@@ -183,7 +183,7 @@ def construct_critical_path(tasks):
     entry_task = None
     # Find an entry task
     for task in tasks:
-        if task.is_entry_task:
+        if task.is_entry:
             entry_task = task
             break
 
@@ -193,7 +193,7 @@ def construct_critical_path(tasks):
 
     # Start from an entry task and run until you find an exit task.
     # Then the critical path would be ready.
-    while temp_task.is_exit_task is False:
+    while temp_task.is_exit is False:
         for child_edge in temp_task.children_edges:
             if round(child_edge.node.priority, 5) == entry_priority:
                 temp_task = child_edge.node

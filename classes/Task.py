@@ -64,23 +64,22 @@ class Task:
         # This isn't needed but it should make it a bit faster if used
         self.slowest_parent: dict = {'parent_task': None, 'communication_time': 0}
 
-        self.is_exit_task = False
-        self.is_entry_task = False
+        self.is_exit = False
+        self.is_entry = False
 
         # Empty lists evaluate to False
         if children_names is not None:
             self.children_till_ready = len(children_names)
             if len(children_names) == 0:
-                self.is_exit_task = True
+                self.is_exit = True
 
         # Empty lists evaluate to False
         if parents_names is not None:
             self.parents_till_ready = len(parents_names)
             if len(parents_names) == 0:
-                self.is_entry_task = True
-                self.status = TaskStatus.READY
+                self.is_entry = True
 
-        if self.is_entry_task == self.is_exit_task is True:
+        if self.is_entry == self.is_exit is True:
             raise Exception(f"Node[ {self.id} ] is not connected in the dag!")
 
         # if name.startswith("Dummy-In") is True:
@@ -211,7 +210,7 @@ class Task:
         return adj_tasks
 
     def str_col_id(self):
-        return f'T[{Fore.GREEN}{self.id}{Fore.RESET}]'
+        return f"{Fore.MAGENTA}T[{Fore.RESET}{Fore.GREEN}{self.id}{Fore.RESET}{Fore.MAGENTA}]{Fore.RESET}"
 
     def str_id(self):
         return f'T[{self.id}]'
@@ -236,10 +235,7 @@ class Task:
             self.status = TaskStatus.SCHEDULED
 
         for child_edge in self.children_edges:
-            # If dummy node does not update right away since the child has one parent only (the dummy)
-            if self.name.startswith('Dummy'):
-                pass
-            elif self.is_slowest_parent(child_edge.node):
+            if self.is_slowest_parent(child_edge.node):
                 # Update the child parent only if you are the slowest parent atm.
                 child_edge.node.slowest_parent = {
                     'parent_task': self, 'communication_time': child_edge.weight}

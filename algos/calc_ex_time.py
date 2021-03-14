@@ -6,14 +6,14 @@ def compute_execution_time(task, m_id, start_time):
     #       not worth looking atm...
     if task.name.startswith('Dummy'):
         # This is only for the dummy OUT node
-        if task.is_exit_task is True:
+        if task.is_exit is True:
             return [start_time, start_time]
         # This is only for the dummy IN node
         else:
             return [0, 0]
         # If between the child and the parent the machine doesn't change
         # then the communication cost is 0.
-    elif task.is_entry_task:
+    elif task.is_entry:
         return [start_time, start_time + task.costs[m_id]]
     elif task.slowest_parent['parent_task'].machine_id == m_id:
         communication_time = 0

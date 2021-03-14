@@ -10,7 +10,7 @@ def calculate_upward_ranks(tasks):
     def recursive_upward_ranks(curr_task):
         # Base condition once your set
         # is empty just return the computation cost
-        if curr_task.is_exit_task:
+        if curr_task.is_exit:
             # TODO: we use runtime or calc the avg here?
             avg_cost = avg(curr_task.costs)
             curr_task.up_rank = avg_cost
@@ -36,7 +36,7 @@ def calculate_downward_ranks(tasks):
     def recursive_downward_ranks(curr_task):
         # Base condition once your set
         # is empty just return the computation cost
-        if curr_task.is_entry_task:
+        if curr_task.is_entry:
             # TODO: we use runtime or calc the avg here?
             avg_cost = avg(curr_task.costs)
             curr_task.down_rank = avg_cost
