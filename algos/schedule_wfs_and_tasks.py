@@ -40,41 +40,34 @@ def schedule_workflow(wf, machines, time_type, try_fill_hole):
         schedule_task_to_best_machine(task, machines, time_type, try_fill_hole)
 
 
-# TimeType.EFT
-# FIXME Way to slow.
 def schedule_tasks_round_robin_heft(unscheduled, machines, n_wfs):
     diff_wfs = set()
 
-    skip_robin = False
     i = 0
+    wfs_remaining = n_wfs
+    # Schedule the first connecting dag because its wf_id is -1
+    schedule_task_to_best_machine(unscheduled.pop(0), machines, TimeType.EFT)
     while unscheduled:
-        old_len = len(unscheduled)
+        if len(unscheduled) == i:
+            i = 0
         task = unscheduled[i]
 
-        # Task is not ready yet
-        if task.parents_till_ready != 0:
+        # Task is not ready yet go to the next one
+        if task.parents_till_ready != 0 or task.wf_id in diff_wfs:
             i += 1
-            continue
-
-        if skip_robin or (task.wf_id not in diff_wfs):
+        else:
             schedule_task_to_best_machine(task, machines, TimeType.EFT)
-            if task.name.startswith("Dummy"):
-                diff_wfs.add(task.wf_id)
+            if task.name.startswith("Dummy-Out"):
+                wfs_remaining -= 1
+            diff_wfs.add(task.wf_id)
             # print(f"Scheduled: {task}")
             unscheduled.pop(i)
             i -= 1
-
+        
         # If we end up looping through all the workflows
         # then go ahead and reset the set.
-        if len(diff_wfs) == n_wfs:
-            i = 0
+        if len(diff_wfs) >= wfs_remaining:
             diff_wfs = set()
-
-        if old_len == len(unscheduled):
-            skip_robin = True
-        else:
-            skip_robin = False
-
 
 def schedule_tasks_heft(unscheduled, machines):
     for task in unscheduled:
