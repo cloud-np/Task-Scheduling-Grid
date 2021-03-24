@@ -173,7 +173,7 @@ class Machine:
         return machines
 
     @staticmethod
-    def get_4_machines():
+    def load_4_machines():
         machines = [
             Machine(id_=0, name="M-0", n_cpu=2, speed=CORE_SPEED - 200),
             Machine(id_=1, name="M-1", n_cpu=1, speed=CORE_SPEED - 100),
