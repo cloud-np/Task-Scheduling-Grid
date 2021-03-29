@@ -1,5 +1,5 @@
 from colorama import Fore
-from typing import List, Set
+from typing import List
 
 DEBUG = True
 ROUND_DIGIT = 2
@@ -153,6 +153,9 @@ class Task:
     def str_wf_id(self):
         return f'WF[{self.wf_id}] '
 
+    def get_key(self):
+        return tuple([self.id, self.wf_id])
+
     def __key(self):
         return tuple([self.id, self.wf_id])
 
@@ -273,4 +276,3 @@ class Task:
         # self.is_exit_node = False
         self.children_edges.append(Edge(cost, task))
         self.children_till_ready += 1
-

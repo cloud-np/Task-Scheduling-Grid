@@ -1,9 +1,6 @@
-from colorama import Fore, Back, Style
-from algos.schedule_wfs_and_tasks import schedule_task
-from algos.calc_ex_time import compute_execution_time
-from classes.Task import Task
+from colorama import Fore
 from random import randint
-from typing import Set, List
+from typing import Set
 
 NETWORK_KBPS = 20000
 # NETWORK_KBPS = 1

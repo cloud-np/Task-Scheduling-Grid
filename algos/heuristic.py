@@ -106,21 +106,18 @@ def create_link(min_link, small_wf):
     small_dag_task = small_wf.cp_info['entry']
     big_dag_task = min_link[1]
 
-    small_dag_task.add_child(big_dag_task)
-    big_dag_task.add_parent(small_dag_task)
+    small_dag_task.add_child(0, big_dag_task)
+    big_dag_task.add_parent(0, small_dag_task)
 
 
 # Can do it with min but wanted something slighly different
 def get_min_link_for_wf(linkables, wf):
-    min_link = linkables[0]
+    min_link = None
     for link in linkables:
         if link[0].wf_id == wf.id:
-            if min_link[2] < link[2]:
+            if min_link is None or min_link[2] < link[2]:
                 min_link = link
-    if min_link[0].wf_id != wf:
-        # print(wf.id, min_link[0].wf_id)
-        min_link = None
-    else:
+    if min_link is not None:
         linkables.remove(min_link)
     return min_link
 
