@@ -146,12 +146,19 @@ class Visualizer:
         ordered_tasks = [sorted(m.tasks, key=lambda t: t.start) for m in machines]
         for tasks in ordered_tasks:
             for task in tasks:
-                all_tasks.append(dict(Task=task.name, Start=task.start, Finish=task.end, Machine=task.machine_id))
+                slp = task.slowest_parent if task.slowest_parent is not None else {'parent_task': None, 'cummonication_time': -1}
+                all_tasks.append(
+                    dict(
+                        TaskName=task.name,
+                        SlowestParent=f"{slp['parent_task'].name if slp['parent_task'] is not None else 'None'} "
+                                      f" w: {slp['communication_time']}",
+                        Start=task.start, Finish=task.end, Machine=f"M-{task.machine_id}", WF_ID=task.wf_id))
+                # all_tasks.append(dict(Task=task.name, Start=task.start, Finish=task.end, Machine=f"{task.machine_id} - T[{task.name}]", WF_ID=task.wf_id))
 
         df = pd.DataFrame(all_tasks)
         df['delta'] = df['Finish'] - df['Start']
 
-        fig = px.timeline(df, x_start="Start", x_end="Finish", y="Machine", color="Machine")
+        fig = px.timeline(df, x_start="Start", x_end="Finish", y="Machine", hover_data=["TaskName", "SlowestParent"], color="WF_ID")
         fig.update_yaxes(autorange="reversed")
 
         fig.layout.xaxis.type = 'linear'

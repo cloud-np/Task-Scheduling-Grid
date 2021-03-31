@@ -135,26 +135,27 @@ class Workflow:
         names = [NAMES_A, NAMES_B]
         # ranks = [RANKS_A, RANKS_B]
         costs = [COSTS_A, COSTS_B]
-        dags = [TASK_DAG_A, TASK_DAG_B]
-        parent_dags = [PARENTS_DAG_A, PARENTS_DAG_B]
+        children_dags = [TASK_DAG_A, TASK_DAG_B]
+        parents_dags = [PARENTS_DAG_A, PARENTS_DAG_B]
         tasks = [list(), list()]
-        for x in range(2):
+        for wf_id in range(2):
             # We do +1 because we usally add an entry node with id = 0
-            tasks[x] = [Task(id_=i + 1,
-                        wf_id=x,
-                        name=names[x][i],
-                        costs=costs[x][i],
-                        runtime=None,
-                        files=None,
-                        children_names=dags[x][i],
-                        parents_names=parent_dags[x][i]) for i in range(0, len(dags[x]))]
+            tasks[wf_id] = [Task(id_=i + 1,
+                            wf_id=wf_id,
+                            name=names[wf_id][i],
+                            costs=costs[wf_id][i],
+                            runtime=None,
+                            files=None,
+                            children_names=[c['name'] for c in children_dags[wf_id][i]],
+                            parents_names=[p['name'] for p in parents_dags[wf_id][i]]) for i in range(0, len(children_dags[wf_id]))]
 
-            for task in tasks[x]:
-                children: list = task.get_tasks_from_names(tasks[x], is_child_tasks=True)
-                parents: list = task.get_tasks_from_names(tasks[x], is_child_tasks=False)
+            for task in tasks[wf_id]:
+                children: list = task.get_tasks_from_names(tasks[wf_id], is_child_tasks=True)
+                parents: list = task.get_tasks_from_names(tasks[wf_id], is_child_tasks=False)
                 # We need at least -> len(Edges) == len(children)
-                children_edges = [Edge(weight=0, node=child) for child in children]
-                parents_edges = [Edge(weight=0, node=parent) for parent in parents]
+                print(task)
+                children_edges = [Edge(weight=children_dags[wf_id][task.id - 1][i]["weight"], node=child) for i, child in enumerate(children)]
+                parents_edges = [Edge(weight=parents_dags[wf_id][task.id - 1][i]["weight"], node=parent) for i, parent in enumerate(parents)]
                 # We use this function to check if everything went smoothly in the parsing
                 task.set_edges(children_edges, parents_edges)
 

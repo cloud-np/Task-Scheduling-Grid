@@ -201,6 +201,7 @@ class Task:
     def str_times(self):
         return f"[{round(self.start, ROUND_DIGIT)} - {round(self.end, ROUND_DIGIT)}]"
 
+    # TODO You can write this better (list comp).
     def get_tasks_from_names(self, tasks, is_child_tasks: bool):
         adj_tasks = list()
         names = self.children_names if is_child_tasks else self.parents_names
