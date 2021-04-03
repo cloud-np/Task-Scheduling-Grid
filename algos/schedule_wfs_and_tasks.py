@@ -63,6 +63,10 @@ def schedule_tasks_round_robin_heft(unscheduled, machines, n_wfs):
             # print(f"Scheduled: {task}")
             unscheduled.pop(i)
             i -= 1
+<<<<<<< HEAD
+=======
+            skipped = 0
+>>>>>>> 498b0e0a380014412189f63bfd8a66ab64cef9f7
         
         # If we end up looping through all the workflows
         # then go ahead and reset the set.
