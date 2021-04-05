@@ -16,14 +16,6 @@ PARENTS_DAG_A = [
     [{"name": "A2", "weight": 10}, {"name": "A3", "weight": 5}, {"name": "A4", "weight": 3}],
 ]
 
-WEIGHTS_A = [
-    [4, 2, 2],
-    [10],
-    [5],
-    [3],
-    []
-]
-
 TASK_DAG_A = [
     [{"name": "A2", "weight": 4}, {"name": "A3", "weight": 2}, {"name": "A4", "weight": 2}],
     [{"name": "A5", "weight": 10}],

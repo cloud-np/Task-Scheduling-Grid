@@ -81,8 +81,8 @@ def multiple_workflows_c4(workflows, machines):
                         (scp_entry, cp_task, rank_diff - scp_entry.up_rank))
     for link in linkables:
         # DEBUG
-        print(f"[{'a' if link[0].wf_id == 0 else 'b'}]-{link[0].str_col_id()} ---> "
-              f"[{'a' if link[1].wf_id == 0 else 'b'}]-{link[1].str_col_id()} "
+        print(f"[{'A' if link[0].wf_id == 0 else 'B'}]-{link[0].str_col_id()} ---> "
+              f"[{'A' if link[1].wf_id == 0 else 'B'}]-{link[1].str_col_id()} "
               f"diff = {Fore.GREEN}{link[2]}{Fore.RESET}")
 
     all_tasks = list()
@@ -93,13 +93,10 @@ def multiple_workflows_c4(workflows, machines):
             create_link(min_link, wf)
         all_tasks.extend(wf.tasks)
     return heft(all_tasks, machines)
-    # DEBUG
-    # print(f"[{'a' if link[0].wf_id == 0 else 'b'}]-{link[0].str_col_id()} ---> "
-    #           f"[{'a' if link[1].wf_id == 0 else 'b'}]-{link[1].str_col_id()} "
-    #           f"diff = {fore.green}{link[2]}{fore.reset}")
-    # Create the link
 
-    # lp_exit_node = wf.tasks[-1]  # This should be the dummy-out
+
+def c4_heft(all_tasks, machines):
+    pass
 
 
 def create_link(min_link, small_wf):
