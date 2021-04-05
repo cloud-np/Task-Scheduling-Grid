@@ -1,11 +1,10 @@
-from classes.Machine import Machine
 from classes.Task import Task, TaskStatus
-from typing import Set
 from algos.calculate_task_ranks import calculate_downward_ranks, calculate_upward_ranks
 from algos.schedule_wfs_and_tasks import construct_critical_path
 from colorama import Fore, Back
 from helpers.data_parser import get_tasks_from_json_file
-from algos.example_data import *
+from algos.example_data import NAMES_A, NAMES_B, COSTS_A, COSTS_B, \
+    TASK_DAG_A, TASK_DAG_B, PARENTS_DAG_A, PARENTS_DAG_B
 from helpers.checker import schedule_checker
 from random import choice
 from classes.Task import Edge
@@ -107,7 +106,6 @@ class Workflow:
                     dummy_out.add_parent(0, task)
                     task.add_child(0, dummy_out)
                     task.is_exit = False
-                    
                 all_tasks.append(task)
 
         dummy_in.is_entry = True
@@ -135,28 +133,29 @@ class Workflow:
     @staticmethod
     def load_paper_example_workflows(machines):
         names = [NAMES_A, NAMES_B]
-        ranks = [RANKS_A, RANKS_B]
+        # ranks = [RANKS_A, RANKS_B]
         costs = [COSTS_A, COSTS_B]
-        dags = [TASK_DAG_A, TASK_DAG_B]
-        parent_dags = [PARENTS_DAG_A, PARENTS_DAG_B]
+        children_dags = [TASK_DAG_A, TASK_DAG_B]
+        parents_dags = [PARENTS_DAG_A, PARENTS_DAG_B]
         tasks = [list(), list()]
-        for x in range(2):
+        for wf_id in range(2):
             # We do +1 because we usally add an entry node with id = 0
-            tasks[x] = [Task(id_=i + 1,
-                        wf_id=x,
-                        name=names[x][i],
-                        costs=costs[x][i],
-                        runtime=None,
-                        files=None,
-                        children_names=dags[x][i],
-                        parents_names=parent_dags[x][i]) for i in range(0, len(dags[x]))]
+            tasks[wf_id] = [Task(id_=i + 1,
+                            wf_id=wf_id,
+                            name=names[wf_id][i],
+                            costs=costs[wf_id][i],
+                            runtime=None,
+                            files=None,
+                            children_names=[c['name'] for c in children_dags[wf_id][i]],
+                            parents_names=[p['name'] for p in parents_dags[wf_id][i]]) for i in range(0, len(children_dags[wf_id]))]
 
-            for task in tasks[x]:
-                children: list = task.get_tasks_from_names(tasks[x], is_child_tasks=True)
-                parents: list = task.get_tasks_from_names(tasks[x], is_child_tasks=False)
+            for task in tasks[wf_id]:
+                children: list = task.get_tasks_from_names(tasks[wf_id], is_child_tasks=True)
+                parents: list = task.get_tasks_from_names(tasks[wf_id], is_child_tasks=False)
                 # We need at least -> len(Edges) == len(children)
-                children_edges = [Edge(weight=0, node=child) for child in children]
-                parents_edges = [Edge(weight=0, node=parent) for parent in parents]
+                print(task)
+                children_edges = [Edge(weight=children_dags[wf_id][task.id - 1][i]["weight"], node=child) for i, child in enumerate(children)]
+                parents_edges = [Edge(weight=parents_dags[wf_id][task.id - 1][i]["weight"], node=parent) for i, parent in enumerate(parents)]
                 # We use this function to check if everything went smoothly in the parsing
                 task.set_edges(children_edges, parents_edges)
 
@@ -169,7 +168,7 @@ class Workflow:
         A = Workflow(0, "example", machines, add_dummies=False, file_path=None, name="A", tasks=a_tasks)
         B = Workflow(1, "example", machines, add_dummies=False, file_path=None, name="B", tasks=b_tasks)
 
-        return [A, B] 
+        return [A, B]
 
     @staticmethod
     def generate_multiple_workflows(n_wfs: int, machines, is_our_method: bool,
@@ -219,7 +218,7 @@ class Workflow:
     def calc_avg_comp_cost(self):
         self.avg_comp_cost = sum([task.avg_cost() for task in self.tasks])
         return self.avg_comp_cost
-        
+
     def calc_avg_com_cost(self):
         self.avg_com_cost = sum([task.avg_com_cost() for task in self.tasks])
         return self.avg_com_cost
@@ -257,10 +256,10 @@ class Workflow:
                         levels[level].append(child)
                         child.level = level
                         # print(f'T[{child.id + 1}] {"A" if child.wf_id == 0 else "B"} --- level: {child.level}')
-        
         # Remove the "wrongly" placed tasks from higher levels.
+
         visited = set()
-        filtered_levels = {level: list() for level in levels.keys()} 
+        filtered_levels = {level: list() for level in levels.keys()}
         for task in tasks:
             if task not in visited:
                 # print(task.level)
@@ -268,7 +267,7 @@ class Workflow:
                 visited.add(task)
             # print(task.str_colored(), task.level)
 
-        return filtered_levels 
+        return filtered_levels
 
     def get_task(self, index):
         return self.tasks[index]

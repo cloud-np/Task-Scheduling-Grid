@@ -10,17 +10,25 @@ NAMES_B = ["B1", "B2", "B3", "B4", "B5", "B6", "B7"]
 
 PARENTS_DAG_A = [
     [],
-    ["A1"],
-    ["A1"],
-    ["A1"],
-    ["A2", "A3", "A4"],
+    [{"name": "A1", "weight": 4}],
+    [{"name": "A1", "weight": 2}],
+    [{"name": "A1", "weight": 2}],
+    [{"name": "A2", "weight": 10}, {"name": "A3", "weight": 5}, {"name": "A4", "weight": 3}],
+]
+
+WEIGHTS_A = [
+    [4, 2, 2],
+    [10],
+    [5],
+    [3],
+    []
 ]
 
 TASK_DAG_A = [
-    ["A2", "A3", "A4"],
-    ["A5"],
-    ["A5"],
-    ["A5"],
+    [{"name": "A2", "weight": 4}, {"name": "A3", "weight": 2}, {"name": "A4", "weight": 2}],
+    [{"name": "A5", "weight": 10}],
+    [{"name": "A5", "weight": 5}],
+    [{"name": "A5", "weight": 3}],
     []
 ]
 
@@ -44,21 +52,21 @@ COSTS_B = [
 
 PARENTS_DAG_B = [
     [],
-    ["B1"],
-    ["B1"],
-    ["B1"],
-    ["B2", "B4"],
-    ["B3", "B4"],
-    ["B5", "B6"]
+    [{"name": "B1", "weight": 3}],
+    [{"name": "B1", "weight": 5}],
+    [{"name": "B1", "weight": 1}],
+    [{"name": "B2", "weight": 10}, {"name": "B4", "weight": 9}],
+    [{"name": "B3", "weight": 3}, {"name": "B4", "weight": 8}],
+    [{"name": "B5", "weight": 4}, {"name": "B6", "weight": 2}]
 ]
 
 TASK_DAG_B = [
-    ["B2", "B3", "B4"],
-    ["B5"],
-    ["B6"],
-    ["B5", "B6"],
-    ["B7"],
-    ["B7"],
+    [{"name": "B2", "weight": 3}, {"name": "B3", "weight": 5}, {"name": "B4", "weight": 1}],
+    [{"name": "B5", "weight": 10}],
+    [{"name": "B6", "weight": 3}],
+    [{"name": "B5", "weight": 9}, {"name": "B6", "weight": 8}],
+    [{"name": "B7", "weight": 4}],
+    [{"name": "B7", "weight": 2}],
     []
 ]
 
@@ -153,7 +161,7 @@ TASK_DAG_1 = [
     # 0 Dummy In
     [-1, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1],
     # 1   1   2   3   4   5   6   7   8   9  10  11
-    [-1, -1, -1, -1, -1,  2,  3, -1,  2, -1, -1, -1, -1],
+    [-1, -1, -1, -1, -1, 2, 3, -1, 2, -1, -1, -1, -1],
     # 2
     [-1, -1, -1, -1, -1, -1, -1, 5, -1, 1, -1, -1, -1],
     # 3

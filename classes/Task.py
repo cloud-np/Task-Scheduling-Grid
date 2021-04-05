@@ -1,5 +1,5 @@
 from colorama import Fore
-from typing import List, Set
+from typing import List
 
 DEBUG = True
 ROUND_DIGIT = 2
@@ -153,6 +153,9 @@ class Task:
     def str_wf_id(self):
         return f'WF[{self.wf_id}] '
 
+    def get_key(self):
+        return tuple([self.id, self.wf_id])
+
     def __key(self):
         return tuple([self.id, self.wf_id])
 
@@ -198,6 +201,7 @@ class Task:
     def str_times(self):
         return f"[{round(self.start, ROUND_DIGIT)} - {round(self.end, ROUND_DIGIT)}]"
 
+    # TODO You can write this better (list comp).
     def get_tasks_from_names(self, tasks, is_child_tasks: bool):
         adj_tasks = list()
         names = self.children_names if is_child_tasks else self.parents_names
@@ -273,4 +277,3 @@ class Task:
         # self.is_exit_node = False
         self.children_edges.append(Edge(cost, task))
         self.children_till_ready += 1
-

@@ -24,7 +24,7 @@ def is_hole_fillable(task, m_id, hole):
     if pred_end <= hole.end:
         return True, [pred_start, pred_end]
     else:
-        return False, [-1 , -1]
+        return False, [-1, -1]
 
 
 def comp_st(times):
@@ -63,11 +63,12 @@ def schedule_tasks_round_robin_heft(unscheduled, machines, n_wfs):
             # print(f"Scheduled: {task}")
             unscheduled.pop(i)
             i -= 1
-        
+
         # If we end up looping through all the workflows
         # then go ahead and reset the set.
         if len(diff_wfs) >= wfs_remaining:
             diff_wfs = set()
+
 
 def schedule_tasks_heft(unscheduled, machines):
     for task in unscheduled:
@@ -131,7 +132,7 @@ def get_machine_and_time(task, machines, time_type, try_fill_hole=False):
     elif time_type == TimeType.LFT:
         time = max(holes_times, key=comp_ft) if holes_times else max(times, key=comp_ft)
     else:
-        raise ValueError(f"Please enter a valid time-type e.g: TimeType.EST")
+        raise ValueError("Please enter a valid time-type e.g: TimeType.EST")
 
     hole = time[1]["hole"] if no_valid_holes is False else None
     return time, hole
@@ -195,4 +196,3 @@ def construct_critical_path(tasks):
     exit_task = temp_task
     # The second return is supposed to be the initialised
     return critical_path, [entry_task, exit_task]
-

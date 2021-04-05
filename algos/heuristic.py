@@ -1,8 +1,9 @@
-from algos.calculate_task_ranks import calculate_downward_ranks, calculate_upward_ranks
-from colorama import Fore
+from algos.calculate_task_ranks import calculate_upward_ranks
 from classes.Workflow import Workflow
 from typing import List
-from algos.schedule_wfs_and_tasks import *
+from colorama import Fore
+from algos.schedule_wfs_and_tasks import schedule_tasks_heft, schedule_tasks_round_robin_heft, \
+    schedule_workflow, schedule_tasks_cpop, pick_machine_for_critical_path, TimeType
 
 
 def heft(tasks, machines):
@@ -78,6 +79,11 @@ def multiple_workflows_c4(workflows, machines):
                 if rank_diff >= scp_entry.up_rank:
                     linkables.append(
                         (scp_entry, cp_task, rank_diff - scp_entry.up_rank))
+    for link in linkables:
+        # DEBUG
+        print(f"[{'a' if link[0].wf_id == 0 else 'b'}]-{link[0].str_col_id()} ---> "
+              f"[{'a' if link[1].wf_id == 0 else 'b'}]-{link[1].str_col_id()} "
+              f"diff = {Fore.GREEN}{link[2]}{Fore.RESET}")
 
     all_tasks = list()
     for wf in workflows:
@@ -100,20 +106,18 @@ def create_link(min_link, small_wf):
     small_dag_task = small_wf.cp_info['entry']
     big_dag_task = min_link[1]
 
-    small_dag_task.add_child(big_dag_task)
-    big_dag_task.add_parent(small_dag_task)
+    small_dag_task.add_child(0, big_dag_task)
+    big_dag_task.add_parent(0, small_dag_task)
 
 
 # Can do it with min but wanted something slighly different
 def get_min_link_for_wf(linkables, wf):
-    min_link = linkables[0]
+    min_link = None
     for link in linkables:
         if link[0].wf_id == wf.id:
-            if min_link[2] < link[2]:
+            if min_link is None or min_link[2] < link[2]:
                 min_link = link
-    if min_link[0].wf_id != wf:
-        min_link = None
-    else:
+    if min_link is not None:
         linkables.remove(min_link)
     return min_link
 

@@ -1,9 +1,6 @@
-from colorama import Fore, Back, Style
-from algos.schedule_wfs_and_tasks import schedule_task
-from algos.calc_ex_time import compute_execution_time
-from classes.Task import Task
+from colorama import Fore
 from random import randint
-from typing import Set, List
+from typing import Set
 
 NETWORK_KBPS = 20000
 # NETWORK_KBPS = 1
@@ -173,7 +170,7 @@ class Machine:
         return machines
 
     @staticmethod
-    def get_4_machines():
+    def load_4_machines():
         machines = [
             Machine(id_=0, name="M-0", n_cpu=2, speed=CORE_SPEED - 200),
             Machine(id_=1, name="M-1", n_cpu=1, speed=CORE_SPEED - 100),
