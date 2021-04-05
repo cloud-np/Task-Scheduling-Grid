@@ -10,4 +10,3 @@ __pycache__/
 helpers/githubHeft
 task_scheduling_env
 linux_env/
-test.py

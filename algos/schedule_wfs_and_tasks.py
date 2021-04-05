@@ -47,20 +47,23 @@ def schedule_tasks_round_robin_heft(unscheduled, machines, n_wfs):
     wfs_remaining = n_wfs
     # Schedule the first connecting dag because its wf_id is -1
     schedule_task_to_best_machine(unscheduled.pop(0), machines, TimeType.EFT)
+    j = 0
     while unscheduled:
         if len(unscheduled) == i:
             i = 0
         task = unscheduled[i]
 
+        j += 1
         # Task is not ready yet go to the next one
         if task.parents_till_ready != 0 or task.wf_id in diff_wfs:
             i += 1
         else:
             schedule_task_to_best_machine(task, machines, TimeType.EFT)
-            if task.name.startswith("Dummy-Out"):
+            if task.name.startswith("Dummy-Out") or (task.children_names is not None and len(task.children_names)) == 0:
                 wfs_remaining -= 1
             diff_wfs.add(task.wf_id)
             # print(f"Scheduled: {task}")
+            print(task.str_colored())
             unscheduled.pop(i)
             i -= 1
 
@@ -73,6 +76,7 @@ def schedule_tasks_round_robin_heft(unscheduled, machines, n_wfs):
 def schedule_tasks_heft(unscheduled, machines):
     for task in unscheduled:
         schedule_task_to_best_machine(task, machines, TimeType.EFT)
+        print(task.str_colored())
 
 
 def schedule_tasks_cpop(machines, queue, critical_info):
