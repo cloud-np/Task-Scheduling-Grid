@@ -153,7 +153,6 @@ class Workflow:
                 children: list = task.get_tasks_from_names(tasks[wf_id], is_child_tasks=True)
                 parents: list = task.get_tasks_from_names(tasks[wf_id], is_child_tasks=False)
                 # We need at least -> len(Edges) == len(children)
-                print(task)
                 children_edges = [Edge(weight=children_dags[wf_id][task.id - 1][i]["weight"], node=child) for i, child in enumerate(children)]
                 parents_edges = [Edge(weight=parents_dags[wf_id][task.id - 1][i]["weight"], node=parent) for i, parent in enumerate(parents)]
                 # We use this function to check if everything went smoothly in the parsing
@@ -165,8 +164,8 @@ class Workflow:
 
         a_tasks = tasks[0]
         b_tasks = tasks[1]
-        A = Workflow(0, "example", machines, add_dummies=False, file_path=None, name="A", tasks=a_tasks)
-        B = Workflow(1, "example", machines, add_dummies=False, file_path=None, name="B", tasks=b_tasks)
+        A = Workflow(0, "example", machines, add_dummies=True, file_path=None, name="A", tasks=a_tasks)
+        B = Workflow(1, "example", machines, add_dummies=True, file_path=None, name="B", tasks=b_tasks)
 
         return [A, B]
 
