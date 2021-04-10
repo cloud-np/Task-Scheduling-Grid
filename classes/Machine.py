@@ -40,6 +40,7 @@ class Machine:
         self.cpti = cpti  # cost per time interval
         self.speed = speed
         self.holes: Set = set()
+        self.holes_saved_time = 0
         self.holes_filled = 0
         # self.network_speed = network_speed
         self.tasks: Set = set()
@@ -56,6 +57,7 @@ class Machine:
         if self.schedule_len <= task.end:
             self.schedule_len = task.end
 
+    # This runs only after the task.machine_id is already set.
     def add_task_to_hole(self, task, hole):
         before_start_gap = task.start - hole.start
         after_end_gap = hole.end - task.end
@@ -65,6 +67,7 @@ class Machine:
         elif after_end_gap >= MIN_GAP_SIZE:
             self.holes.add(Hole(start=task.end, end=hole.end, gap=after_end_gap))
 
+        self.holes_saved_time += hole.gap - before_start_gap - after_end_gap
         self.remove_hole(hole)
 
     def remove_hole(self, hole):
@@ -147,7 +150,7 @@ class Machine:
             else:
                 communication_time = task.slowest_parent['communication_time']
             self.schedule_len = task.start - communication_time
-            print(f"{task} changed was the last task in the list")
+            # print(f"{task} changed was the last task in the list")
             self.tasks.remove(task)
 
     def machine_details(self):

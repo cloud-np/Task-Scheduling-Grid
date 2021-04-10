@@ -4,6 +4,7 @@ from algos.heuristic import multiple_workflows_scheduling, \
     multiple_workflows_c3, \
     multiple_workflows_c4
 
+
 def run_method(pick, machines, workflows):
     if pick == "holes":
         method = multiple_workflows_scheduling

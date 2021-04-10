@@ -63,7 +63,7 @@ def schedule_tasks_round_robin_heft(unscheduled, machines, n_wfs):
                 wfs_remaining -= 1
             diff_wfs.add(task.wf_id)
             # print(f"Scheduled: {task}")
-            print(task.str_colored())
+            # print(task.str_colored())
             unscheduled.pop(i)
             i -= 1
 
@@ -76,7 +76,6 @@ def schedule_tasks_round_robin_heft(unscheduled, machines, n_wfs):
 def schedule_tasks_heft(unscheduled, machines):
     for task in unscheduled:
         schedule_task_to_best_machine(task, machines, TimeType.EFT)
-        print(task.str_colored())
 
 
 def schedule_tasks_cpop(machines, queue, critical_info):

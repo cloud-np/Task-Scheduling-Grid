@@ -22,11 +22,12 @@ def run_simulation(n, run_methods, visuals):
         max_machine = max(machines, key=lambda m: m.schedule_len)
         slowest_machines.append({"machine": max_machine, "method_used": name})
 
+        print(f"\t{Back.MAGENTA}METHOD USED: {Fore.LIGHTYELLOW_EX}{name}{Fore.RESET}{Back.RESET}")
         if name == "holes":
             for machine in machines:
-                print(f'{machine.str_id()} filled_holes: {machine.holes_filled}')
-        print(f"\t{Back.MAGENTA}METHOD USED: {Fore.LIGHTYELLOW_EX}{name}{Fore.RESET}{Back.RESET}")
-        print(f'\n{max_machine.str_id()}\n{max_machine.str_schedule_len()}')
+                print(f'{machine.str_col_id()} filled_holes: {machine.holes_filled}')
+            print(f"Time saved = {Fore.GREEN}{sum([m.holes_saved_time for m in machines])}{Fore.RESET}")
+        print(f'\n{max_machine.str_col_id()}\n{max_machine.str_col_schedule_len()}')
 
     if visuals is True:
         Visualizer.compare_schedule_len(slowest_machines)

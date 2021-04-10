@@ -26,8 +26,6 @@ def calculate_upward_ranks(tasks):
         return max_rank
 
     recursive_upward_ranks(tasks[0])
-    for t in tasks:
-        print(f"T[{t.id}][{t.wf_id}] --> {t.up_rank}")
     return tasks
 
 
