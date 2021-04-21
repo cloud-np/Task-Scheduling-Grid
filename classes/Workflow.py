@@ -158,10 +158,6 @@ class Workflow:
                 # We use this function to check if everything went smoothly in the parsing
                 task.set_edges(children_edges, parents_edges)
 
-            # for task in tasks:
-            #     if len(task.children_edges) == 0:
-            #         task.is_exit_task = True
-
         a_tasks = tasks[0]
         b_tasks = tasks[1]
         A = Workflow(0, "example", machines, add_dummies=True, file_path=None, name="A", tasks=a_tasks)
