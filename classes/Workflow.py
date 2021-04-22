@@ -27,6 +27,7 @@ class Workflow:
         self.name = name
         self.tasks = tasks
         self.deadline = deadline
+        self.scheduled = False
         self.avg_comp_cost: float = -1.0
         self.avg_com_cost: float = -1.0
         self.ccr: float = -1.0

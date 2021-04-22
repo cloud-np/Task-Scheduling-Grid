@@ -1,13 +1,7 @@
 from classes.Task import TaskStatus
-from enum import Enum
+from classes.Schedule import FillMethod, TimeType
 from algos.calc_ex_time import compute_execution_time
 
-
-class TimeType(Enum):
-    EST = 0
-    EFT = 1
-    LST = 2
-    LFT = 3
 
 
 def pick_machine_for_task(task, machines):
@@ -20,24 +14,17 @@ def pick_machine_for_task(task, machines):
 def is_hole_fillable(task, m_id, hole):
     # Check if the parent end interfere with the child start
     # pred: predicted
-    [pred_start, pred_end] = compute_execution_time(task, m_id, hole.start)
+    pred_start, pred_end = compute_execution_time(task, m_id, hole.start)
     if pred_end <= hole.end:
-        return True, [pred_start, pred_end]
+        return True, {"start": pred_start, "end": pred_end, "potensial_saved_time": hole.gap - (pred_end - pred_start)}
     else:
         return False, [-1, -1]
 
 
-def comp_st(times):
-    return times[1]["start"]
-
-
-def comp_ft(times):
-    return times[1]["end"]
-
-
-def schedule_workflow(wf, machines, time_type, try_fill_hole):
+def schedule_workflow(wf, machines, time_type, hole_filling_type):
+    wf.scheduled = True
     for task in wf.tasks:
-        schedule_task_to_best_machine(task, machines, time_type, try_fill_hole)
+        schedule_task_to_best_machine(task, machines, time_type, hole_filling_type)
 
 
 def schedule_tasks_round_robin_heft(unscheduled, machines, n_wfs):
@@ -93,10 +80,6 @@ def schedule_tasks_cpop(machines, queue, critical_info):
         if mpt in critical_path:
             # Here we send on purpose only the critical_machine
             schedule_tasks_heft([mpt], [machines[critical_machine_id]])
-            # start = machines[critical_machine_id].schedule_len
-            # end = start + mpt.costs[critical_machine_id]
-            # schedule_task({'start': start, 'end': end}, mpt, machines[critical_machine_id])
-
         else:
             # You run schedule_tasks and you simply send just one task so it works fine.
             schedule_tasks_heft([mpt], machines)
@@ -109,45 +92,68 @@ def schedule_tasks_cpop(machines, queue, critical_info):
                 queue.append(child)
 
 
-def get_machine_and_time(task, machines, time_type, try_fill_hole=False):
+def pick_machine_based_on_timetype(time_type, times):
+    # Prioritize to fill the holes first.
+    if time_type == TimeType.EST:
+        time = min(times, key=compare_start)
+    elif time_type == TimeType.EFT:
+        time = min(times, key=compare_end)
+    elif time_type == TimeType.LST:
+        time = max(times, key=compare_start)
+    elif time_type == TimeType.LFT:
+        time = max(times, key=compare_end)
+    else:
+        raise ValueError(f"This is not a valid time_type: {time_type}")
+    return time
+
+
+def compare_start(times):
+    return times["start"]
+
+
+def compare_end(times):
+    return times["end"]
+
+
+def fastest_fit(time_type, holes_times):
+    pass
+
+
+def get_machine_and_time(task, machines, time_type, hole_filling_type=FillMethod.NO_FILL):
     holes_times = list()
     times = list()
     no_valid_holes = True
     for machine in machines:
-        if try_fill_hole:
+        if hole_filling_type != FillMethod.NO_FILL:
             for hole in machine.holes:
-                [is_fillable, tmp_hole_time] = is_hole_fillable(task, machine.id, hole)
-                if is_fillable:
-                    holes_times.append((machine, {"start": tmp_hole_time[0], "end": tmp_hole_time[1], "hole": hole}))
+                [is_fillable, hole_times] = is_hole_fillable(task, machine.id, hole)
+                if is_fillable is True:
+                    holes_times.append({"machine": machine, "hole": hole, **hole_times})
                     no_valid_holes = False
 
         if no_valid_holes:
             [start, end] = compute_execution_time(task, machine.id, machine.schedule_len)
-            times.append((machine, {"start": start, "end": end}))
+            times.append({"machine": machine, "start": start, "end": end})
 
-    # Prioritize to fill the holes first.
-    if time_type == TimeType.EST:
-        time = min(holes_times, key=comp_st) if holes_times else min(times, key=comp_st)
-    elif time_type == TimeType.EFT:
-        time = min(holes_times, key=comp_ft) if holes_times else min(times, key=comp_ft)
-    elif time_type == TimeType.LST:
-        time = max(holes_times, key=comp_st) if holes_times else max(times, key=comp_st)
-    elif time_type == TimeType.LFT:
-        time = max(holes_times, key=comp_ft) if holes_times else max(times, key=comp_ft)
+    # If there are holes to fill prioritize them.
+    if len(holes_times) > 0:
+        if hole_filling_type == FillMethod.FASTEST_FIT:
+            time = pick_machine_based_on_timetype(time_type, holes_times)
+        elif hole_filling_type == FillMethod.BEST_FIT:
+            time = max(holes_times, key=lambda t: t["potensial_saved_time"])
+    # This Runs if holes method was not picked.
     else:
-        raise ValueError("Please enter a valid time-type e.g: TimeType.EST")
-
-    hole = time[1]["hole"] if no_valid_holes is False else None
+        time = pick_machine_based_on_timetype(time_type, times)
+    hole = time["hole"] if no_valid_holes is False else None
     return time, hole
 
 
-def schedule_task_to_best_machine(task, machines, time_type, try_fill_hole=False):
-    time_and_machine, hole = get_machine_and_time(task, machines, time_type, try_fill_hole)
-    # min_time[0] -> Machine
-    # min_time[1] -> (start_time, end_time)
-    schedule_task({'start': time_and_machine[1]["start"],
-                   'end': time_and_machine[1]["end"]}, task,
-                  machine=time_and_machine[0], hole=hole)
+def schedule_task_to_best_machine(task, machines, time_type, hole_filling_type=FillMethod.NO_FILL):
+    time_and_machine, hole = get_machine_and_time(task, machines, time_type, hole_filling_type)
+
+    schedule_task({'start': time_and_machine["start"],
+                   'end': time_and_machine["end"]}, task,
+                  machine=time_and_machine["machine"], hole=hole)
 
 
 # This function schedules the task and returns the new

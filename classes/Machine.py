@@ -2,7 +2,7 @@ from colorama import Fore
 from random import randint
 from typing import Set
 
-NETWORK_KBPS = 20000
+NETWORK_KBPS = 200
 # NETWORK_KBPS = 1
 HAS_NETWORK = True
 CORE_SPEED = 1200
@@ -15,6 +15,7 @@ class Hole:
         self.gap = gap
         self.start = start
         self.end = end
+        self.time_saved = 0 
 
     def __key(self):
         return tuple((self.gap, (self.start, self.end)))
@@ -62,13 +63,19 @@ class Machine:
         before_start_gap = task.start - hole.start
         after_end_gap = hole.end - task.end
 
+
+        # New holes get created based on the minimum gap we added.
         if before_start_gap >= MIN_GAP_SIZE:
             self.holes.add(Hole(start=hole.start, end=task.start, gap=before_start_gap))
         elif after_end_gap >= MIN_GAP_SIZE:
             self.holes.add(Hole(start=task.end, end=hole.end, gap=after_end_gap))
 
-        self.holes_saved_time += hole.gap - before_start_gap - after_end_gap
+        hole.time_saved = hole.gap - before_start_gap - after_end_gap
+        self.holes_saved_time += hole.time_saved
         self.remove_hole(hole)
+    
+    def get_potential_hole_time_saved(self, task, hole):
+        return hole.gap - (task.start - hole.start + hole.end - task.end)
 
     def remove_hole(self, hole):
         self.holes_filled += 1

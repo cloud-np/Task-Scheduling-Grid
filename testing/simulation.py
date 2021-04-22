@@ -1,7 +1,7 @@
-from compare_methods import run_method
 from classes.Machine import Machine
 from colorama import Fore, Back
 from classes.Workflow import Workflow
+from classes.Schedule import Schedule
 from helpers.visualize import Visualizer
 
 
@@ -15,19 +15,15 @@ def run_simulation(n, run_methods, visuals):
     # workflows = Workflow.load_paper_example_workflows(machines)
 
     slowest_machines = list()
-    for name in run_methods:
+    for method in run_methods:
         machines = Machine.load_4_machines()
         workflows = Workflow.load_example_workflows(machines=machines, n=n)
-        run_method(name, machines, workflows)
-        max_machine = max(machines, key=lambda m: m.schedule_len)
-        slowest_machines.append({"machine": max_machine, "method_used": name})
+        schedule = Schedule(name=method['name'], workflows=workflows, machines=machines, time_types=method["time_types"], fill_type=method["fill_type"])
 
-        print(f"\t{Back.MAGENTA}METHOD USED: {Fore.LIGHTYELLOW_EX}{name}{Fore.RESET}{Back.RESET}")
-        if name == "holes":
-            for machine in machines:
-                print(f'{machine.str_col_id()} filled_holes: {machine.holes_filled}')
-            print(f"Time saved = {Fore.GREEN}{sum([m.holes_saved_time for m in machines])}{Fore.RESET}")
-        print(f'\n{max_machine.str_col_id()}\n{max_machine.str_col_schedule_len()}')
+        schedule.run()
+        schedule.info()
+
+        slowest_machines.append({"machine": schedule.get_slowest_machine(), "method_used": schedule.method_used_info()})
 
     if visuals is True:
-        Visualizer.compare_schedule_len(slowest_machines)
+        Visualizer.compare_schedule_len(slowest_machines, len(workflows))

@@ -26,4 +26,4 @@ def holes_scheduling(workflows, machines, time_types, hole_filling_type):
     # Not the cleanest way to handle this but works for now.
     for wf in workflows:
         if wf.scheduled is False:
-            scheduler.schedule_workflow(wf, machines, TimeType.EFT, hole_filling_type=hole_filling_type)
+            scheduler.schedule_workflow(wf, machines, time_types[0], hole_filling_type=hole_filling_type)

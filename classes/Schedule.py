@@ -69,35 +69,44 @@ class Schedule:
 
     def method_used_info(self):
         if self.name.startswith("holes"):
-            return f"{''.join([t + ' ' for t in self.time_types])} {self.fill_type}"
+            return f"{''.join([Schedule.get_time_type(t) + ' ' for t in self.time_types])} {self.fill_type}"
 
     @staticmethod
     def get_scheduling_method(name):
         if name.startswith("holes"):
             return holes_scheduling
         elif name == "c1":
-            return multiple_workflows_c1
+            return c1.multiple_workflows_c1
         elif name == "c2":
-            return multiple_workflows_c2
+            return c2.multiple_workflows_c2
         elif name == "c3":
-            return multiple_workflows_c3
+            return c3.multiple_workflows_c3
         elif name == "c4":
-            return multiple_workflows_c4
+            return c4.multiple_workflows_c4
         else:
             raise ValueError(f"Not a valid method option: {name}")
 
     @staticmethod
     def get_time_type(ttype):
-        if ttype == "EFT":
-            return TimeType.EFT
-        elif ttype == "EST":
-            return TimeType.EST
-        elif ttype == "LST":
-            return TimeType.LST
-        elif ttype == "LFT":
-            return TimeType.LFT
+        if ttype.__class__ == str:
+            if ttype == "EFT":
+                return TimeType.EFT
+            elif ttype == "EST":
+                return TimeType.EST
+            elif ttype == "LST":
+                return TimeType.LST
+            elif ttype == "LFT":
+                return TimeType.LFT
         else:
-            return ValueError(f"Not supported Time Type: {ttype}")
+            if ttype == TimeType.EFT:
+                return "EFT"
+            elif ttype == TimeType.EST:
+                return "EST"
+            elif ttype == TimeType.LST:
+                return "LST"
+            elif ttype == TimeType.LFT:
+                return "LFT"
+        return ValueError(f"Not supported Time Type: {ttype}")
 
     @staticmethod
     def get_fill_type(ftype):

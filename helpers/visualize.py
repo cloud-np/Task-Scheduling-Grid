@@ -5,7 +5,7 @@ import numpy as np
 class Visualizer:
 
     @staticmethod
-    def compare_schedule_len(slowest_machines):
+    def compare_schedule_len(slowest_machines, n_workflows):
         s_lens_x = [round(m["machine"].schedule_len) for m in slowest_machines]
         labels = [m["method_used"] for m in slowest_machines]
 
@@ -23,7 +23,7 @@ class Visualizer:
         ax.legend()
         ax.set_ylabel("Method Used")
         # plt.grid(True)
-        plt.title("Methods for multiple workflow scheduling.")
+        plt.title(f"Multiple workflow scheduling sample size {n_workflows}")
         fig.tight_layout()
         plt.show()
 
