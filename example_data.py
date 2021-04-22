@@ -1,3 +1,48 @@
+HOLE_METHOD_VARIATIONS = {"EFT_variations": [
+                        # EST - EST
+                        {"name": "holes FASTEST-FIT", "time_types": ["EST", "EST"], "fill_type": "FASTEST-FIT"},
+                        {"name": "holes BEST-FIT", "time_types": ["EST", "EST"], "fill_type": "BEST-FIT"},
+                        {"name": "holes FIRST-FIT", "time_types": ["EST", "EST"], "fill_type": "FIRST-FIT"},
+                        {"name": "holes WORST-FIT", "time_types": ["EST", "EST"], "fill_type": "WORST-FIT"},
+                        # EFT - EST
+                        {"name": "holes FASTEST-FIT", "time_types": ["EFT", "EST"], "fill_type": "FASTEST-FIT"},
+                        {"name": "holes BEST-FIT", "time_types": ["EFT", "EST"], "fill_type": "BEST-FIT"},
+                        {"name": "holes FIRST-FIT", "time_types": ["EFT", "EST"], "fill_type": "FIRST-FIT"},
+                        {"name": "holes WORST-FIT", "time_types": ["EFT", "EST"], "fill_type": "WORST-FIT"},
+                        # EFT - EFT
+                        {"name": "holes FASTEST-FIT", "time_types": ["EFT", "EFT"], "fill_type": "FASTEST-FIT"},
+                        {"name": "holes BEST-FIT", "time_types": ["EFT", "EFT"], "fill_type": "BEST-FIT"},
+                        {"name": "holes FIRST-FIT", "time_types": ["EFT", "EFT"], "fill_type": "FIRST-FIT"},
+                        {"name": "holes WORST-FIT", "time_types": ["EFT", "EFT"], "fill_type": "WORST-FIT"},
+                        # EST - EFT
+                        {"name": "holes FASTEST-FIT", "time_types": ["EST", "EFT"], "fill_type": "FASTEST-FIT"},
+                        {"name": "holes BEST-FIT", "time_types": ["EST", "EFT"], "fill_type": "BEST-FIT"},
+                        {"name": "holes FIRST-FIT", "time_types": ["EST", "EFT"], "fill_type": "FIRST-FIT"},
+                        {"name": "holes WORST-FIT", "time_types": ["EST", "EFT"], "fill_type": "WORST-FIT"}],
+
+                        "LFT_variations": [
+                        # LST - EFT
+                        {"name": "holes FASTEST-FIT", "time_types": ["LST", "EFT"], "fill_type": "FASTEST-FIT"},
+                        {"name": "holes BEST-FIT", "time_types": ["LST", "EFT"], "fill_type": "BEST-FIT"},
+                        {"name": "holes FIRST-FIT", "time_types": ["LST", "EFT"], "fill_type": "FIRST-FIT"},
+                        {"name": "holes WORST-FIT", "time_types": ["LST", "EFT"], "fill_type": "WORST-FIT"},
+                        # LST - EST 
+                        {"name": "holes FASTEST-FIT", "time_types": ["LST", "EST"], "fill_type": "FASTEST-FIT"},
+                        {"name": "holes BEST-FIT", "time_types": ["LST", "EST"], "fill_type": "BEST-FIT"},
+                        {"name": "holes FIRST-FIT", "time_types": ["LST", "EST"], "fill_type": "FIRST-FIT"},
+                        {"name": "holes WORST-FIT", "time_types": ["LST", "EST"], "fill_type": "WORST-FIT"},
+                        # LFT - EST 
+                        {"name": "holes FASTEST-FIT", "time_types": ["LFT", "EST"], "fill_type": "FASTEST-FIT"},
+                        {"name": "holes BEST-FIT", "time_types": ["LFT", "EST"], "fill_type": "BEST-FIT"},
+                        {"name": "holes FIRST-FIT", "time_types": ["LFT", "EST"], "fill_type": "FIRST-FIT"},
+                        {"name": "holes WORST-FIT", "time_types": ["LFT", "EST"], "fill_type": "WORST-FIT"},
+                        # LFT - EFT 
+                        {"name": "holes FASTEST-FIT", "time_types": ["LFT", "EFT"], "fill_type": "FASTEST-FIT"},
+                        {"name": "holes BEST-FIT", "time_types": ["LFT", "EFT"], "fill_type": "BEST-FIT"},
+                        {"name": "holes FIRST-FIT", "time_types": ["LFT", "EFT"], "fill_type": "FIRST-FIT"},
+                        {"name": "holes WORST-FIT", "time_types": ["LFT", "EFT"], "fill_type": "WORST-FIT"}]}
+
+
 # MUTLIPLE WORKFLOW PAPER
 
 RANKS_A = [50, 42, 36, 20, 6]

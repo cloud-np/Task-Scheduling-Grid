@@ -69,7 +69,11 @@ class Schedule:
 
     def method_used_info(self):
         if self.name.startswith("holes"):
-            return f"{''.join([Schedule.get_time_type(t) + ' ' for t in self.time_types])} {self.fill_type}"
+            # return f"{''.join([Schedule.get_time_type(t) + '-' for t in self.time_types])} {self.fill_type}"
+            ttypes = [Schedule.get_time_type(t) for t in self.time_types]
+            return f"{ttypes[0]}\n{self.get_fill_type(self.fill_type)}"
+        else:
+            return f"{self.name}"
 
     @staticmethod
     def get_scheduling_method(name):
@@ -106,19 +110,31 @@ class Schedule:
                 return "LST"
             elif ttype == TimeType.LFT:
                 return "LFT"
-        return ValueError(f"Not supported Time Type: {ttype}")
+        raise ValueError(f"Not supported Time Type: {ttype}")
 
     @staticmethod
     def get_fill_type(ftype):
-        if ftype == "FASTEST-FIT":
-            return FillMethod.FASTEST_FIT
-        elif ftype == "BEST-FIT":
-            return FillMethod.BEST_FIT
-        elif ftype == "FIRST_FIT":
-            return FillMethod.FIRST_FIT
-        elif ftype == "WORST-FIT":
-            return FillMethod.WORST_FIT
-        elif ftype == "NO-FILL":
-            return FillMethod.NO_FILL
+        if ftype.__class__ == str:
+            if ftype == "FASTEST-FIT":
+                return FillMethod.FASTEST_FIT
+            elif ftype == "BEST-FIT":
+                return FillMethod.BEST_FIT
+            elif ftype == "FIRST-FIT":
+                return FillMethod.FIRST_FIT
+            elif ftype == "WORST-FIT":
+                return FillMethod.WORST_FIT
+            elif ftype == "NO-FILL":
+                return FillMethod.NO_FILL
         else:
-            return ValueError(f"Not supported Fill Type: {ftype}")
+            if ftype == FillMethod.FASTEST_FIT:
+                return "FASTEST"
+            elif ftype == FillMethod.BEST_FIT:
+                return "BEST"
+            elif ftype == FillMethod.FIRST_FIT:
+                return "FIRST"
+            elif ftype == FillMethod.WORST_FIT:
+                return "WORST"
+            elif ftype == FillMethod.NO_FILL:
+                return "NO"
+
+        raise ValueError(f"Not supported Fill Type: {ftype}")

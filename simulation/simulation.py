@@ -1,8 +1,8 @@
-from classes.Machine import Machine
+from classes.machine import Machine
 from colorama import Fore, Back
-from classes.Workflow import Workflow
-from classes.Schedule import Schedule
-from helpers.visualize import Visualizer
+from classes.workflow import Workflow
+from classes.schedule import Schedule
+from visuals.visualize import Visualizer
 
 
 def run_simulation(n, run_methods, visuals):

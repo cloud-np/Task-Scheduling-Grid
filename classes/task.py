@@ -208,7 +208,7 @@ class Task:
         for name in names:
             tmp = Task.find_task_by_name(tasks, name)
             if tmp is None:
-                return ValueError
+                raise ValueError(f"Can't find task name in given tasks: {name}")
             else:
                 adj_tasks.append(tmp)
         return adj_tasks

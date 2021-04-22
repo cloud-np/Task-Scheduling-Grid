@@ -8,6 +8,7 @@ datasets
 __pycache__/
 *.csv
 *.zip
+test.py
 helpers/githubHeft
 task_scheduling_env
 linux_env/

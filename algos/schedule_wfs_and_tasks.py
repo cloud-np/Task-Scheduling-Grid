@@ -1,7 +1,8 @@
-from classes.Task import TaskStatus
-from classes.Schedule import FillMethod, TimeType
+from classes.task import TaskStatus
+from classes.schedule import FillMethod, TimeType
 from algos.calc_ex_time import compute_execution_time
 
+# TODO move to schedule.py
 
 
 def pick_machine_for_task(task, machines):
@@ -16,9 +17,9 @@ def is_hole_fillable(task, m_id, hole):
     # pred: predicted
     pred_start, pred_end = compute_execution_time(task, m_id, hole.start)
     if pred_end <= hole.end:
-        return True, {"start": pred_start, "end": pred_end, "potensial_saved_time": hole.gap - (pred_end - pred_start)}
+        return {"start": pred_start, "end": pred_end, "gap_left": hole.gap - (pred_end - pred_start)}
     else:
-        return False, [-1, -1]
+        return None
 
 
 def schedule_workflow(wf, machines, time_type, hole_filling_type):
@@ -115,49 +116,54 @@ def compare_end(times):
     return times["end"]
 
 
-def fastest_fit(time_type, holes_times):
-    pass
-
-
 def get_machine_and_time(task, machines, time_type, hole_filling_type=FillMethod.NO_FILL):
     holes_times = list()
-    times = list()
-    no_valid_holes = True
+    task_times_on_machines = list()
+    best_time = None
     for machine in machines:
+        # Try to find the existing holes (in the current machine) to fill.
         if hole_filling_type != FillMethod.NO_FILL:
             for hole in machine.holes:
-                [is_fillable, hole_times] = is_hole_fillable(task, machine.id, hole)
-                if is_fillable is True:
-                    holes_times.append({"machine": machine, "hole": hole, **hole_times})
-                    no_valid_holes = False
+                valid_hole_info = is_hole_fillable(task, machine.id, hole)
+                if valid_hole_info is not None:
+                    holes_times.append({"machine": machine, "hole": hole, **valid_hole_info})
 
-        if no_valid_holes:
+        # If no valid holes were found try to look into the current machine
+        # and find the execution time of the specific task in the machine. 
+        if len(holes_times) == 0:
             [start, end] = compute_execution_time(task, machine.id, machine.schedule_len)
-            times.append({"machine": machine, "start": start, "end": end})
+            task_times_on_machines.append({"machine": machine, "start": start, "end": end})
 
     # If there are holes to fill prioritize them.
     if len(holes_times) > 0:
         if hole_filling_type == FillMethod.FASTEST_FIT:
-            time = pick_machine_based_on_timetype(time_type, holes_times)
+            best_time = pick_machine_based_on_timetype(time_type, holes_times)
         elif hole_filling_type == FillMethod.BEST_FIT:
-            time = max(holes_times, key=lambda t: t["potensial_saved_time"])
-    # This Runs if holes method was not picked.
+            best_time = min(holes_times, key=lambda t: t["gap_left"])
+        elif hole_filling_type == FillMethod.FIRST_FIT:
+            # We could write this to run faster but I think we will losse readility
+            best_time = holes_times[0] 
+        elif hole_filling_type == FillMethod.WORST_FIT:
+            best_time = max(holes_times, key=lambda t: t["gap_left"])
+    # If no holes were found.
     else:
-        time = pick_machine_based_on_timetype(time_type, times)
-    hole = time["hole"] if no_valid_holes is False else None
-    return time, hole
+        best_time = pick_machine_based_on_timetype(time_type, task_times_on_machines)
+
+    if best_time is None:
+        raise ValueError(f"No machine or hole in a machine was assigned to: {task}")
+    return best_time
 
 
 def schedule_task_to_best_machine(task, machines, time_type, hole_filling_type=FillMethod.NO_FILL):
-    time_and_machine, hole = get_machine_and_time(task, machines, time_type, hole_filling_type)
+    time_and_machine = get_machine_and_time(task, machines, time_type, hole_filling_type)
 
     schedule_task({'start': time_and_machine["start"],
                    'end': time_and_machine["end"]}, task,
-                  machine=time_and_machine["machine"], hole=hole)
+                  machine=time_and_machine["machine"], hole=time_and_machine.get('hole'))
 
 
 # This function schedules the task and returns the new
-def schedule_task(sch_time, task, machine, hole=None):
+def schedule_task(sch_time, task, machine, hole):
     task.machine_id = machine.id
     task.start = sch_time['start']
     task.end = sch_time['end']

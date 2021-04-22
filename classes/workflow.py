@@ -1,13 +1,12 @@
-from classes.Task import Task, TaskStatus
-from algos.calculate_task_ranks import calculate_downward_ranks, calculate_upward_ranks
+from classes.task import Task, TaskStatus, Edge
+from algos.calc_task_ranks import calculate_downward_ranks, calculate_upward_ranks
 from algos.schedule_wfs_and_tasks import construct_critical_path
 from colorama import Fore, Back
 from helpers.data_parser import get_tasks_from_json_file
-from algos.example_data import NAMES_A, NAMES_B, COSTS_A, COSTS_B, \
+from example_data import NAMES_A, NAMES_B, COSTS_A, COSTS_B, \
     TASK_DAG_A, TASK_DAG_B, PARENTS_DAG_A, PARENTS_DAG_B
 from helpers.checker import schedule_checker
 from random import choice
-from classes.Task import Edge
 
 WF_TYPES = ['cycles', 'epigenomics', 'genome', 'montage', 'seismology', 'soykbr']
 NUM_TASKS = [10, 14, 20, 30, 50, 100, 133, 200, 300, 400, 500, 1000]

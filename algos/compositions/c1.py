@@ -1,4 +1,4 @@
-import classes.Workflow as wf
+import classes.workflow as wf
 from algos.heuristic import heft
 
 # C1 From paper: Scheduling Multiple DAGs onto Heterogeneous Systems

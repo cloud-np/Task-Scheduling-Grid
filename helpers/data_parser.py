@@ -1,9 +1,9 @@
 import csv
 import json
-from classes.Task import *
-import classes.Machine as Machines
+from classes.task import Task, Edge
+import classes.machine as Machines
 # from classes.Machine import NETWORK_KBPS
-from helpers.helpers import get_id_from_name
+from helpers.utils import get_id_from_name
 
 
 def get_tasks_from_json_file(file_name, wf_id):
