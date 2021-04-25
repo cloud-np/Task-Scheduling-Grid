@@ -14,6 +14,7 @@ def run_simulation(n, run_methods, visuals):
     # is_our_method = True
     # workflows = Workflow.load_paper_example_workflows(machines)
 
+    workflows: list = list()
     slowest_machines = list()
     for method in run_methods:
         machines = Machine.load_4_machines()
@@ -26,4 +27,5 @@ def run_simulation(n, run_methods, visuals):
         slowest_machines.append({"machine": schedule.get_slowest_machine(), "method_used": schedule.method_used_info()})
 
     if visuals is True:
-        Visualizer.compare_schedule_len(slowest_machines, len(workflows))
+        # Visualizer.compare_schedule_len(slowest_machines, len(workflows))
+        Visualizer.compare_hole_filling_methods(slowest_machines)

@@ -2,10 +2,10 @@ from enum import Enum
 from typing import List
 from colorama import Fore, Back
 from algos.holes_scheduling import holes_scheduling
-from algos.compositions import c1
-from algos.compositions import c2
-from algos.compositions import c3
-from algos.compositions import c4
+from compositions import c1
+from compositions import c2
+from compositions import c3
+from compositions import c4
 
 
 class TimeType(Enum):
@@ -61,7 +61,7 @@ class Schedule:
         print(f'\n{slowest_machine.str_col_id()}\n{slowest_machine.str_col_schedule_len()}\n')
 
     def run(self):
-        if self.name.startswith("holes"):
+        if self.schedule_function.__name__.startswith("holes"):
             self.schedule_function(self.workflows, self.machines, self.time_types, self.fill_type)
         else:
             self.schedule_function(self.workflows, self.machines)
@@ -71,7 +71,7 @@ class Schedule:
         if self.name.startswith("holes"):
             # return f"{''.join([Schedule.get_time_type(t) + '-' for t in self.time_types])} {self.fill_type}"
             ttypes = [Schedule.get_time_type(t) for t in self.time_types]
-            return f"{ttypes[0]}\n{self.get_fill_type(self.fill_type)}"
+            return f"{ttypes[0]}-{ttypes[1]} {self.get_fill_type(self.fill_type)}"
         else:
             return f"{self.name}"
 

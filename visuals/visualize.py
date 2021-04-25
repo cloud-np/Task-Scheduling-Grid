@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+from typing import Dict, List
+import plotly.graph_objects as go
 import numpy as np
 
 
@@ -9,6 +11,7 @@ class Visualizer:
         s_lens_x = [round(m["machine"].schedule_len) for m in slowest_machines]
         labels = [m["method_used"] for m in slowest_machines]
 
+        plt.style.use("seaborn-dark")
         x = np.arange(len(labels))
         width = 0.35
 
@@ -24,8 +27,37 @@ class Visualizer:
         ax.set_ylabel("Method Used")
         # plt.grid(True)
         plt.title(f"Multiple workflow scheduling sample size {n_workflows}")
+        plt.grid(True)
         fig.tight_layout()
         plt.show()
+
+    @staticmethod
+    def compare_hole_filling_methods(slowest_machines):
+
+        methods_order = list()
+        infos: Dict[str, List[int]] = dict()
+        for i, m in enumerate(slowest_machines):
+            ttypes, method = m['method_used'].split()
+            if i < 4:
+                methods_order.append(method)
+            if infos.get(ttypes) is not None:
+                infos[ttypes].append(round(m['machine'].schedule_len))
+            else:
+                infos[ttypes] = [round(m['machine'].schedule_len)]
+
+        bars = list()
+        for key, info in infos.items():
+            bars.append(go.Bar(name=key, x=methods_order, y=info))  # type:ignore
+
+        fig = go.Figure(data=bars)  # type: ignore
+
+        # fig = go.Figure(data=[
+        #     go.Bar(name='SF Zoo', x=fill_methods, y=[20, 14, 23]),  # type:ignore
+        #     go.Bar(name='LA Zoo', x=fill_methods, y=[12, 18, 29])   # type:ignore
+        # ])
+        # Change the bar mode
+        fig.update_layout(barmode='group')
+        fig.show()
 
     @staticmethod
     def create_visuals_edges(tasks, G, go):
@@ -109,33 +141,6 @@ class Visualizer:
         nx.set_node_attributes(G, pos, "pos")
         return G
 
-    @staticmethod
-    def visualize_tasks(tasks):
-        import plotly.graph_objects as go
-        # G = nx.random_geometric_graph(200, 10.125)
-
-        G = Visualizer.create_graph(tasks)
-
-        edge_trace, node_trace = Visualizer.create_visuals_edges(tasks, G, go)
-
-        Visualizer.color_node_points(G, node_trace)
-
-        fig = go.Figure(data=[edge_trace, node_trace],
-                        layout=go.Layout(
-                        title='<br>Network graph made with Python',
-                        titlefont_size=16,
-                        showlegend=False,
-                        hovermode='closest',
-                        margin=dict(b=20, l=5, r=5, t=40),
-                        annotations=[dict(
-                            text="Python code: <a href='https://plotly.com/ipython-notebooks/network-graphs/'> https://plotly.com/ipython-notebooks/network-graphs/</a>",
-                            showarrow=False,
-                            xref="paper", yref="paper",
-                            x=0.005, y=-0.002)],
-                        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
-                        )
-        fig.show()
 
     @staticmethod
     def visualize_machines(machines):
@@ -165,28 +170,6 @@ class Visualizer:
         fig.data[0].x = df.delta.tolist()
         fig.full_figure_for_development(warn=False)
         fig.show()
-
-    # @staticmethod
-    # def visualize_schedule1(schedule):
-    #     y = list()
-    #     x = list()
-    #     measures = list()
-    #     for task in schedule["tasks"]:
-    #         y.append(task.name)
-    #         measures.append('relative')
-    #         x.append(task.end - task.start)
-
-    #     import plotly.graph_objects as go
-    #     fig = go.Figure(go.Waterfall(
-    #         name="2018", orientation="h", measure=measures,
-    #         y=y,
-    #         x=x,
-    #         connector={"mode": "between", "line": {"width": 4, "color": "rgb(0, 0, 0)", "dash": "solid"}}
-    #     ))
-
-    #     fig.update_layout(title="Profit and loss statement 2018")
-
-    #     fig.show()
 
 
 def autolabel(rects, ax):

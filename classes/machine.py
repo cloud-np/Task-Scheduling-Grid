@@ -15,7 +15,7 @@ class Hole:
         self.gap = gap
         self.start = start
         self.end = end
-        self.time_saved = 0 
+        self.time_saved = 0
 
     def __key(self):
         return tuple((self.gap, (self.start, self.end)))

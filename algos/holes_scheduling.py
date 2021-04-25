@@ -1,4 +1,5 @@
-import algos.schedule_wfs_and_tasks as scheduler 
+import algos.schedule_wfs_and_tasks as scheduler
+
 
 def holes_scheduling(workflows, machines, time_types, hole_filling_type):
     """This method is used to schedule with method holes.
@@ -16,10 +17,8 @@ def holes_scheduling(workflows, machines, time_types, hole_filling_type):
 
     j = len(sorted_wfs) - 1
     for i in range(len(sorted_wfs) // 2):
-        scheduler.schedule_workflow(sorted_wfs[i], machines,
-                          time_types[0], hole_filling_type=hole_filling_type)
-        scheduler.schedule_workflow(sorted_wfs[j], machines,
-                          time_types[1], hole_filling_type=hole_filling_type)
+        scheduler.schedule_workflow(sorted_wfs[i], machines, time_types[0], hole_filling_type=hole_filling_type)
+        scheduler.schedule_workflow(sorted_wfs[j], machines, time_types[1], hole_filling_type=hole_filling_type)
         j -= 1
 
     # This is incase we have an odd number of workflows so one is left out without a pair.
