@@ -3,6 +3,7 @@ from colorama import Fore
 SUCCESS = f'{Fore.GREEN}The schedule is valid!{Fore.RESET}'
 
 
+# FIXME Need refactoring.
 def schedule_checker(tasks, machines):
     # Check if there is one and only task running at a certain time
     # NOTE: The tasks should be in the order the got

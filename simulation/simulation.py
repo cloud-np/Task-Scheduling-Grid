@@ -2,9 +2,13 @@ from classes.machine import Machine
 from colorama import Fore, Back
 from classes.workflow import Workflow
 from classes.schedule import Schedule
+from helpers.checker import schedule_checker
 from visuals.visualize import Visualizer
 
 
+# TODO One idea is to pass schedule functions to the
+# run() method of the Schedule obj. This sounds a bit cleaner.
+# than making it pick a the correct function as init time.
 def run_simulation(n, run_methods, visuals):
     # VISUAL SCHEDULE ----------
     # schedule = {"tasks": all_tasks}

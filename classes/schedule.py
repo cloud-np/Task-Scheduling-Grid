@@ -51,7 +51,7 @@ class Schedule:
             raise Exception("You should run the scheduling method first.")
 
     def info(self):
-        print(f"\t{Back.MAGENTA}METHOD USED: {Fore.LIGHTYELLOW_EX}{self.name}{Fore.RESET}{Back.RESET}")
+        print(f"\t{Back.MAGENTA}{Fore.LIGHTYELLOW_EX}{self.method_used_info()}{Fore.RESET}{Back.RESET}")
         if self.name.startswith("holes"):
             for machine in self.machines:
                 print(machine.holes_filled)
