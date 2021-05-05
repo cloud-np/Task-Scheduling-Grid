@@ -2,10 +2,10 @@ from enum import Enum
 from typing import List
 from colorama import Fore, Back
 from algos.holes_scheduling import holes_scheduling
-from compositions import c1
-from compositions import c2
-from compositions import c3
-from compositions import c4
+from wf_compositions import c1
+from wf_compositions import c2
+from wf_compositions import c3
+from wf_compositions import c4
 
 
 class TimeType(Enum):
@@ -23,7 +23,7 @@ class FillMethod(Enum):
     WORST_FIT = 3
 
 
-class Schedule:
+class Scheduler:
 
     def __init__(self, name, workflows, machines, time_types: List[str], fill_type):
         self.name = name
@@ -43,6 +43,19 @@ class Schedule:
         self.schedule_function = self.get_scheduling_method(name)
 
         self.is_scheduling_done = False
+
+    # This function schedules the task and returns the new
+    @staticmethod
+    def schedule_task(sch_time, task, machine, hole):
+        task.machine_id = machine.id
+        task.start = sch_time['start']
+        task.end = sch_time['end']
+        task.update_children_and_self_status()
+
+        if hole is None:
+            machine.add_task(task)
+        else:
+            machine.add_task_to_hole(task, hole)
 
     def get_slowest_machine(self):
         if self.is_scheduling_done is True:
@@ -70,7 +83,7 @@ class Schedule:
     def method_used_info(self):
         if self.name.startswith("holes"):
             # return f"{''.join([Schedule.get_time_type(t) + '-' for t in self.time_types])} {self.fill_type}"
-            ttypes = [Schedule.get_time_type(t) for t in self.time_types]
+            ttypes = [Scheduler.get_time_type(t) for t in self.time_types]
             return f"{ttypes[0]}-{ttypes[1]} {self.get_fill_type(self.fill_type)}"
         else:
             return f"{self.name}"

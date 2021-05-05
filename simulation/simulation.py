@@ -1,7 +1,7 @@
 from classes.machine import Machine
 from colorama import Fore, Back
 from classes.workflow import Workflow
-from classes.schedule import Schedule
+from classes.scheduler import Scheduler
 from helpers.checker import schedule_checker
 from visuals.visualize import Visualizer
 
@@ -23,7 +23,7 @@ def run_simulation(n, run_methods, visuals):
     for method in run_methods:
         machines = Machine.load_4_machines()
         workflows = Workflow.load_example_workflows(machines=machines, n=n)
-        schedule = Schedule(name=method['name'], workflows=workflows, machines=machines, time_types=method["time_types"], fill_type=method["fill_type"])
+        schedule = Scheduler(name=method['name'], workflows=workflows, machines=machines, time_types=method["time_types"], fill_type=method["fill_type"])
 
         schedule.run()
         schedule.info()

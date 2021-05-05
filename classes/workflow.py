@@ -1,8 +1,7 @@
 from classes.task import Task, TaskStatus, Edge
 from algos.calc_task_ranks import calculate_downward_ranks, calculate_upward_ranks
-from algos.schedule_wfs_and_tasks import construct_critical_path
+import algos.schedule_wfs as algos
 from colorama import Fore, Back
-from copy import deepcopy, copy
 from helpers.data_parser import get_tasks_from_json_file
 from example_data import NAMES_A, NAMES_B, COSTS_A, COSTS_B, \
     TASK_DAG_A, TASK_DAG_B, PARENTS_DAG_A, PARENTS_DAG_B
@@ -12,6 +11,7 @@ from random import choice
 WF_TYPES = ['cycles', 'epigenomics', 'genome', 'montage', 'seismology', 'soykbr']
 NUM_TASKS = [10, 14, 20, 30, 50, 100, 133, 200, 300, 400, 500, 1000]
 CACHED_WFS = dict()
+
 
 # Each Workflow has each very own Tasks and Machines
 # objects. This is crucial because the are not referencing
@@ -127,7 +127,7 @@ class Workflow:
                 print(task)
             task.set_priority(task.down_rank + task.up_rank)
 
-        critical_path, [entry_task, exit_task] = construct_critical_path(self.tasks)
+        critical_path, [entry_task, exit_task] = algos.construct_critical_path(self.tasks)
         self.cp_info = {"critical_path": critical_path, "entry": entry_task, "exit": exit_task}
         return critical_path, [entry_task, exit_task]
 
@@ -191,13 +191,10 @@ class Workflow:
         wf_types = ['cycles', 'genome', 'seismology', 'cycles', 'soykbr', 'epigenomics',
                     'genome', 'cycles', 'seismology', 'genome', 'cycles', 'genome', 'epigenomics',
                     'cycles', 'genome', 'epigenomics', 'seismology', 'genome', 'soykbr', 'soykbr']
-        
+
         workflows = [
-            Workflow(id_=i, 
-            file_path=f"{path}/{wf_types[i]}/{wf_types[i]}_{num_tasks[i]}.json",
-            wf_type=wf_types[i], 
-            machines=machines, 
-            add_dummies=True) for i in range(n)]
+            Workflow(id_=i, file_path=f"{path}/{wf_types[i]}/{wf_types[i]}_{num_tasks[i]}.json",
+                     wf_type=wf_types[i], machines=machines, add_dummies=True) for i in range(n)]
         return workflows
 
     # Gets the starting tasks which are the entry tasks to begin with.

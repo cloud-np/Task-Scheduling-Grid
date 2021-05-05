@@ -13,8 +13,8 @@ if __name__ == "__main__":
     # visuals = False
     # print("\n\n\t\tFOR N = 5")
     # run_simulation(5, run_methods, visuals)
-    # print("\n\n\t\tFOR N = 10")
-    # run_simulation(10, run_methods, visuals)
-    print("\n\n\t\tFOR N = 20")
-    run_simulation(20, run_methods, visuals)
+    print("\n\n\t\tFOR N = 10")
+    run_simulation(10, run_methods, visuals)
+    # print("\n\n\t\tFOR N = 20")
+    # run_simulation(20, run_methods, visuals)
     # run_simulation(20, run_methods=["c3"], visuals=False)

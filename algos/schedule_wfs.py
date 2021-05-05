@@ -1,6 +1,6 @@
 from classes.task import TaskStatus
-from classes.schedule import FillMethod, TimeType
-from algos.calc_ex_time import compute_execution_time
+import algos.calc_times_on_machines as algos
+from classes.scheduler import FillMethod, TimeType, Scheduler
 
 # TODO move to schedule.py
 
@@ -8,24 +8,15 @@ from algos.calc_ex_time import compute_execution_time
 def pick_machine_for_task(task, machines):
     # We pick the "first" available machine
     machine = min(machines, key=lambda m: m.schedule_len)
-    tmp_time = compute_execution_time(task, machine.id, machine.schedule_len)
+    tmp_time = algos.compute_execution_time(task, machine.id, machine.schedule_len)
     return machine, tmp_time
-
-
-def is_hole_fillable(task, m_id, hole):
-    # Check if the parent end interfere with the child start
-    # pred: predicted
-    pred_start, pred_end = compute_execution_time(task, m_id, hole.start)
-    if pred_end <= hole.end:
-        return {"start": pred_start, "end": pred_end, "gap_left": hole.gap - (pred_end - pred_start)}
-    else:
-        return None
 
 
 def schedule_workflow(wf, machines, time_type, hole_filling_type):
     wf.scheduled = True
     for task in wf.tasks:
-        schedule_task_to_best_machine(task, machines, time_type, hole_filling_type)
+        schedule_task_to_best_machine(
+            task, machines, time_type, hole_filling_type)
 
 
 def schedule_tasks_round_robin_heft(unscheduled, machines, n_wfs):
@@ -114,63 +105,12 @@ def compare_end(times):
     return times["end"]
 
 
-def get_machine_and_time(task, machines, time_type, hole_filling_type=FillMethod.NO_FILL):
-    holes_times = list()
-    task_times_on_machines = list()
-    best_time = None
-    for machine in machines:
-        # Try to find the existing holes (in the current machine) to fill.
-        if hole_filling_type != FillMethod.NO_FILL:
-            for hole in machine.holes:
-                valid_hole_info = is_hole_fillable(task, machine.id, hole)
-                if valid_hole_info is not None:
-                    holes_times.append({"machine": machine, "hole": hole, **valid_hole_info})
-
-        # If no valid holes were found try to look into the current machine
-        # and find the execution time of the specific task in the machine. 
-        if len(holes_times) == 0:
-            [start, end] = compute_execution_time(task, machine.id, machine.schedule_len)
-            task_times_on_machines.append({"machine": machine, "start": start, "end": end})
-
-    # If there are holes to fill prioritize them.
-    if len(holes_times) > 0:
-        if hole_filling_type == FillMethod.FASTEST_FIT:
-            best_time = pick_machine_based_on_timetype(time_type, holes_times)
-        elif hole_filling_type == FillMethod.BEST_FIT:
-            best_time = min(holes_times, key=lambda t: t["gap_left"])
-        elif hole_filling_type == FillMethod.FIRST_FIT:
-            # We could write this to run faster but I think we will losse readility
-            best_time = holes_times[0] 
-        elif hole_filling_type == FillMethod.WORST_FIT:
-            best_time = max(holes_times, key=lambda t: t["gap_left"])
-    # If no holes were found.
-    else:
-        best_time = pick_machine_based_on_timetype(time_type, task_times_on_machines)
-
-    if best_time is None:
-        raise ValueError(f"No machine or hole in a machine was assigned to: {task}")
-    return best_time
-
-
 def schedule_task_to_best_machine(task, machines, time_type, hole_filling_type=FillMethod.NO_FILL):
-    time_and_machine = get_machine_and_time(task, machines, time_type, hole_filling_type)
+    time_and_machine = algos.calc_time_on_machine(
+        task, machines, time_type, hole_filling_type)
 
-    schedule_task({'start': time_and_machine["start"],
-                   'end': time_and_machine["end"]}, task,
-                  machine=time_and_machine["machine"], hole=time_and_machine.get('hole'))
-
-
-# This function schedules the task and returns the new
-def schedule_task(sch_time, task, machine, hole):
-    task.machine_id = machine.id
-    task.start = sch_time['start']
-    task.end = sch_time['end']
-    task.update_children_and_self_status()
-
-    if hole is None:
-        machine.add_task(task)
-    else:
-        machine.add_task_to_hole(task, hole)
+    Scheduler.schedule_task({'start': time_and_machine["start"], 'end': time_and_machine["end"]},
+                            task, machine=time_and_machine["machine"], hole=time_and_machine.get('hole'))
 
 
 def pick_machine_for_critical_path(critical_path, machines):

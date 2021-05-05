@@ -1,4 +1,4 @@
-import algos.schedule_wfs_and_tasks as scheduler
+import algos.schedule_wfs as scheduler
 
 
 def holes_scheduling(workflows, machines, time_types, hole_filling_type):

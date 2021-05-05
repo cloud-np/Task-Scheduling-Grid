@@ -1,5 +1,7 @@
 from colorama import Fore
 from random import randint
+# import algos.calc_ex_time as time_calc
+from algos.calc_times_on_machines import compute_execution_time
 from typing import Set
 
 NETWORK_KBPS = 200
@@ -28,6 +30,16 @@ class Hole:
             return self.__key() == other.__key()
         else:
             return NotImplemented
+
+    def is_fillable(self, task, m_id):
+        # Check if the parent end interfere with the child start
+        # pred: predicted
+        # pred_start, pred_end = time_calc.compute_execution_time(task, m_id, self.start)
+        pred_start, pred_end = compute_execution_time(task, m_id, self.start)
+        if pred_end <= self.end:
+            return {"start": pred_start, "end": pred_end, "gap_left": self.gap - (pred_end - pred_start)}
+        else:
+            return None
 
 
 class Machine:
@@ -63,7 +75,6 @@ class Machine:
         before_start_gap = task.start - hole.start
         after_end_gap = hole.end - task.end
 
-
         # New holes get created based on the minimum gap we added.
         if before_start_gap >= MIN_GAP_SIZE:
             self.holes.add(Hole(start=hole.start, end=task.start, gap=before_start_gap))
@@ -73,8 +84,9 @@ class Machine:
         hole.time_saved = hole.gap - before_start_gap - after_end_gap
         self.holes_saved_time += hole.time_saved
         self.remove_hole(hole)
-    
-    def get_potential_hole_time_saved(self, task, hole):
+
+    @staticmethod
+    def get_potential_hole_time_saved(task, hole):
         return hole.gap - (task.start - hole.start + hole.end - task.end)
 
     def remove_hole(self, hole):
