@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List
+from typing import List, Any
 from colorama import Fore, Back
 from algos.holes_scheduling import holes_scheduling
 from wf_compositions import c1
@@ -40,7 +40,7 @@ class Scheduler:
         self.fill_type = self.get_fill_type(fill_type)
 
         # The method that we gonna run the schedule.
-        self.schedule_function = self.get_scheduling_method(name)
+        self.schedule_function: Any = self.get_scheduling_method(name)
 
         self.is_scheduling_done = False
 
