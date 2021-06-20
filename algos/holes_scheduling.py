@@ -13,7 +13,7 @@ def holes_scheduling(workflows, machines, time_types, hole_filling_type):
         machines (list(Machine)): Contains information about the machines.
         time_types (list(TimeType)): Shows the time type we should use for each workflow to be schedules with. e.g: EFT - EST
     """
-    sorted_wfs = sorted(workflows, key=lambda wf_: wf_.calc_ccr(), reverse=True)
+    sorted_wfs = sorted(workflows, key=lambda wf_: wf_.ccr, reverse=True)
 
     j = len(sorted_wfs) - 1
     for i in range(len(sorted_wfs) // 2):

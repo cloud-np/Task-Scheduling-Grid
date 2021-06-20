@@ -1,5 +1,5 @@
 from colorama import Fore
-from typing import List
+from typing import List, Union
 
 DEBUG = True
 ROUND_DIGIT = 2
@@ -38,7 +38,7 @@ class Edge:
 
 
 class Task:
-    def __init__(self, id_, wf_id, name, costs, runtime, files, children_names, parents_names):
+    def __init__(self, id_, wf_id, name, costs, runtime, files, children_names, parents_names) -> None:
         self.costs = costs
         self.id = id_
         self.name = name
@@ -52,6 +52,7 @@ class Task:
         self.runtime = runtime
         self.files = files
         self.wf_id = wf_id
+        self.wf_deadline: Union[int, None] = None
         self.status = TaskStatus.UNSCHEDULED
         self.children_names = children_names
         self.children_till_ready = 0
@@ -82,16 +83,8 @@ class Task:
         if self.is_entry == self.is_exit is True:
             raise Exception(f"Node[ {self.id} ] is not connected in the dag!")
 
-        # if name.startswith("Dummy-In") is True:
-        #     self.is_entry_task = True
-        # elif name.startswith("Dummy-Out") is True:
-        #     self.is_exit_task = True
-
-        #     self.up_rank = self.down_rank = 0
-        #     self.end = 0
-        #     self.start = 0
-        #     self.slowest_parent = {
-        #         'parent_task': None, 'communication_time': 0}
+    def set_wf_deadline(self, deadline):
+        self.wf_deadline = deadline
 
     @staticmethod
     def make_dummy_node(id_, wf_id, name):

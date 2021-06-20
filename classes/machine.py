@@ -2,7 +2,7 @@ from colorama import Fore
 from random import randint
 # import algos.calc_ex_time as time_calc
 from algos.calc_times_on_machines import compute_execution_time
-from typing import Set
+from typing import Set, Union
 
 NETWORK_KBPS = 200
 # NETWORK_KBPS = 1
@@ -48,7 +48,7 @@ class Machine:
         self.schedule_len = 0
         self.id: int = id_
         self.name: str = name
-        self.n_cpu: int = n_cpu
+        self.n_cpu: Union[int, None] = n_cpu
         self.memory = memory
         self.cpti = cpti  # cost per time interval
         self.speed = speed
