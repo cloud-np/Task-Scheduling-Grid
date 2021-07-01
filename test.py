@@ -9,4 +9,3 @@ if __name__ == "__main__":
     machines = Machine.load_4_machines()
     workflows = Workflow.load_example_workflows(machines=machines, n=10)
     Paper2011(workflows, machines)
-

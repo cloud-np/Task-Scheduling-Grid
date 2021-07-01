@@ -28,13 +28,6 @@ class Edge:
 
     def __str__(self):
         return f'--- {self.weight} --> {self.node.str_id()}'
-    # can't use this yet because task __eq__ checks based the
-    # rank attribute. it should be changed to name or id_
-    # def __eq__(self, other):
-    #     if isinstance(other, edge):
-    #         return self.node == other.node
-    #     else:
-    #         return notimplemented
 
 
 class Task:
