@@ -23,7 +23,7 @@ def run_simulation(n, run_methods, visuals):
     for method in run_methods:
         machines = Machine.load_4_machines()
         workflows = Workflow.load_example_workflows(machines=machines, n=n)
-        schedule = Scheduler(name=method['name'], workflows=workflows, machines=machines, time_types=method["time_types"], fill_type=method["fill_type"])
+        schedule = Scheduler(name=method['name'], workflows=workflows, machines=machines, time_types=method.get("time_types"), fill_type=method["fill_type"], priority_type=method.get("priority_type"))
 
         schedule.run()
         schedule.info()

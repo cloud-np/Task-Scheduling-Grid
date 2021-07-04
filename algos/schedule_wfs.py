@@ -1,4 +1,6 @@
-from classes.task import TaskStatus
+from classes.task import TaskStatus, Task
+from typing import Union
+from classes.scheduler import PriorityType
 import algos.calc_times_on_machines as algos
 from classes.scheduler import FillMethod, TimeType, Scheduler
 
@@ -8,15 +10,56 @@ from classes.scheduler import FillMethod, TimeType, Scheduler
 def pick_machine_for_task(task, machines):
     # We pick the "first" available machine
     machine = min(machines, key=lambda m: m.schedule_len)
-    tmp_time = algos.compute_execution_time(task, machine.id, machine.schedule_len)
+    tmp_time = algos.compute_execution_time(
+        task, machine.id, machine.schedule_len)
     return machine, tmp_time
 
 
 def schedule_workflow(wf, machines, time_type, hole_filling_type):
     wf.scheduled = True
-    for task in wf.tasks:
-        schedule_task_to_best_machine(
-            task, machines, time_type, hole_filling_type)
+
+    unscheduled = sorted(wf.tasks, key=lambda t: t.up_rank)
+    # unscheduled = wf.tasks
+    i = 0
+    while len(unscheduled) > 0:
+        if i >= len(unscheduled):
+            i = 0
+        task = unscheduled[i]
+        if task.status == TaskStatus.READY:
+            schedule_task_to_best_machine(
+                task, machines, time_type, hole_filling_type)
+            unscheduled.pop(i)
+        i += 1
+
+
+def schedule_workflow_2011_paper(wf, machines, priority_type, hole_filling_type):
+    # 1. Sort tasks in workflows based on the priority_type
+    #   - EDF:  The deadline time from each workflow.
+    #   - HLF:  Up-rank as usual.
+    #   - LSTF: wf_deadline - curr_time - up_rank
+    wf.scheduled = True
+    unscheduled = []
+
+    if priority_type == PriorityType.HLF:
+        unscheduled = sorted(wf.tasks, key=lambda t: t.up_rank)
+    elif priority_type == PriorityType.EDF:
+        for t in wf.tasks:
+            if t.wf_deadline is None:
+                raise Exception("deadline is NONE")
+        unscheduled = sorted(wf.tasks, key=lambda t: t.wf_deadline)
+    elif priority_type == PriorityType.LSTF:
+        unscheduled = sorted(wf.tasks, key=lambda t: t.calc_lstf(time=0))
+
+    i = 0
+    while len(unscheduled) > 0:
+        if i >= len(unscheduled):
+            i = 0
+        task = unscheduled[i]
+        if task.status == TaskStatus.READY:
+            schedule_task_to_best_machine(
+                task, machines, TimeType.EFT, hole_filling_type)
+            unscheduled.pop(i)
+        i += 1
 
 
 def schedule_tasks_round_robin_heft(unscheduled, machines, n_wfs):
@@ -106,6 +149,8 @@ def compare_end(times):
 
 
 def schedule_task_to_best_machine(task, machines, time_type, hole_filling_type=FillMethod.NO_FILL):
+    if task.status != TaskStatus.READY:
+        raise Exception("Task status is not ready! ", task)
     time_and_machine = algos.calc_time_on_machine(
         task, machines, time_type, hole_filling_type)
 
@@ -125,14 +170,18 @@ def pick_machine_for_critical_path(critical_path, machines):
     return min(machines_costs, key=lambda tup: tup[0])[1]
 
 
-def construct_critical_path(tasks):
-    critical_path = list()
-    entry_task = None
-    # Find an entry task
+def find_an_entry_task(tasks):
     for task in tasks:
         if task.is_entry:
-            entry_task = task
-            break
+            return task
+    raise Exception("NO entry task found! func: [find_an_entry_task]")
+
+
+def construct_critical_path(tasks):
+    critical_path = list()
+
+    # Find an entry task
+    entry_task = find_an_entry_task(tasks)
 
     entry_priority = round(entry_task.priority, 5)
     temp_task = entry_task

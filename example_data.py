@@ -1,46 +1,100 @@
-HOLE_METHOD_VARIATIONS = {"EFT_variations": [
-                        # EST - EST
-                        {"name": "holes FASTEST-FIT", "time_types": ["EST", "EST"], "fill_type": "FASTEST-FIT"},
-                        {"name": "holes BEST-FIT", "time_types": ["EST", "EST"], "fill_type": "BEST-FIT"},
-                        {"name": "holes FIRST-FIT", "time_types": ["EST", "EST"], "fill_type": "FIRST-FIT"},
-                        {"name": "holes WORST-FIT", "time_types": ["EST", "EST"], "fill_type": "WORST-FIT"},
-                        # EFT - EST
-                        {"name": "holes FASTEST-FIT", "time_types": ["EFT", "EST"], "fill_type": "FASTEST-FIT"},
-                        {"name": "holes BEST-FIT", "time_types": ["EFT", "EST"], "fill_type": "BEST-FIT"},
-                        {"name": "holes FIRST-FIT", "time_types": ["EFT", "EST"], "fill_type": "FIRST-FIT"},
-                        {"name": "holes WORST-FIT", "time_types": ["EFT", "EST"], "fill_type": "WORST-FIT"},
-                        # EFT - EFT
-                        {"name": "holes FASTEST-FIT", "time_types": ["EFT", "EFT"], "fill_type": "FASTEST-FIT"},
-                        {"name": "holes BEST-FIT", "time_types": ["EFT", "EFT"], "fill_type": "BEST-FIT"},
-                        {"name": "holes FIRST-FIT", "time_types": ["EFT", "EFT"], "fill_type": "FIRST-FIT"},
-                        {"name": "holes WORST-FIT", "time_types": ["EFT", "EFT"], "fill_type": "WORST-FIT"},
-                        # EST - EFT
-                        {"name": "holes FASTEST-FIT", "time_types": ["EST", "EFT"], "fill_type": "FASTEST-FIT"},
-                        {"name": "holes BEST-FIT", "time_types": ["EST", "EFT"], "fill_type": "BEST-FIT"},
-                        {"name": "holes FIRST-FIT", "time_types": ["EST", "EFT"], "fill_type": "FIRST-FIT"},
-                        {"name": "holes WORST-FIT", "time_types": ["EST", "EFT"], "fill_type": "WORST-FIT"}],
+HOLE_METHOD_VARIATIONS = {
 
-                        "LFT_variations": [
-                        # LST - EFT
-                        {"name": "holes FASTEST-FIT", "time_types": ["LST", "EFT"], "fill_type": "FASTEST-FIT"},
-                        {"name": "holes BEST-FIT", "time_types": ["LST", "EFT"], "fill_type": "BEST-FIT"},
-                        {"name": "holes FIRST-FIT", "time_types": ["LST", "EFT"], "fill_type": "FIRST-FIT"},
-                        {"name": "holes WORST-FIT", "time_types": ["LST", "EFT"], "fill_type": "WORST-FIT"},
-                        # LST - EST
-                        {"name": "holes FASTEST-FIT", "time_types": ["LST", "EST"], "fill_type": "FASTEST-FIT"},
-                        {"name": "holes BEST-FIT", "time_types": ["LST", "EST"], "fill_type": "BEST-FIT"},
-                        {"name": "holes FIRST-FIT", "time_types": ["LST", "EST"], "fill_type": "FIRST-FIT"},
-                        {"name": "holes WORST-FIT", "time_types": ["LST", "EST"], "fill_type": "WORST-FIT"},
-                        # LFT - EST
-                        {"name": "holes FASTEST-FIT", "time_types": ["LFT", "EST"], "fill_type": "FASTEST-FIT"},
-                        {"name": "holes BEST-FIT", "time_types": ["LFT", "EST"], "fill_type": "BEST-FIT"},
-                        {"name": "holes FIRST-FIT", "time_types": ["LFT", "EST"], "fill_type": "FIRST-FIT"},
-                        {"name": "holes WORST-FIT", "time_types": ["LFT", "EST"], "fill_type": "WORST-FIT"},
-                        # LFT - EFT
-                        {"name": "holes FASTEST-FIT", "time_types": ["LFT", "EFT"], "fill_type": "FASTEST-FIT"},
-                        {"name": "holes BEST-FIT", "time_types": ["LFT", "EFT"], "fill_type": "BEST-FIT"},
-                        {"name": "holes FIRST-FIT", "time_types": ["LFT", "EFT"], "fill_type": "FIRST-FIT"},
-                        {"name": "holes WORST-FIT", "time_types": ["LFT", "EFT"], "fill_type": "WORST-FIT"}]}
+    "EFT_variations": [
+        # EST - EST
+        {"name": "holes FASTEST-FIT",
+         "time_types": ["EST", "EST"], "fill_type": "FASTEST-FIT"},
+        {"name": "holes BEST-FIT",
+         "time_types": ["EST", "EST"], "fill_type": "BEST-FIT"},
+        {"name": "holes FIRST-FIT",
+         "time_types": ["EST", "EST"], "fill_type": "FIRST-FIT"},
+        {"name": "holes WORST-FIT",
+         "time_types": ["EST", "EST"], "fill_type": "WORST-FIT"},
+        # EFT - EST
+        {"name": "holes FASTEST-FIT",
+         "time_types": ["EFT", "EST"], "fill_type": "FASTEST-FIT"},
+        {"name": "holes BEST-FIT",
+         "time_types": ["EFT", "EST"], "fill_type": "BEST-FIT"},
+        {"name": "holes FIRST-FIT",
+         "time_types": ["EFT", "EST"], "fill_type": "FIRST-FIT"},
+        {"name": "holes WORST-FIT",
+         "time_types": ["EFT", "EST"], "fill_type": "WORST-FIT"},
+        # EFT - EFT
+        {"name": "holes FASTEST-FIT",
+         "time_types": ["EFT", "EFT"], "fill_type": "FASTEST-FIT"},
+        {"name": "holes BEST-FIT",
+         "time_types": ["EFT", "EFT"], "fill_type": "BEST-FIT"},
+        {"name": "holes FIRST-FIT",
+         "time_types": ["EFT", "EFT"], "fill_type": "FIRST-FIT"},
+        {"name": "holes WORST-FIT",
+         "time_types": ["EFT", "EFT"], "fill_type": "WORST-FIT"},
+        # EST - EFT
+        {"name": "holes FASTEST-FIT",
+         "time_types": ["EST", "EFT"], "fill_type": "FASTEST-FIT"},
+        {"name": "holes BEST-FIT",
+         "time_types": ["EST", "EFT"], "fill_type": "BEST-FIT"},
+        {"name": "holes FIRST-FIT",
+         "time_types": ["EST", "EFT"], "fill_type": "FIRST-FIT"},
+        {"name": "holes WORST-FIT", "time_types": ["EST", "EFT"], "fill_type": "WORST-FIT"}],
+
+    "LFT_variations": [
+        # LST - EFT
+        {"name": "holes FASTEST-FIT",
+         "time_types": ["LST", "EFT"], "fill_type": "FASTEST-FIT"},
+        {"name": "holes BEST-FIT",
+         "time_types": ["LST", "EFT"], "fill_type": "BEST-FIT"},
+        {"name": "holes FIRST-FIT",
+         "time_types": ["LST", "EFT"], "fill_type": "FIRST-FIT"},
+        {"name": "holes WORST-FIT",
+         "time_types": ["LST", "EFT"], "fill_type": "WORST-FIT"},
+        # LST - EST
+        {"name": "holes FASTEST-FIT",
+         "time_types": ["LST", "EST"], "fill_type": "FASTEST-FIT"},
+        {"name": "holes BEST-FIT",
+         "time_types": ["LST", "EST"], "fill_type": "BEST-FIT"},
+        {"name": "holes FIRST-FIT",
+         "time_types": ["LST", "EST"], "fill_type": "FIRST-FIT"},
+        {"name": "holes WORST-FIT",
+         "time_types": ["LST", "EST"], "fill_type": "WORST-FIT"},
+        # LFT - EST
+        {"name": "holes FASTEST-FIT",
+         "time_types": ["LFT", "EST"], "fill_type": "FASTEST-FIT"},
+        {"name": "holes BEST-FIT",
+         "time_types": ["LFT", "EST"], "fill_type": "BEST-FIT"},
+        {"name": "holes FIRST-FIT",
+         "time_types": ["LFT", "EST"], "fill_type": "FIRST-FIT"},
+        {"name": "holes WORST-FIT",
+         "time_types": ["LFT", "EST"], "fill_type": "WORST-FIT"},
+        # LFT - EFT
+        {"name": "holes FASTEST-FIT",
+         "time_types": ["LFT", "EFT"], "fill_type": "FASTEST-FIT"},
+        {"name": "holes BEST-FIT",
+         "time_types": ["LFT", "EFT"], "fill_type": "BEST-FIT"},
+        {"name": "holes FIRST-FIT",
+         "time_types": ["LFT", "EFT"], "fill_type": "FIRST-FIT"},
+        {"name": "holes WORST-FIT", "time_types": ["LFT", "EFT"], "fill_type": "WORST-FIT"}],
+
+    "holes-2011-FASTEST-FIT": [
+        {"name": "holes2011 FASTEST-EDF", "fill_type": "FASTEST-FIT", "priority_type": "EDF"},
+        {"name": "holes2011 FASTEST-LSTF", "fill_type": "FASTEST-FIT", "priority_type": "LSTF"},
+        {"name": "holes2011 FASTEST-HLF", "fill_type": "FASTEST-FIT", "priority_type": "HLF"},
+    ],
+    "holes-2011-BEST-FIT": [
+        {"name": "holes2011 BEST-EDF", "fill_type": "BEST-FIT", "priority_type": "EDF"},
+        {"name": "holes2011 BEST-LSTF", "fill_type": "BEST-FIT", "priority_type": "LSTF"},
+        {"name": "holes2011 BEST-HLF", "fill_type": "BEST-FIT", "priority_type": "HLF"},
+    ],
+    "holes-2011-WORST-FIT": [
+        {"name": "holes2011 WORST-EDF", "fill_type": "WORST-FIT", "priority_type": "EDF"},
+        {"name": "holes2011 WORST-LSTF", "fill_type": "WORST-FIT", "priority_type": "LSTF"},
+        {"name": "holes2011 WORST-HLF", "fill_type": "WORST-FIT", "priority_type": "HLF"},
+    ],
+    "holes-2011-FIRST-FIT": [
+        {"name": "holes2011 FIRST-EDF", "fill_type": "FIRST-FIT", "priority_type": "EDF"},
+        {"name": "holes2011 FIRST-LSTF", "fill_type": "FIRST-FIT", "priority_type": "LSTF"},
+        {"name": "holes2011 FIRST-HLF", "fill_type": "FIRST-FIT", "priority_type": "HLF"},
+    ]
+}
 
 
 # MUTLIPLE WORKFLOW PAPER
@@ -58,11 +112,13 @@ PARENTS_DAG_A = [
     [{"name": "A1", "weight": 4}],
     [{"name": "A1", "weight": 2}],
     [{"name": "A1", "weight": 2}],
-    [{"name": "A2", "weight": 10}, {"name": "A3", "weight": 5}, {"name": "A4", "weight": 3}],
+    [{"name": "A2", "weight": 10}, {"name": "A3",
+                                    "weight": 5}, {"name": "A4", "weight": 3}],
 ]
 
 TASK_DAG_A = [
-    [{"name": "A2", "weight": 4}, {"name": "A3", "weight": 2}, {"name": "A4", "weight": 2}],
+    [{"name": "A2", "weight": 4}, {"name": "A3",
+                                   "weight": 2}, {"name": "A4", "weight": 2}],
     [{"name": "A5", "weight": 10}],
     [{"name": "A5", "weight": 5}],
     [{"name": "A5", "weight": 3}],
@@ -98,7 +154,8 @@ PARENTS_DAG_B = [
 ]
 
 TASK_DAG_B = [
-    [{"name": "B2", "weight": 3}, {"name": "B3", "weight": 5}, {"name": "B4", "weight": 1}],
+    [{"name": "B2", "weight": 3}, {"name": "B3",
+                                   "weight": 5}, {"name": "B4", "weight": 1}],
     [{"name": "B5", "weight": 10}],
     [{"name": "B6", "weight": 3}],
     [{"name": "B5", "weight": 9}, {"name": "B6", "weight": 8}],
