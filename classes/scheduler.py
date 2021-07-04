@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List, Any
 from colorama import Fore, Back
-from algos.holes_scheduling import holes_scheduling
+from algos.holes_scheduling import holes_scheduling, holes2011
 from wf_compositions import c1
 from wf_compositions import c2
 from wf_compositions import c3
@@ -15,6 +15,12 @@ class TimeType(Enum):
     LFT = 3
 
 
+class PriorityType(Enum):
+    HLF = 0
+    EDF = 1
+    LSTF = 2
+
+
 class FillMethod(Enum):
     NO_FILL = -1
     FASTEST_FIT = 0
@@ -25,22 +31,25 @@ class FillMethod(Enum):
 
 class Scheduler:
 
-    def __init__(self, name, workflows, machines, time_types: List[str], fill_type):
+    def __init__(self, name, workflows, machines, time_types: List[str], fill_type, priority_type=None):
         self.name = name
         self.workflows = workflows
         self.machines = machines
 
-        # Get time types e.g: EFT = earliest finish time
-        if len(time_types) != 1 and len(time_types) != 2:
-            raise ValueError(f"Time types should not be more than 2 or less than 1 you entered: {time_types}")
+        # if len(time_types) != 1 and len(time_types) != 2:
+        #     raise ValueError(
+        #         f"Time types should not be more than 2 or less than 1 you entered: {time_types}")
+        if time_types is not None:
+            # Get time types e.g: EFT = earliest finish time
+            self.time_types = [self.get_time_type(ttype) for ttype in time_types]
 
-        self.time_types = [self.get_time_type(ttype) for ttype in time_types]
+        if priority_type is not None:
+            self.priority_type = self.get_priority_type(priority_type)
 
         # Get fill type e.g: FASTEST-FIT = pick the hole that has gives the best time.
         self.fill_type = self.get_fill_type(fill_type)
-
         # The method that we gonna run the schedule.
-        self.schedule_function: Any = self.get_scheduling_method(name)
+        self.schedule_method: Any = self.get_scheduling_method(name)
 
         self.is_scheduling_done = False
 
@@ -64,33 +73,57 @@ class Scheduler:
             raise Exception("You should run the scheduling method first.")
 
     def info(self):
-        print(f"\t{Back.MAGENTA}{Fore.LIGHTYELLOW_EX}{self.method_used_info()}{Fore.RESET}{Back.RESET}")
+        print(
+            f"\t{Back.MAGENTA}{Fore.LIGHTYELLOW_EX}{self.method_used_info()}{Fore.RESET}{Back.RESET}")
         if self.name.startswith("holes"):
             for machine in self.machines:
                 print(machine.holes_filled)
-            print(f"Time saved = {Fore.GREEN}{sum([m.holes_saved_time for m in self.machines])}{Fore.RESET}")
+            print(
+                f"Time saved = {Fore.GREEN}{sum([m.holes_saved_time for m in self.machines])}{Fore.RESET}")
 
         slowest_machine = self.get_slowest_machine()
-        print(f'\n{slowest_machine.str_col_id()}\n{slowest_machine.str_col_schedule_len()}\n')
+        print(
+            f'\n{slowest_machine.str_col_id()}\n{slowest_machine.str_col_schedule_len()}\n')
+
+    @staticmethod
+    def get_priority_type(priority):
+        if priority == "EDF":
+            return PriorityType.EDF
+        elif priority == "HLF":
+            return PriorityType.HLF
+        elif priority == "LSTF":
+            return PriorityType.LSTF
 
     def run(self):
-        if self.schedule_function.__name__.startswith("holes"):
-            self.schedule_function(self.workflows, self.machines, self.time_types, self.fill_type)
+        print(self.schedule_method.__name__)
+        if self.schedule_method.__name__.startswith("holes2011"):
+            if self.priority_type is None:
+                raise Exception("Please give a priority type!")
+            self.schedule_method(
+                self.workflows, self.machines, self.priority_type, self.fill_type)
+        elif self.schedule_method.__name__.startswith("holes"):
+            self.schedule_method(
+                self.workflows, self.machines, self.time_types, self.fill_type)
         else:
-            self.schedule_function(self.workflows, self.machines)
+            self.schedule_method(self.workflows, self.machines)
         self.is_scheduling_done = True
 
     def method_used_info(self):
-        if self.name.startswith("holes"):
+
+        if self.name.startswith("holes2011"):
+            return self.name
+        elif self.name.startswith("holes"):
             # return f"{''.join([Schedule.get_time_type(t) + '-' for t in self.time_types])} {self.fill_type}"
             ttypes = [Scheduler.get_time_type(t) for t in self.time_types]
             return f"{ttypes[0]}-{ttypes[1]} {self.get_fill_type(self.fill_type)}"
         else:
-            return f"{self.name}"
+            return self.name
 
     @staticmethod
     def get_scheduling_method(name):
-        if name.startswith("holes"):
+        if name.startswith("holes2011"):
+            return holes2011
+        elif name.startswith("holes"):
             return holes_scheduling
         elif name == "c1":
             return c1.multiple_workflows_c1

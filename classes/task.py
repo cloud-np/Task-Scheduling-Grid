@@ -90,6 +90,11 @@ class Task:
                     children_names=None,
                     parents_names=None)
 
+    def calc_lstf(self, time):
+        if self.wf_deadline is None:
+            raise Exception("Wf deadline is None!")
+        return self.wf_deadline - time - self.up_rank
+
     def reset(self):
         self.start = None
         self.end = None

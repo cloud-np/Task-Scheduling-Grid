@@ -43,16 +43,13 @@ def calc_time_on_machine(task, machines, time_type, hole_filling_type=FillMethod
             for hole in machine.holes:
                 valid_hole_info = hole.is_fillable(task, machine.id)
                 if valid_hole_info is not None:
-                    holes_times.append(
-                        {"machine": machine, "hole": hole, **valid_hole_info})
+                    holes_times.append({"machine": machine, "hole": hole, **valid_hole_info})
 
         # If no valid holes were found try to look into the current machine
         # and find the execution time of the specific task in the machine.
         if len(holes_times) == 0:
-            [start, end] = compute_execution_time(
-                task, machine.id, machine.schedule_len)
-            task_times_on_machines.append(
-                {"machine": machine, "start": start, "end": end})
+            [start, end] = compute_execution_time(task, machine.id, machine.schedule_len)
+            task_times_on_machines.append({"machine": machine, "start": start, "end": end})
 
     # If there are holes to fill prioritize them.
     if len(holes_times) > 0:
@@ -72,5 +69,5 @@ def calc_time_on_machine(task, machines, time_type, hole_filling_type=FillMethod
 
     if best_time is None:
         raise ValueError(
-            f"No machine or hole in a machine was assigned to: {task}")
+            f"No machine or hole was assigned to: {task}")
     return best_time

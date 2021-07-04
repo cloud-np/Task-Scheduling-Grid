@@ -129,18 +129,18 @@ class Visualizer:
     """
     @staticmethod
     def create_graph(tasks):
-        import networkx as nx
-        import random
-        G = nx.DiGraph()
-        random.seed(10)
-        for task in tasks:
-            G.add_node(task.get_key())
-            for edge in task.children_edges:
-                G.add_edge(task, edge.node)
-        pos = {t: [10, t.level] for t in tasks}
-        nx.set_node_attributes(G, pos, "pos")
-        return G
-
+        ...
+        # import networkx as nx
+        # import random
+        # G = nx.DiGraph()
+        # random.seed(10)
+        # for task in tasks:
+        #     G.add_node(task.get_key())
+        #     for edge in task.children_edges:
+        #         G.add_edge(task, edge.node)
+        # pos = {t: [10, t.level] for t in tasks}
+        # nx.set_node_attributes(G, pos, "pos")
+        # return G
 
     @staticmethod
     def visualize_machines(machines):
