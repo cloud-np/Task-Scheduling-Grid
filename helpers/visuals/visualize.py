@@ -7,8 +7,14 @@ import numpy as np
 class Visualizer:
 
     @staticmethod
-    def compare_schedule_len(slowest_machines, n_workflows):
-        s_lens_x = [round(m["machine"].schedule_len) for m in slowest_machines]
+    def compare_schedule_len(slowest_machines, n_workflows, save_fig=False, show_fig=True):
+        schedule_lens_x = [round(m["machine"].schedule_len) for m in slowest_machines]
+
+        # Change the color of the smallest schedule_len
+        bar_colors = ['b' for _ in schedule_lens_x]
+        min_len_index = schedule_lens_x.index(min(schedule_lens_x))
+        bar_colors[min_len_index] = 'r'
+
         labels = [m["method_used"] for m in slowest_machines]
 
         plt.style.use("seaborn-dark")
@@ -17,9 +23,8 @@ class Visualizer:
 
         fig, ax = plt.subplots()
 
-        rects = ax.bar(x - width / 2, s_lens_x, width)
+        rects = ax.bar(x - width / 2, schedule_lens_x, width, color=bar_colors)
 
-        # plt.plot(s_lens_x, labels)
         ax.set_xticks(x)
         ax.set_xticklabels(labels)
         autolabel(rects, ax)
@@ -28,8 +33,14 @@ class Visualizer:
         # plt.grid(True)
         plt.title(f"Multiple workflow scheduling sample size {n_workflows}")
         plt.grid(True)
+        fig.set_size_inches(12, 4)
         fig.tight_layout()
-        plt.show()
+
+        if show_fig:
+            plt.show()
+        if save_fig:
+            plt.savefig("fig")
+        return fig
 
     @staticmethod
     def compare_hole_filling_methods(slowest_machines):

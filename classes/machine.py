@@ -1,5 +1,6 @@
 from colorama import Fore
 from random import randint
+from classes.task import Task
 # import algos.calc_ex_time as time_calc
 from algos.calc_times_on_machines import compute_execution_time
 from typing import Set, Union
@@ -56,7 +57,7 @@ class Machine:
         self.holes_saved_time = 0
         self.holes_filled = 0
         # self.network_speed = network_speed
-        self.tasks: Set = set()
+        self.tasks: Set[Task] = set()
 
     def add_task(self, task):
         if DEBUG and (task in self.tasks):
@@ -142,7 +143,7 @@ class Machine:
         return f'{Fore.BLUE}TOTAL LEN:{Fore.RESET} {self.schedule_len}'
 
     def str_schedule_len(self):
-        return f'TOTAL LEN:{self.schedule_len}'
+        return f'TOTAL LEN: {self.schedule_len}'
 
     # def print_info(self):
     #     for task in self.tasks:
@@ -155,7 +156,7 @@ class Machine:
     #     return tmp_str
 
     def clear(self):
-        self.tasks = list()
+        self.tasks = set()
         self.schedule_len = 0
 
     def update_schedule(self, task):

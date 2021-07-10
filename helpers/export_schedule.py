@@ -1,5 +1,7 @@
 import json
 
+# TODO: Transfer these functions to Scheduler class
+
 
 def create_schedule_json(schedule):
     data = create_json_from_schedule(schedule)

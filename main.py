@@ -1,4 +1,4 @@
-from simulation.simulation import run_simulation
+from helpers.simulation.simulation import run_multiple_simulations, run_simulation
 from example_data import HOLE_METHOD_VARIATIONS
 
 if __name__ == "__main__":
@@ -13,12 +13,7 @@ if __name__ == "__main__":
     # run_methods = HOLE_METHOD_VARIATIONS["holes-2011-FIRST-FIT"]
     # run_methods = [{"name": "holes2011 EFT-EFT", "time_types": ["EFT", "EFT"], "fill_type": "FASTEST-FIT", "priority_type": "LSTF"}]
     # run_methods = ["holes EFT-EST", "holes EST-EFT", "holes EFT-EFT", "holes EST-EST", "holes LST-EFT", "holes LST-EST", "holes LFT-EST", "holes LFT-EFT", "holes LST-LST", "holes LFT-LFT"]
-    visuals = True
-    # visuals = False
-    # print("\n\n\t\tFOR N = 5")
-    # run_simulation(5, run_methods, visuals)
-    print("\n\n\t\tFOR N = 10")
-    run_simulation(10, run_methods, visuals)
-    # print("\n\n\t\tFOR N = 20")
-    # run_simulation(20, run_methods, visuals)
-    # run_simulation(20, run_methods=["c3"], visuals=False)
+    n = 5
+    print(f"\n\n\t\tFOR N = {n}")
+    # run_simulation(n, run_methods, visuals=True, save_fig=False, show_fig=False)
+    run_multiple_simulations([5, 10], run_methods, visuals=True, save_fig=False, show_fig=False)
