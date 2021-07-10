@@ -209,14 +209,22 @@ class Workflow:
 
     @staticmethod
     def load_example_workflows(machines, n, path: str = './datasets'):
-        num_tasks = [10, 50, 20, 500, 30, 100, 14, 50, 400, 200,
-                     500, 1000, 300, 500, 100, 50, 200, 300, 1000, 1000]
-        wf_types = ['cycles', 'genome', 'seismology', 'cycles', 'soykbr', 'epigenomics',
-                    'genome', 'cycles', 'seismology', 'genome', 'cycles', 'genome', 'epigenomics',
-                    'cycles', 'genome', 'epigenomics', 'seismology', 'genome', 'soykbr', 'soykbr']
+        num_tasks = [
+            10, 50, 20, 500, 30, 100, 14, 50, 400, 200,
+            500, 1000, 300, 500, 100, 50, 200, 300, 1000, 1000,
+            10, 50, 20, 500, 30, 100, 14, 50, 400, 200,
+            500, 1000, 300, 500, 100, 50, 200, 300, 1000, 1000
+        ]
+        wf_types = [
+            'cycles', 'genome', 'seismology', 'cycles', 'soykbr', 'epigenomics',
+            'genome', 'cycles', 'seismology', 'genome', 'cycles', 'genome', 'epigenomics',
+            'cycles', 'genome', 'epigenomics', 'seismology', 'genome', 'soykbr', 'soykbr',
+            'cycles', 'genome', 'seismology', 'cycles', 'soykbr', 'epigenomics',
+            'genome', 'cycles', 'seismology', 'genome', 'cycles', 'genome', 'epigenomics',
+            'cycles', 'genome', 'epigenomics', 'seismology', 'genome', 'soykbr', 'soykbr'
+        ]
 
-        workflows = [
-            Workflow(id_=i, file_path=f"{path}/{wf_types[i]}/{wf_types[i]}_{num_tasks[i]}.json",
+        workflows = [Workflow(id_=i, file_path=f"{path}/{wf_types[i]}/{wf_types[i]}_{num_tasks[i]}.json",
                      wf_type=wf_types[i], machines=machines, add_dummies=True) for i in range(n)]
         return workflows
 

@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import List, Any
 from colorama import Fore, Back
+from matplotlib.pyplot import fill
 from algos.holes_scheduling import holes_scheduling, holes2011
 from wf_compositions import c1
 from wf_compositions import c2
@@ -31,17 +32,19 @@ class FillMethod(Enum):
 
 class Scheduler:
 
-    def __init__(self, name, workflows, machines, time_types: List[str], fill_type, priority_type=None):
+    def __init__(self, name, workflows, machines, time_types: List[str], fill_type, priority_type=None, output_file="scheduler_output.txt"):
         self.name = name
         self.workflows = workflows
         self.machines = machines
+        self.output_file = output_file
 
         # if len(time_types) != 1 and len(time_types) != 2:
         #     raise ValueError(
         #         f"Time types should not be more than 2 or less than 1 you entered: {time_types}")
         if time_types is not None:
             # Get time types e.g: EFT = earliest finish time
-            self.time_types = [self.get_time_type(ttype) for ttype in time_types]
+            self.time_types = [self.get_time_type(
+                ttype) for ttype in time_types]
 
         if priority_type is not None:
             self.priority_type = self.get_priority_type(priority_type)
@@ -108,16 +111,50 @@ class Scheduler:
             self.schedule_method(self.workflows, self.machines)
         self.is_scheduling_done = True
 
-    def method_used_info(self):
+    def method_used_info(self, concise=False):
+        fill_type = None
+        if self.name.startswith("holes"):
+            if concise:
+                if self.fill_type == FillMethod.FASTEST_FIT:
+                    fill_type = "FST"
+                elif self.fill_type == FillMethod.BEST_FIT:
+                    fill_type = "B"
+                elif self.fill_type == FillMethod.FIRST_FIT:
+                    fill_type = "FR"
+                elif self.fill_type == FillMethod.WORST_FIT:
+                    fill_type = "W"
+            else:
+                fill_type = self.get_fill_type(self.fill_type)
 
-        if self.name.startswith("holes2011"):
-            return self.name
-        elif self.name.startswith("holes"):
-            # return f"{''.join([Schedule.get_time_type(t) + '-' for t in self.time_types])} {self.fill_type}"
-            ttypes = [Scheduler.get_time_type(t) for t in self.time_types]
-            return f"{ttypes[0]}-{ttypes[1]} {self.get_fill_type(self.fill_type)}"
+            if self.name.startswith("holes2011"):
+                return f"{fill_type} {self.priority_type}\n"
+            else:
+                ttypes = [Scheduler.get_time_type(t) for t in self.time_types]
+                return f"{fill_type}\n{ttypes[0]}-{ttypes[1]}\n"
         else:
             return self.name
+
+    def get_scheduled_info(self):
+        def add_nl(_str):
+            return f"{_str}\n"
+        method_info = self.method_used_info()
+        holes_filled = None
+        time_saved = None
+        if self.name.startswith("holes"):
+            for machine in self.machines:
+                holes_filled = machine.holes_filled
+            time_saved = sum([m.holes_saved_time for m in self.machines])
+
+        slowest_machine = self.get_slowest_machine()
+        m_id = slowest_machine.str_id()
+        schedule_len = slowest_machine.str_schedule_len()
+
+        return [method_info, f"Holes Filled {holes_filled}", add_nl(time_saved), add_nl(m_id), add_nl(schedule_len)]
+
+    def save_output_to_file(self):
+        lines = self.get_scheduled_info()
+        with open(self.output_file, "w+") as f:
+            f.writelines(lines)
 
     @staticmethod
     def get_scheduling_method(name):
