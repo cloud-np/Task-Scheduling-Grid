@@ -44,21 +44,26 @@ def run_simulation(n, run_methods, visuals=False, save_fig=False, show_fig=True,
         fig = Visualizer.compare_schedule_len(slowest_machines, len(workflows), save_fig=save_fig, show_fig=show_fig)
         # Visualizer.compare_hole_filling_methods(slowest_machines)
         if save_sim:
-            save_simulation(infos, fig)
+            pass
+            # save_simulation(infos, fig)
     return infos, fig
 
 
+# TODO: This works for now but its quite "dirty".
+#       Clean this up later on.
 def run_multiple_simulations(ns, run_methods, visuals=False, save_fig=False, show_fig=True, save_sim=False):
-    for i, n in enumerate(ns):
-        info, fig = run_simulation(n, run_methods, visuals, save_fig, show_fig, save_sim)
-        print("for ", n)
-        workbook = save_simulation(info, fig, s_pos=[2 + i * 40, 0])
-        workbook.close()
-
-
-def save_simulation(infos, fig, s_pos: List[int] = [2, 0], file_path: str = "simulation_info.xlsx"):
-    workbook = xlsxwriter.Workbook(file_path)
+    workbook = xlsxwriter.Workbook('simulation_info.xlsx')
     wks = workbook.add_worksheet('Runned Simulation Info')
+    bold = workbook.add_format({'bold': True})
+    for i, n in enumerate(ns):
+        infos, fig = run_simulation(n, run_methods, visuals, save_fig, show_fig, save_sim)
+        print("for ", n)
+        write_to_excel(infos, fig, wks, bold, s_pos=[2 + i * 40, 0])
+    workbook.close()
+
+
+# file_path: str = "simulation_info.xlsx"):
+def write_to_excel(infos, fig, wks, bold, s_pos: List[int] = [2, 0]):
     # wks1.write(0, 0, 'test')
 
     imgdata = io.BytesIO()
@@ -68,7 +73,6 @@ def save_simulation(infos, fig, s_pos: List[int] = [2, 0], file_path: str = "sim
     # The image we insert needs at least 20 rows.
     x_offset = s_pos[0] + 20
     y_offset = s_pos[1] + 1
-    bold = workbook.add_format({'bold': True})
 
     wks.set_column(0, 50, 20)
 
@@ -92,4 +96,4 @@ def save_simulation(infos, fig, s_pos: List[int] = [2, 0], file_path: str = "sim
 
         # schedule_len
         wks.write(x_offset, y_offset + 3, int(float(info[4].split("TOTAL LEN: ")[1])))
-    return workbook
+    # return workbook

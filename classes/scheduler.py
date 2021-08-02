@@ -81,12 +81,10 @@ class Scheduler:
         if self.name.startswith("holes"):
             for machine in self.machines:
                 print(machine.holes_filled)
-            print(
-                f"Time saved = {Fore.GREEN}{sum([m.holes_saved_time for m in self.machines])}{Fore.RESET}")
+            print(f"Time saved = {Fore.GREEN}{sum([m.holes_saved_time for m in self.machines])}{Fore.RESET}")
 
         slowest_machine = self.get_slowest_machine()
-        print(
-            f'\n{slowest_machine.str_col_id()}\n{slowest_machine.str_col_schedule_len()}\n')
+        print(f'\n{slowest_machine.str_col_id()}\n{slowest_machine.str_col_schedule_len()}\n')
 
     @staticmethod
     def get_priority_type(priority):
@@ -138,11 +136,11 @@ class Scheduler:
         def add_nl(_str):
             return f"{_str}\n"
         method_info = self.method_used_info()
-        holes_filled = None
+        holes_filled: int = 0
         time_saved = None
         if self.name.startswith("holes"):
             for machine in self.machines:
-                holes_filled = machine.holes_filled
+                holes_filled += machine.holes_filled
             time_saved = sum([m.holes_saved_time for m in self.machines])
 
         slowest_machine = self.get_slowest_machine()
