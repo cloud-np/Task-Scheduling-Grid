@@ -195,10 +195,14 @@ class Machine:
     @staticmethod
     def load_4_machines():
         machines = [
-            Machine(id_=0, name="M-0", n_cpu=2, speed=CORE_SPEED - 200),
-            Machine(id_=1, name="M-1", n_cpu=1, speed=CORE_SPEED - 100),
-            Machine(id_=2, name="M-2", n_cpu=4, speed=CORE_SPEED - 300),
-            Machine(id_=3, name="M-3", n_cpu=2, speed=CORE_SPEED - 400)
+            # Machine(id_=0, name="M-0", n_cpu=2, speed=CORE_SPEED - 200),
+            # Machine(id_=1, name="M-1", n_cpu=1, speed=CORE_SPEED - 100),
+            # Machine(id_=2, name="M-2", n_cpu=4, speed=CORE_SPEED - 300),
+            # Machine(id_=3, name="M-3", n_cpu=2, speed=CORE_SPEED - 400)
+            Machine(id_=0, name="M-0", n_cpu=2),
+            Machine(id_=1, name="M-1", n_cpu=1),
+            Machine(id_=2, name="M-2", n_cpu=4),
+            Machine(id_=3, name="M-3", n_cpu=2)
         ]
         return machines
 
@@ -208,7 +212,8 @@ class Machine:
     # We can't use the ceil or floor function here because the numbers
     # are quite small and we will be missing that information.
     def __generate_cost_for_task(self, runtime):
-        return runtime + 1500 - self.speed / self.n_cpu
+        # return runtime + 1500 - self.speed / self.n_cpu
+        return runtime / self.n_cpu
 
     def assign_tasks_with_costs(self, tasks):
         for task in tasks:

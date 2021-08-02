@@ -213,7 +213,9 @@ class Workflow:
             10, 50, 20, 500, 30, 100, 14, 50, 400, 200,
             500, 1000, 300, 500, 100, 50, 200, 300, 1000, 1000,
             10, 50, 20, 500, 30, 100, 14, 50, 400, 200,
-            500, 1000, 300, 500, 100, 50, 200, 300, 1000, 1000
+            500, 1000, 300, 500, 100, 50, 200, 300, 1000, 1000,
+            500, 1000, 300, 500, 100, 50, 200, 300, 1000, 1000,
+            300, 50, 200
         ]
         wf_types = [
             'cycles', 'genome', 'seismology', 'cycles', 'soykbr', 'epigenomics',
@@ -221,7 +223,9 @@ class Workflow:
             'cycles', 'genome', 'epigenomics', 'seismology', 'genome', 'soykbr', 'soykbr',
             'cycles', 'genome', 'seismology', 'cycles', 'soykbr', 'epigenomics',
             'genome', 'cycles', 'seismology', 'genome', 'cycles', 'genome', 'epigenomics',
-            'cycles', 'genome', 'epigenomics', 'seismology', 'genome', 'soykbr', 'soykbr'
+            'cycles', 'genome', 'epigenomics', 'seismology', 'genome', 'soykbr', 'soykbr',
+            'cycles', 'genome', 'epigenomics', 'seismology', 'genome', 'soykbr', 'soykbr',
+            'soykbr', 'epigenomics', 'cycles'
         ]
 
         workflows = [Workflow(id_=i, file_path=f"{path}/{wf_types[i]}/{wf_types[i]}_{num_tasks[i]}.json",

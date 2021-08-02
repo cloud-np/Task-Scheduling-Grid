@@ -1,5 +1,4 @@
 import algos.schedule_wfs as scheduler
-import random
 
 
 def holes_scheduling(workflows, machines, time_types, hole_filling_type):
