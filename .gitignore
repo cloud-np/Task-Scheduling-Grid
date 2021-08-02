@@ -12,3 +12,5 @@ test.py
 helpers/githubHeft
 venv/
 linux_env/
+simulation_info.xlsx
+sim_files/
