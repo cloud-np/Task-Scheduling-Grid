@@ -1,5 +1,4 @@
 ## Overview
-
 This project tries to solve the problem of task scheduling of multiple workflows in a grid. Which is a NP-Problem.
 Below we gonna look into details some of the algorithms used to solve this problem. (later on we gonna describe the problem better as well)
 
@@ -37,9 +36,9 @@ task.priority = task.up_rank + task.down_rank
 Critical-Path-on-a-Processor (CPOP).
 
 Here the CPOP algorithm we need to find the critical path.
-1. First we need to calculate the priority of each task. Which means we need to 
-calculate both **up_rank** and **down_rank** of each task before we procceed.
 
+• First we need to calculate the priority of each task. Which means we need to 
+calculate both **up_rank** and **down_rank** of each task before we procceed.
 ```python
 def create_critical_path(workflow):
         # Calculate downward and upward ranks
@@ -51,7 +50,7 @@ def create_critical_path(workflow):
       ...
       
 ```
-2. Then we start from an entry task and we try to find the task with the same
+• Then we start from an entry task and we try to find the task with the same
 priority as the entry task we added in the path. We do that until we hit an **exit task**. When
 that happens our critical path is ready.
 ```python
@@ -117,19 +116,30 @@ create big holes between the machines and then we 'fit' inside these holes a low
             sorted_wfs[j], machines, time_types[1], hole_filling_type)
         j -= 1
 ```
+
+### Time types
 About the **time_types** variable. We schedule our workflows in pairs. This array (time_types) holds two values one that corrisponds on how the first workflow is going to be scheduled and the second on how the second workflow is getting scheduled. We can change this array and try many ways to schedule our workflows. e.g:
 
-•**EFT** = Pick the machine that gives the **earliest finish time** for our task. e.g: if *T2* in *M1* gives schedule-len = 10 and *T2* in *M2* gives 
+
+#####EFT
+Pick the machine that gives the **earliest finish time** for our task. e.g: if *T2* in *M1* gives schedule-len = 10 and *T2* in *M2* gives 
 schedule-len = 12 we pick M1.
-•**EST** = Pick the machine that gives the **earliest start time** for our task.
-•**LST** = Pick the machine that gives the **latest start time** for our task.
-•**LFT** = Pick the machine that gives the **latest finish time** for our task.
+#####EST
+Pick the machine that gives the **earliest start time** for our task.
+#####LST
+Pick the machine that gives the **latest start time** for our task.
+#####LFT
+Pick the machine that gives the **latest finish time** for our task.
 
-
-
+### Hole Filling Types
 Now about the **hole_filling_type** variable. We can change this variable and try many ways to put a task in a hole. e.g:
-•**BEST FIT (B)** = Pick the hole that **fills** the most space possible.
-•**WORST FIT (W)** = Pick the hole that **leaves** the most space possible.
-•**FIRST FIT (FR)** = Pick the first hole that fits our task.
-•**FASTEST FIT (FST)** = Pick the **machine** that gives the best time based on our time types regardless if we fill a hole or not.
+
+#####BEST FIT (B)
+Pick the hole that **fills** the most space possible.
+#####WORST FIT (W)
+Pick the hole that **leaves** the most space possible.
+#####FIRST FIT (FR)
+Pick the first hole that fits our task.
+#####FASTEST FIT (FST)
+Pick the **machine** that gives the best time based on our time types regardless if we fill a hole or not.
 
