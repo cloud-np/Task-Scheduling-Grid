@@ -1,12 +1,42 @@
-## Welcome to GitHub Pages
+## Overview
 
-You can use the [editor on GitHub](https://github.com/cloud-np/Task-Scheduling-Grid/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+This project tries to solve the problem of task scheduling of multiple workflows in a grid. Which is a NP-Problem.
+Below we gonna look into details some of the algorithms used to solve this problem. (later on we gonna describe the problem better as well)
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+## Single Workflow Scheduling
 
-### Markdown
+Below we see some popular single workflow scheduling algorithms.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+### HEFT
+Heterogeneous-Earliest-Finish-Time (HEFT).
+
+**Info**
+The HEFT algorithm has 2 major phases: 
+1. Task prioritizing
+      With that in mind we calculate the **task.up_rank** property 
+      of the tasks and we sort them based of that value.
+2. Processor selection
+      We pick the machine for each task that give the best **earliest finish time**.
+
+
+
+```python
+def heft(tasks: List[Task], machines: List[Machine]):
+  # Phase 1
+  calculate_upward_ranks(tasks)
+  
+  # Sort the tasks based of the up_rank
+  tasks.sort(key=lambda task: task.up_rank, reverse=True)
+  
+  # Phase 2
+  schedule_tasks_with_EFT(tasks, machines)
+```
+
+
+### Holes Scheduling
+
+With this method we takes advantage of the holes that are 
+getting created from long data transfer times of the files to between the machines.
 
 ```markdown
 Syntax highlighted code block
@@ -25,13 +55,3 @@ Syntax highlighted code block
 
 [Link](url) and ![Image](src)
 ```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/cloud-np/Task-Scheduling-Grid/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
