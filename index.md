@@ -37,8 +37,9 @@ Critical-Path-on-a-Processor (CPOP).
 
 Here the CPOP algorithm we need to find the critical path.
 
-* First we need to calculate the priority of each task. Which means we need to 
+First we need to calculate the priority of each task. Which means we need to 
 calculate both **up_rank** and **down_rank** of each task before we procceed.
+
 ```python
 def create_critical_path(workflow):
         # Calculate downward and upward ranks
