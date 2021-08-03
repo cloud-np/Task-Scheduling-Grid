@@ -130,8 +130,8 @@ schedule-len = 12 we pick M1.
 ### Hole Filling Types
 Now about the **hole_filling_type** variable. We can change this variable and try many ways to put a task in a hole. e.g:
 
-* BEST FIT (B) = Pick the hole that **fills** the most space possible.
-* WORST FIT (W) = Pick the hole that **leaves** the most space possible.
-* FIRST FIT (FR) = Pick the first hole that fits our task.
+* BEST FIT (B) = Pick the hole that **fills** the most gap possible.
+* WORST FIT (W) = Pick the hole that **leaves** the most gap possible.
+* FIRST FIT (FR) = Pick the **first hole** that fits our task.
 * FASTEST FIT (FST) = Pick the **machine** that gives the best time based on our time types regardless if we fill a hole or not.
 
