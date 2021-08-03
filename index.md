@@ -121,15 +121,11 @@ create big holes between the machines and then we 'fit' inside these holes a low
 About the **time_types** variable. We schedule our workflows in pairs. This array (time_types) holds two values one that corrisponds on how the first workflow is going to be scheduled and the second on how the second workflow is getting scheduled. We can change this array and try many ways to schedule our workflows. e.g:
 
 
-######EFT
-Pick the machine that gives the **earliest finish time** for our task. e.g: if *T2* in *M1* gives schedule-len = 10 and *T2* in *M2* gives 
+* EFT = Pick the machine that gives the **earliest finish time** for our task. e.g: if *T2* in *M1* gives schedule-len = 10 and *T2* in *M2* gives 
 schedule-len = 12 we pick M1.
-######EST
-Pick the machine that gives the **earliest start time** for our task.
-######LST
-Pick the machine that gives the **latest start time** for our task.
-######LFT
-Pick the machine that gives the **latest finish time** for our task.
+* EST = Pick the machine that gives the **earliest start time** for our task.
+* LST = Pick the machine that gives the **latest start time** for our task.
+* LFT = Pick the machine that gives the **latest finish time** for our task.
 
 ### Hole Filling Types
 Now about the **hole_filling_type** variable. We can change this variable and try many ways to put a task in a hole. e.g:
