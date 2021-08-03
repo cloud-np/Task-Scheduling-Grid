@@ -50,9 +50,11 @@ def create_critical_path(workflow):
       ...
       
 ```
-* Then we start from an entry task and we try to find the task with the same
+
+Then we start from an entry task and we try to find the task with the same
 priority as the entry task we added in the path. We do that until we hit an **exit task**. When
 that happens our critical path is ready.
+
 ```python
 def construct_critical_path(tasks):
       ...
