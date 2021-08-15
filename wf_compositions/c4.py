@@ -1,6 +1,8 @@
 from algos.heuristic import heft
 
 # C4 From paper: Scheduling Multiple DAGs onto Heterogeneous Systems
+
+
 def multiple_workflows_c4(workflows, machines):
     # Critical-path entry task
     cp_infos = sorted([{'info': wf.cp_info, 'linked': False} for wf in workflows],

@@ -50,8 +50,8 @@ class Machine:
         self.id: int = id_
         self.name: str = name
         self.n_cpu: Union[int, None] = n_cpu
-        self.memory = memory
-        self.cpti = cpti  # cost per time interval
+        # self.memory = memory
+        # self.cpti = cpti  # cost per time interval
         self.speed = speed
         self.holes: Set = set()
         self.holes_saved_time = 0
@@ -176,7 +176,7 @@ class Machine:
     def machine_details(self):
         return f'ID[{Fore.GREEN}{self.id}{Fore.RESET}] ' \
                f'{Fore.RED}n_cpu:{Fore.RESET} {Fore.YELLOW}{self.n_cpu}{Fore.RESET} ' \
-               f'{Fore.RED}speed:{Fore.RESET} {Fore.YELLOW}{self.speed}{Fore.RESET} '
+            #    f'{Fore.RED}speed:{Fore.RESET} {Fore.YELLOW}{self.speed}{Fore.RESET} '
 
     @staticmethod
     def generate_rand_machines(n_machines):
@@ -187,7 +187,7 @@ class Machine:
                     id_=i,
                     name=f'M-{i}',
                     n_cpu=randint(1, 4),
-                    speed=CORE_SPEED - randint(100, 400),
+                    # speed=CORE_SPEED - randint(100, 400),
                 )
             )
         return machines
@@ -195,14 +195,14 @@ class Machine:
     @staticmethod
     def load_4_machines():
         machines = [
-            # Machine(id_=0, name="M-0", n_cpu=2, speed=CORE_SPEED - 200),
-            # Machine(id_=1, name="M-1", n_cpu=1, speed=CORE_SPEED - 100),
-            # Machine(id_=2, name="M-2", n_cpu=4, speed=CORE_SPEED - 300),
-            # Machine(id_=3, name="M-3", n_cpu=2, speed=CORE_SPEED - 400)
-            Machine(id_=0, name="M-0", n_cpu=2),
-            Machine(id_=1, name="M-1", n_cpu=1),
-            Machine(id_=2, name="M-2", n_cpu=4),
-            Machine(id_=3, name="M-3", n_cpu=2)
+            Machine(id_=0, name="M-0", n_cpu=2, speed=CORE_SPEED - 200),
+            Machine(id_=1, name="M-1", n_cpu=1, speed=CORE_SPEED - 100),
+            Machine(id_=2, name="M-2", n_cpu=4, speed=CORE_SPEED - 300),
+            Machine(id_=3, name="M-3", n_cpu=2, speed=CORE_SPEED - 400)
+            # Machine(id_=0, name="M-0", n_cpu=2),
+            # Machine(id_=1, name="M-1", n_cpu=1),
+            # Machine(id_=2, name="M-2", n_cpu=4),
+            # Machine(id_=3, name="M-3", n_cpu=2)
         ]
         return machines
 
@@ -212,8 +212,8 @@ class Machine:
     # We can't use the ceil or floor function here because the numbers
     # are quite small and we will be missing that information.
     def __generate_cost_for_task(self, runtime):
-        # return runtime + 1500 - self.speed / self.n_cpu
-        return runtime / self.n_cpu
+        return runtime + 1500 - self.speed / self.n_cpu
+        # return runtime / self.n_cpu
 
     def assign_tasks_with_costs(self, tasks):
         for task in tasks:

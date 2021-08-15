@@ -5,7 +5,6 @@ import algos.schedule_wfs as scheduler
 
 
 def heft(tasks, machines):
-
     # Phase 1
     calculate_upward_ranks(tasks)
     # We sort the tasks based of their up_rank

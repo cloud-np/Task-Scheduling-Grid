@@ -2,6 +2,8 @@ import classes.workflow as wf
 from algos.heuristic import heft
 
 # C2 From paper: Scheduling Multiple DAGs onto Heterogeneous Systems
+
+
 def multiple_workflows_c2(workflows, machines):
     # 1. Connect all workflows with one "BIG" entry node and one "BIG" exit node.
     all_tasks = wf.Workflow.connect_wfs(workflows, machines)

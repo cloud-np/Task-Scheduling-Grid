@@ -16,4 +16,4 @@ if __name__ == "__main__":
     # n = 5
     # print(f"\n\n\t\tFOR N = {n}")
     # run_simulation(n, run_methods, visuals=True, save_fig=False, show_fig=False)
-    run_multiple_simulations([5, 10, 15, 20, 25, 30, 35, 40, 45, 50], run_methods, visuals=True, save_fig=False, show_fig=False)
+    run_multiple_simulations([5], run_methods, visuals=True, save_fig=False, show_fig=False)

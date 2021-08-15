@@ -67,17 +67,6 @@ def get_tasks_from_json_file(file_name, wf_id):
                 # parent_edge.weight = 0
                 parent_edge.weight /= Machines.NETWORK_KBPS
 
-        # if wf_id == 0 and task.id == 1:
-        #     print(f"{task} MY CHILD IS:")
-        #     for child_edge in children_edges:
-        #         if child_edge.node.id == 2:
-        #             print(child_edge)
-        # if wf_id == 0 and task.id == 2:
-        #     print(f"{task} MY PARENT IS:")
-        #     for parent_edge in parents_edges:
-        #         if parent_edge.node.id == 1:
-        #             print(parent_edge)
-
         # We use this function to check if everything went smoothly in the parsing
         task.set_edges(children_edges, parents_edges)
 
