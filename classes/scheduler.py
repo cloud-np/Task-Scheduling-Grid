@@ -2,7 +2,7 @@ from enum import Enum
 from typing import List, Any
 from colorama import Fore, Back
 from matplotlib.pyplot import fill
-from algos.holes_scheduling import holes_scheduling, holes2011
+from algos.holes_scheduling import holes_scheduling, holes2011, compute_execution_time
 from wf_compositions import c1
 from wf_compositions import c2
 from wf_compositions import c3
@@ -68,6 +68,12 @@ class Scheduler:
             machine.add_task(task)
         else:
             machine.add_task_to_hole(task, hole)
+    
+    def pick_first_avail_machine(task):
+        # We pick the "first" available machine
+        machine = min(self.machines, key=lambda m: m.schedule_len)
+        tmp_time = compute_execution_time(task, machine.id, machine.schedule_len)
+        return machine, tmp_time
 
     def get_slowest_machine(self):
         if self.is_scheduling_done is True:
@@ -76,8 +82,7 @@ class Scheduler:
             raise Exception("You should run the scheduling method first.")
 
     def info(self):
-        print(
-            f"\t{Back.MAGENTA}{Fore.LIGHTYELLOW_EX}{self.method_used_info()}{Fore.RESET}{Back.RESET}")
+        print(f"\t{Back.MAGENTA}{Fore.LIGHTYELLOW_EX}{self.method_used_info()}{Fore.RESET}{Back.RESET}")
         if self.name.startswith("holes"):
             for machine in self.machines:
                 print(machine.holes_filled)

@@ -4,16 +4,6 @@ from classes.scheduler import PriorityType
 import algos.calc_times_on_machines as algos
 from classes.scheduler import FillMethod, TimeType, Scheduler
 
-# TODO move to schedule.py
-
-
-def pick_machine_for_task(task, machines):
-    # We pick the "first" available machine
-    machine = min(machines, key=lambda m: m.schedule_len)
-    tmp_time = algos.compute_execution_time(
-        task, machine.id, machine.schedule_len)
-    return machine, tmp_time
-
 
 def schedule_workflow(wf, machines, time_type, hole_filling_type):
     wf.scheduled = True

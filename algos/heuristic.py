@@ -1,7 +1,5 @@
 from algos.calc_task_ranks import calculate_upward_ranks
 import algos.schedule_wfs as scheduler
-# from algos.schedule_wfs_and_tasks import schedule_tasks_heft, schedule_tasks_round_robin_heft, \
-#     schedule_tasks_cpop, pick_machine_for_critical_path
 
 
 def heft(tasks, machines):
