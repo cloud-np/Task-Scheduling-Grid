@@ -1,4 +1,4 @@
-from helpers.simulation.simulation import run_multiple_simulations, run_simulation
+from helpers.simulation.simulation import run_n_sims, run_sim, run_save_n_sims_to_excel
 from example_data import HOLE_METHOD_VARIATIONS
 
 if __name__ == "__main__":
@@ -16,4 +16,5 @@ if __name__ == "__main__":
     # n = 5
     # print(f"\n\n\t\tFOR N = {n}")
     # run_simulation(n, run_methods, visuals=True, save_fig=False, show_fig=False)
-    run_multiple_simulations([5, 10, 15, 20, 25, 30, 35, 40, 45, 50], run_methods, visuals=True, save_fig=False, show_fig=False)
+    # run_n_sims([5, 10], run_methods)
+    run_save_n_sims_to_excel([5, 10, 15, 20, 25, 30, 35], run_methods)

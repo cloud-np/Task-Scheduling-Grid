@@ -86,6 +86,26 @@ class Machine:
         self.holes_saved_time += hole.time_saved
         self.remove_hole(hole)
 
+    def get_util_time(self):
+        return self.schedule_len - self.get_idle_time()
+
+    def get_idle_time(self):
+        # t.start can't be None since the task is "inside" the
+        # machine it means it also received a start time
+        sorted_tasks = sorted(self.tasks, key=lambda t: t.start)
+        idle_time = 0
+        old_end = sorted_tasks[0].end
+        for t in sorted_tasks[1:]:
+            idle_time += t.start - old_end
+            old_end = t.end
+        return idle_time
+
+    def get_util_perc(self):
+        return (self.get_util_time() / self.schedule_len) * 100
+
+    def get_idle_perc(self):
+        return (self.get_idle_time() / self.schedule_len) * 100
+
     @staticmethod
     def get_potential_hole_time_saved(task, hole):
         return hole.gap - (task.start - hole.start + hole.end - task.end)

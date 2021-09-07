@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import List, Any
+import os
 from colorama import Fore, Back
 from matplotlib.pyplot import fill
 from algos.holes_scheduling import holes_scheduling, holes2011
@@ -32,15 +33,15 @@ class FillMethod(Enum):
 
 class Scheduler:
 
-    def __init__(self, name, workflows, machines, time_types: List[str], fill_type, priority_type=None, output_file="scheduler_output.txt"):
+    def __init__(self, name, workflows, machines, time_types: List[str], fill_type, priority_type=None, output_path="./simulation_output"):
         self.name = name
+        self.n_wfs = len(workflows)
         self.workflows = workflows
         self.machines = machines
-        self.output_file = output_file
+        self.output_path = output_path
+        # E.g: sim_out/5.txt
+        self.output_file = f"{self.output_path}/{self.n_wfs}.txt"
 
-        # if len(time_types) != 1 and len(time_types) != 2:
-        #     raise ValueError(
-        #         f"Time types should not be more than 2 or less than 1 you entered: {time_types}")
         if time_types is not None:
             # Get time types e.g: EFT = earliest finish time
             self.time_types = [self.get_time_type(
@@ -81,10 +82,12 @@ class Scheduler:
         if self.name.startswith("holes"):
             for machine in self.machines:
                 print(machine.holes_filled)
-            print(f"Time saved = {Fore.GREEN}{sum([m.holes_saved_time for m in self.machines])}{Fore.RESET}")
+            print(
+                f"Time saved = {Fore.GREEN}{sum([m.holes_saved_time for m in self.machines])}{Fore.RESET}")
 
         slowest_machine = self.get_slowest_machine()
-        print(f'\n{slowest_machine.str_col_id()}\n{slowest_machine.str_col_schedule_len()}\n')
+        print(
+            f'\n{slowest_machine.str_col_id()}\n{slowest_machine.str_col_schedule_len()}\n')
 
     @staticmethod
     def get_priority_type(priority):
@@ -149,9 +152,29 @@ class Scheduler:
 
         return [method_info, f"Holes Filled {holes_filled}", add_nl(time_saved), add_nl(m_id), add_nl(schedule_len)]
 
+    def get_info_for_files(self) -> List[str]:
+        slowest_machine = self.get_slowest_machine()
+        schedule_len = slowest_machine.schedule_len
+        lines = [str(round(m.get_util_perc(), 2)) + "," for m in self.machines]
+        lines.insert(0, f"{self.name},")
+        lines.insert(1, f"{schedule_len},")
+        lines[len(lines) - 1] = lines[len(lines) - 1] + "\n"
+        return lines
+
     def save_output_to_file(self):
-        lines = self.get_scheduled_info()
-        with open(self.output_file, "w+") as f:
+        lines = self.get_info_for_files()
+
+        # Create the path if it does not exist.
+        if not os.path.exists(self.output_path):
+            os.makedirs(self.output_path)
+
+        # If the file does not exist then add the titles.
+        if not os.path.exists(self.output_file):
+            titles: str = "Method Name,Total Makespan," + "".join([f"Machine Util-{m.id}," for m in self.machines])
+            lines.insert(0, titles + '\n')
+
+        # Append to the correct file if it exists otherwise create it.
+        with open(self.output_file, "a+") as f:
             f.writelines(lines)
 
     @staticmethod

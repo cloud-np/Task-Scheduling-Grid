@@ -15,57 +15,57 @@ import io
 # TODO One idea is to pass schedule functions to the
 # run() method of the Schedule obj. This sounds a bit cleaner.
 # than making it pick a the correct function as init time.
-def run_simulation(n, run_methods, visuals=False, save_fig=False, show_fig=True, save_sim=False):
-    # VISUAL SCHEDULE ----------
-    # schedule = {"tasks": all_tasks}
-    # create_schedule_json(schedule)
-
-    # FINAL TESTING -----------
-    # is_our_method = True
-    # workflows = Workflow.load_paper_example_workflows(machines)
-
-    workflows: list = list()
-    slowest_machines: list = list()
-    infos: list = list()
+def run_sim(n, run_methods, visuals=False, save_fig=False, show_fig=True, save_sim=False):
+    workflows = []
+    slowest_machines = []
+    schedules = []
     fig = None
     for method in run_methods:
         machines = Machine.load_4_machines()
         workflows = Workflow.load_example_workflows(machines=machines, n=n)
-        schedule = Scheduler(name=method['name'], workflows=workflows, machines=machines, time_types=method.get("time_types"), fill_type=method["fill_type"], priority_type=method.get("priority_type"))
+        schedule = Scheduler(name=method['name'], workflows=workflows, machines=machines, time_types=method.get(
+            "time_types"), fill_type=method["fill_type"], priority_type=method.get("priority_type"))
 
         schedule.run()
         schedule.info()
 
         slowest_machines.append({"machine": schedule.get_slowest_machine(), "method_used": schedule.method_used_info(concise=True)})
 
-        infos.append(schedule.get_scheduled_info())
+        schedules.append(schedule)
 
     if visuals is True:
-        fig = Visualizer.compare_schedule_len(slowest_machines, len(workflows), save_fig=save_fig, show_fig=show_fig)
+        fig = Visualizer.compare_schedule_len(slowest_machines, len(
+            workflows), save_fig=save_fig, show_fig=show_fig)
         # Visualizer.compare_hole_filling_methods(slowest_machines)
         if save_sim:
             pass
             # save_simulation(infos, fig)
-    return infos, fig
+    return schedules, fig
 
 
-# TODO: This works for now but its quite "dirty".
-#       Clean this up later on.
-def run_multiple_simulations(ns, run_methods, visuals=False, save_fig=False, show_fig=True, save_sim=False):
+def run_n_sims(ns, run_methods, visuals=False, save_fig=False, show_fig=False, save_sim=False):
+    for n in ns:
+        schedules, fig = run_sim(n, run_methods, visuals, save_fig, show_fig, save_sim)
+        for s in schedules:
+            s.save_output_to_file()
+        print("Finished simulating for n = ", n)
+
+
+def run_save_n_sims_to_excel(ns, run_methods):
     workbook = xlsxwriter.Workbook('simulation_info.xlsx')
     wks = workbook.add_worksheet('Runned Simulation Info')
     bold = workbook.add_format({'bold': True})
     for i, n in enumerate(ns):
-        infos, fig = run_simulation(n, run_methods, visuals, save_fig, show_fig, save_sim)
-        print("for ", n)
-        write_to_excel(infos, fig, wks, bold, s_pos=[2 + i * 40, 0])
+        schedules, fig = run_sim(n, run_methods, visuals=True, save_fig=False, show_fig=False, save_sim=False)
+        print("Finished simulating for n = ", n)
+
+        write_to_excel(schedules, fig, wks, bold, s_pos=[2 + i * 40, 0])
     workbook.close()
 
 
-# file_path: str = "simulation_info.xlsx"):
-def write_to_excel(infos, fig, wks, bold, s_pos: List[int] = [2, 0]):
-    # wks1.write(0, 0, 'test')
+def write_to_excel(schedules: List[Scheduler], fig, wks, bold, s_pos: List[int] = [2, 0]):
 
+    infos = [s.get_scheduled_info() for s in schedules]
     imgdata = io.BytesIO()
     fig.savefig(imgdata, format='png')
     wks.insert_image(s_pos[0], s_pos[1], '', {'image_data': imgdata})
@@ -95,5 +95,5 @@ def write_to_excel(infos, fig, wks, bold, s_pos: List[int] = [2, 0]):
         wks.write(x_offset, y_offset + 2, int(float(info[2])))
 
         # schedule_len
-        wks.write(x_offset, y_offset + 3, int(float(info[4].split("TOTAL LEN: ")[1])))
-    # return workbook
+        wks.write(x_offset, y_offset + 3,
+                  int(float(info[4].split("TOTAL LEN: ")[1])))
