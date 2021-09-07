@@ -140,8 +140,7 @@ class Workflow:
                 print(task)
             task.set_priority(task.down_rank + task.up_rank)
 
-        critical_path, [entry_task,
-                        exit_task] = algos.construct_critical_path(self.tasks)
+        critical_path, [entry_task, exit_task] = algos.construct_critical_path(self.tasks)
         self.cp_info = {"critical_path": critical_path,
                         "entry": entry_task, "exit": exit_task}
         return critical_path, [entry_task, exit_task]

@@ -179,9 +179,12 @@ def construct_critical_path(tasks):
 
     # Start from an entry task and run until you find an exit task.
     # Then the critical path would be ready.
+    counter = 0
     while temp_task.is_exit is False:
         for child_edge in temp_task.children_edges:
-            if round(child_edge.node.priority, 5) == entry_priority:
+            counter += 1
+            diff: float = entry_priority - child_edge.node.priority
+            if abs(diff) < 0.90:
                 temp_task = child_edge.node
                 critical_path.append(child_edge.node)
                 break
