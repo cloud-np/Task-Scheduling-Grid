@@ -207,7 +207,7 @@ class Machine:
                     id_=i,
                     name=f'M-{i}',
                     n_cpu=randint(1, 4),
-                    # speed=CORE_SPEED - randint(100, 400),
+                    speed=CORE_SPEED - randint(100, 400),
                 )
             )
         return machines

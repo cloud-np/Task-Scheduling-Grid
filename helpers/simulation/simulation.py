@@ -36,18 +36,15 @@ def run_sim(n, run_methods, visuals=False, save_fig=False, show_fig=True, save_s
     if visuals is True:
         fig = Visualizer.compare_schedule_len(slowest_machines, len(
             workflows), save_fig=save_fig, show_fig=show_fig)
-        # Visualizer.compare_hole_filling_methods(slowest_machines)
         if save_sim:
-            pass
-            # save_simulation(infos, fig)
+            for s in schedules:
+                s.save_output_to_file()
     return schedules, fig
 
 
 def run_n_sims(ns, run_methods, visuals=False, save_fig=False, show_fig=False, save_sim=False):
     for n in ns:
         schedules, fig = run_sim(n, run_methods, visuals, save_fig, show_fig, save_sim)
-        for s in schedules:
-            s.save_output_to_file()
         print("Finished simulating for n = ", n)
 
 

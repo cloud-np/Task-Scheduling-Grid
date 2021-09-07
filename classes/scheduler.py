@@ -166,6 +166,9 @@ class Scheduler:
         lines[len(lines) - 1] = lines[len(lines) - 1] + "\n"
         return lines
 
+    # NOTE:
+    # avg_util of machines
+    # avg_makespan of wfs
     def save_output_to_file(self):
         lines = self.get_info_for_files()
 
