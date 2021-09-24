@@ -1,0 +1,71 @@
+Diff = 3603.0
+Our Method = holes BEST-FIT len = 1845.0
+Theirs = holes2011 WORST-HLF len = 5448.0
+MachineBlueprint(id_=0, name='M-0', n_cpu=3, speed=1200)
+MachineBlueprint(id_=1, name='M-1', n_cpu=4, speed=1200)
+
+========= WORKFLOW-0 ========= 
+	TaskBlueprint(id_=0, wf_id=0, name='task-0', runtime=9, children_edges=[<classes.task.Edge object at 0x7f76a432a4c0>, <classes.task.Edge object at 0x7f76a432a2e0>, <classes.task.Edge object at 0x7f76a43479a0>, <classes.task.Edge object at 0x7f76a4333b20>], parents_edges=[<classes.task.Edge object at 0x7f76a4344a90>], status=2, is_entry=False, is_exit=False)
+		Edge(17, 1)
+		Edge(4, 2)
+		Edge(7, 1)
+		Edge(20, 2)
+
+		Edge(0, -1)
+	TaskBlueprint(id_=1, wf_id=0, name='task-1', runtime=10, children_edges=[<classes.task.Edge object at 0x7f76a4347e80>, <classes.task.Edge object at 0x7f76a40e8070>], parents_edges=[<classes.task.Edge object at 0x7f76a432ae80>, <classes.task.Edge object at 0x7f76a4347580>], status=2, is_entry=False, is_exit=False)
+		Edge(20, 2)
+		Edge(19, 2)
+
+		Edge(17, 0)
+		Edge(7, 0)
+	TaskBlueprint(id_=2, wf_id=0, name='task-2', runtime=11, children_edges=[<classes.task.Edge object at 0x7f76a4344b80>], parents_edges=[<classes.task.Edge object at 0x7f76a4347340>, <classes.task.Edge object at 0x7f76a4333790>, <classes.task.Edge object at 0x7f76a431eaf0>, <classes.task.Edge object at 0x7f76a40e80d0>], status=2, is_entry=False, is_exit=False)
+		Edge(0, 9)
+
+		Edge(4, 0)
+		Edge(20, 1)
+		Edge(20, 0)
+		Edge(19, 1)
+
+========= WORKFLOW-1 ========= 
+	TaskBlueprint(id_=0, wf_id=1, name='task-0', runtime=2, children_edges=[<classes.task.Edge object at 0x7f76a40e8250>, <classes.task.Edge object at 0x7f76a40e8310>, <classes.task.Edge object at 0x7f76a40e83d0>, <classes.task.Edge object at 0x7f76a40e8550>], parents_edges=[<classes.task.Edge object at 0x7f76a40e8f10>], status=2, is_entry=False, is_exit=False)
+		Edge(3, 1)
+		Edge(2, 2)
+		Edge(2, 1)
+		Edge(3, 2)
+
+		Edge(0, -1)
+	TaskBlueprint(id_=1, wf_id=1, name='task-1', runtime=15, children_edges=[<classes.task.Edge object at 0x7f76a40e8490>, <classes.task.Edge object at 0x7f76a40e8610>], parents_edges=[<classes.task.Edge object at 0x7f76a40e82b0>, <classes.task.Edge object at 0x7f76a40e8430>], status=2, is_entry=False, is_exit=False)
+		Edge(13, 2)
+		Edge(3, 2)
+
+		Edge(3, 0)
+		Edge(2, 0)
+	TaskBlueprint(id_=2, wf_id=1, name='task-2', runtime=13, children_edges=[<classes.task.Edge object at 0x7f76a40e8fa0>], parents_edges=[<classes.task.Edge object at 0x7f76a40e8370>, <classes.task.Edge object at 0x7f76a40e84f0>, <classes.task.Edge object at 0x7f76a40e85b0>, <classes.task.Edge object at 0x7f76a40e8670>], status=2, is_entry=False, is_exit=False)
+		Edge(0, 9)
+
+		Edge(2, 0)
+		Edge(13, 1)
+		Edge(3, 0)
+		Edge(3, 1)
+
+========= WORKFLOW-2 ========= 
+	TaskBlueprint(id_=0, wf_id=2, name='task-0', runtime=6, children_edges=[<classes.task.Edge object at 0x7f76a40e87f0>, <classes.task.Edge object at 0x7f76a40e88b0>, <classes.task.Edge object at 0x7f76a40e8970>, <classes.task.Edge object at 0x7f76a40e8af0>], parents_edges=[<classes.task.Edge object at 0x7f76a40eb0a0>], status=2, is_entry=False, is_exit=False)
+		Edge(14, 1)
+		Edge(6, 2)
+		Edge(16, 1)
+		Edge(3, 2)
+
+		Edge(0, -1)
+	TaskBlueprint(id_=1, wf_id=2, name='task-1', runtime=13, children_edges=[<classes.task.Edge object at 0x7f76a40e8a30>, <classes.task.Edge object at 0x7f76a40e8bb0>], parents_edges=[<classes.task.Edge object at 0x7f76a40e8850>, <classes.task.Edge object at 0x7f76a40e89d0>], status=2, is_entry=False, is_exit=False)
+		Edge(1, 2)
+		Edge(19, 2)
+
+		Edge(14, 0)
+		Edge(16, 0)
+	TaskBlueprint(id_=2, wf_id=2, name='task-2', runtime=11, children_edges=[<classes.task.Edge object at 0x7f76a40eb160>], parents_edges=[<classes.task.Edge object at 0x7f76a40e8910>, <classes.task.Edge object at 0x7f76a40e8a90>, <classes.task.Edge object at 0x7f76a40e8b50>, <classes.task.Edge object at 0x7f76a40e8c10>], status=2, is_entry=False, is_exit=False)
+		Edge(0, 9)
+
+		Edge(6, 0)
+		Edge(1, 1)
+		Edge(3, 0)
+		Edge(19, 1)

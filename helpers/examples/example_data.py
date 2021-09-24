@@ -74,26 +74,31 @@ HOLE_METHOD_VARIATIONS = {
          "time_types": ["LFT", "EFT"], "fill_type": "FIRST-FIT"},
         {"name": "holes WORST-FIT", "time_types": ["LFT", "EFT"], "fill_type": "WORST-FIT"}],
 
-    "holes-2011-FASTEST-FIT": [
+    "holes-paper-2011": [
+        # "holes-2011-FASTEST-FIT": [
         {"name": "holes2011 FASTEST-EDF", "fill_type": "FASTEST-FIT", "priority_type": "EDF"},
         {"name": "holes2011 FASTEST-LSTF", "fill_type": "FASTEST-FIT", "priority_type": "LSTF"},
         {"name": "holes2011 FASTEST-HLF", "fill_type": "FASTEST-FIT", "priority_type": "HLF"},
-    ],
-    "holes-2011-BEST-FIT": [
+        # "holes-2011-BEST-FIT": [
         {"name": "holes2011 BEST-EDF", "fill_type": "BEST-FIT", "priority_type": "EDF"},
         {"name": "holes2011 BEST-LSTF", "fill_type": "BEST-FIT", "priority_type": "LSTF"},
         {"name": "holes2011 BEST-HLF", "fill_type": "BEST-FIT", "priority_type": "HLF"},
-    ],
-    "holes-2011-WORST-FIT": [
+        # "holes-2011-WORST-FIT": [
         {"name": "holes2011 WORST-EDF", "fill_type": "WORST-FIT", "priority_type": "EDF"},
         {"name": "holes2011 WORST-LSTF", "fill_type": "WORST-FIT", "priority_type": "LSTF"},
         {"name": "holes2011 WORST-HLF", "fill_type": "WORST-FIT", "priority_type": "HLF"},
-    ],
-    "holes-2011-FIRST-FIT": [
+        # "holes-2011-FIRST-FIT": [
         {"name": "holes2011 FIRST-EDF", "fill_type": "FIRST-FIT", "priority_type": "EDF"},
         {"name": "holes2011 FIRST-LSTF", "fill_type": "FIRST-FIT", "priority_type": "LSTF"},
         {"name": "holes2011 FIRST-HLF", "fill_type": "FIRST-FIT", "priority_type": "HLF"},
+    ],
+
+    "compositions": [
+        {"name": "c1", "time_types": ["EST"], "fill_type": "NO-FILL"},
+        {"name": "c2", "time_types": ["EST"], "fill_type": "NO-FILL"},
+        {"name": "c3", "time_types": ["EST"], "fill_type": "NO-FILL"},
     ]
+
 }
 
 

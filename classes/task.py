@@ -1,5 +1,7 @@
 from colorama import Fore
+from random import randint
 from typing import List, Union
+from dataclasses import dataclass
 
 DEBUG = True
 ROUND_DIGIT = 2
@@ -30,11 +32,30 @@ class Edge:
         return f'--- {self.weight} --> {self.node.str_id()}'
 
 
+@dataclass
+class TaskBlueprint:
+    id_: int
+    wf_id: int
+    name: str
+    runtime: float
+    children_edges: List['Task']
+    parents_edges: List['Task']
+    status: TaskStatus
+    is_entry: bool
+    is_exit: bool
+
+
 class Task:
-    def __init__(self, id_, wf_id, name, costs, runtime, files, children_names, parents_names) -> None:
+    def __init__(self, id_, wf_id, name, costs, runtime, files, children_names, parents_names, status=TaskStatus.UNSCHEDULED) -> None:
         self.costs = costs
         self.id = id_
         self.name = name
+        self.runtime = runtime
+        self.files = files
+        self.wf_id = wf_id
+        self.status: TaskStatus = status
+        self.children_names = children_names
+        self.parents_names = parents_names
         self.start = None
         self.end = None
         self.machine_id: int = -1
@@ -42,39 +63,49 @@ class Task:
         self.level = None
         self.down_rank = None
         self.priority = None
-        self.runtime = runtime
-        self.files = files
-        self.wf_id = wf_id
         self.wf_deadline: Union[int, None] = None
-        self.status = TaskStatus.UNSCHEDULED
-        self.children_names = children_names
-        self.children_till_ready = 0
-        self.parents_names = parents_names
-        self.parents_till_ready = 0
-        self.children_edges: List[Edge] = list()
-        self.parents_edges: List[Edge] = list()
+        self.children_till_ready: int = 0
+        self.parents_till_ready: int = 0
+        self.children_edges: List[Edge] = []
+        self.parents_edges: List[Edge] = []
 
         # This should be updated by the slowest parent.
         # This isn't needed but it should make it a bit faster if used
         self.slowest_parent: dict = {'parent_task': None, 'communication_time': 0}
 
-        self.is_exit = False
-        self.is_entry = False
-
-        # Empty lists evaluate to False
-        if children_names is not None:
-            self.children_till_ready = len(children_names)
-            if len(children_names) == 0:
-                self.is_exit = True
-
-        # Empty lists evaluate to False
-        if parents_names is not None:
-            self.parents_till_ready = len(parents_names)
-            if len(parents_names) == 0:
-                self.is_entry = True
+        self.is_exit: bool = False
+        self.is_entry: bool = False
 
         if self.is_entry == self.is_exit is True:
             raise Exception(f"Node[ {self.id} ] is not connected in the dag!")
+
+    def reset(self):
+        self.machine_id = -1
+        self.start = None
+        self.end = None
+        self.status = TaskStatus.READY if self.is_entry else TaskStatus.UNSCHEDULED
+        self.slowest_parent: dict = {'parent_task': None, 'communication_time': 0}
+        self.set_edges(self.children_edges, self.parents_edges)
+
+    def get_blueprint(self):
+        return TaskBlueprint(self.id, self.wf_id, self.name, self.runtime, self.children_edges, self.parents_edges, self.status, self.is_entry, self.is_exit)
+
+    @staticmethod
+    def blueprint_to_task(blp: TaskBlueprint):
+        print(blp)
+        t = Task(
+            id_=blp.id_,
+            wf_id=blp.wf_id,
+            name=blp.name,
+            costs=[],
+            runtime=blp.runtime,
+            status=blp.status,
+            files=None,
+            children_names=None,
+            parents_names=None)
+        t.set_edges([Edge(e.weight, e.node) for e in blp.children_edges],
+                    [Edge(e.weight, e.node) for e in blp.parents_edges])
+        return t
 
     def set_wf_deadline(self, deadline):
         self.wf_deadline = deadline
@@ -84,7 +115,7 @@ class Task:
         return Task(id_=id_,
                     wf_id=wf_id,
                     name=name,
-                    costs=list(),
+                    costs=[],
                     runtime=0,
                     files=None,
                     children_names=None,
@@ -95,11 +126,6 @@ class Task:
             raise Exception("Wf deadline is None!")
         return self.wf_deadline - time - self.up_rank
 
-    def reset(self):
-        self.start = None
-        self.end = None
-        self.machine_id = -1
-
     def set_priority(self, priority_value):
         self.priority = priority_value
 
@@ -109,7 +135,7 @@ class Task:
             if self.start is not None and self.end is not None else ''
         up_rank = f'up-rank: {Fore.YELLOW}{round(self.up_rank, ROUND_DIGIT)}{Fore.RESET}' \
             if self.up_rank is not None else ''
-        down_rank = f'down_rank: {Fore.YELLOW}{round(self.down_rank, ROUND_DIGIT)}{Fore.RESET} ' \
+        down_rank = f'level: {Fore.YELLOW}{round(self.down_rank, ROUND_DIGIT)}{Fore.RESET} ' \
             if self.down_rank is not None else ''
 
         format_str += f'{Fore.CYAN}{self.name}{Fore.RESET} ' if self.name.startswith("Dummy") \
@@ -180,7 +206,7 @@ class Task:
         return sum(self.costs) / len(self.costs)
 
     @staticmethod
-    def find_task_by_name(tasks, name):
+    def find_task_by_name(tasks, name) -> Union['Task', None]:
         for task in tasks:
             if task.name == name:
                 return task
@@ -193,8 +219,8 @@ class Task:
         return f"[{round(self.start, ROUND_DIGIT)} - {round(self.end, ROUND_DIGIT)}]"
 
     # TODO You can write this better (list comp).
-    def get_tasks_from_names(self, tasks, is_child_tasks: bool):
-        adj_tasks = list()
+    def get_tasks_from_names(self, tasks, is_child_tasks: bool) -> List['Task']:
+        adj_tasks: List['Task'] = []
         names = self.children_names if is_child_tasks else self.parents_names
         for name in names:
             tmp = Task.find_task_by_name(tasks, name)
@@ -213,7 +239,14 @@ class Task:
     def set_edges(self, children_edges, parents_edges):
         # TODO Check if everything went fine in parsing.
         self.children_edges = children_edges
+        self.children_till_ready = len(children_edges)
+        if len(children_edges) == 0:
+            self.is_exit = True
+
         self.parents_edges = parents_edges
+        self.parents_till_ready = len(parents_edges)
+        if len(parents_edges) == 0:
+            self.is_entry = True
 
     def is_slowest_parent(self, child):
         if child.slowest_parent['parent_task'] is None or \
@@ -245,6 +278,10 @@ class Task:
                 child_edge.node.parents_till_ready -= 1
                 if child_edge.node.parents_till_ready == 0:
                     child_edge.node.status = TaskStatus.READY
+
+    @staticmethod
+    def create_random_task(id_, wf_id):
+        return Task(id_=id_, wf_id=wf_id, name=f"task-{id_}", costs=[], runtime=randint(2, 15), files=None, children_names=None, parents_names=None)
 
     def print_children(self):
         tmp_str = self.str_id()

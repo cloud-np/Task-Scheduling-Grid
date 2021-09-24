@@ -5,51 +5,81 @@ import algos.calc_times_on_machines as algos
 from classes.scheduler import FillMethod, TimeType, Scheduler
 
 
+def holes_scheduling(workflows, machines, time_types, hole_filling_type):
+    """This method is used to schedule with method holes.
+
+    This basically creates the more holes it can in the schedule
+    on perpuse so it can fill them later with tasks with high computation
+    cost and low communication cost.
+
+    Args:
+        workflows (list(Workflow)): Contains information about the workflows.
+        machines (list(Machine)): Contains information about the machines.
+        time_types (list(TimeType)): Shows the time type we should use for each workflow to be schedules with. e.g: EFT - EST
+    """
+    sorted_wfs = sorted(workflows, key=lambda wf_: wf_.ccr, reverse=True)
+
+    j = len(sorted_wfs) - 1
+    for i in range(len(sorted_wfs) // 2):
+        schedule_workflow(
+            sorted_wfs[i], machines, time_types[0], hole_filling_type=hole_filling_type)
+        schedule_workflow(
+            sorted_wfs[j], machines, time_types[1], hole_filling_type=hole_filling_type)
+        j -= 1
+
+    # This is incase we have an odd number of workflows so one is left out without a pair.
+    # Not the cleanest way to handle this but works for now.
+    for wf in workflows:
+        if wf.scheduled is False:
+            schedule_workflow(wf, machines, time_types[0], hole_filling_type=hole_filling_type)
+
+
 def schedule_workflow(wf, machines, time_type, hole_filling_type):
-    wf.scheduled = True
-
     unscheduled = sorted(wf.tasks, key=lambda t: t.up_rank)
-    # unscheduled = wf.tasks
-    i = 0
+
     while len(unscheduled) > 0:
-        if i >= len(unscheduled):
-            i = 0
-        task = unscheduled[i]
-        if task.status == TaskStatus.READY:
-            schedule_task_to_best_machine(
-                task, machines, time_type, hole_filling_type)
-            unscheduled.pop(i)
-        i += 1
+        before_pop = len(unscheduled)
+        for i, un_task in enumerate(unscheduled):
+            if un_task.status == TaskStatus.READY:
+                schedule_task_to_best_machine(un_task, machines, time_type, hole_filling_type)
+                unscheduled.pop(i)
+
+        if before_pop == len(unscheduled):
+            raise Exception("None of the tasks are ready!!")
+    wf.set_scheduled(True)
 
 
-def schedule_workflow_2011_paper(wf, machines, priority_type, hole_filling_type):
-    # 1. Sort tasks in workflows based on the priority_type
-    #   - EDF:  The deadline time from each workflow.
-    #   - HLF:  Up-rank as usual.
-    #   - LSTF: wf_deadline - curr_time - up_rank
-    wf.scheduled = True
-    unscheduled = []
+def schedule_workflow_2011_paper(workflows, machines, priority_type, hole_filling_type):
+    def __schedule_workflows(wf, machines, priority_type, hole_filling_type):
+        # 1. Sort tasks in workflows based on the priority_type
+        #   - EDF:  The deadline time from each workflow.
+        #   - HLF:  Up-rank as usual.
+        #   - LSTF: wf_deadline - curr_time - up_rank
+        unscheduled = []
 
-    if priority_type == PriorityType.HLF:
-        unscheduled = sorted(wf.tasks, key=lambda t: t.up_rank)
-    elif priority_type == PriorityType.EDF:
-        for t in wf.tasks:
-            if t.wf_deadline is None:
-                raise Exception("deadline is NONE")
-        unscheduled = sorted(wf.tasks, key=lambda t: t.wf_deadline)
-    elif priority_type == PriorityType.LSTF:
-        unscheduled = sorted(wf.tasks, key=lambda t: t.calc_lstf(time=0))
+        if priority_type == PriorityType.HLF:
+            unscheduled = sorted(wf.tasks, key=lambda t: t.up_rank)
+        elif priority_type == PriorityType.EDF:
+            for t in wf.tasks:
+                if t.wf_deadline is None:
+                    raise Exception("deadline is NONE")
+            unscheduled = sorted(wf.tasks, key=lambda t: t.wf_deadline)
+        elif priority_type == PriorityType.LSTF:
+            unscheduled = sorted(wf.tasks, key=lambda t: t.calc_lstf(time=0))
 
-    i = 0
-    while len(unscheduled) > 0:
-        if i >= len(unscheduled):
-            i = 0
-        task = unscheduled[i]
-        if task.status == TaskStatus.READY:
-            schedule_task_to_best_machine(
-                task, machines, TimeType.EFT, hole_filling_type)
-            unscheduled.pop(i)
-        i += 1
+        i = 0
+        while len(unscheduled) > 0:
+            if i >= len(unscheduled):
+                i = 0
+            task = unscheduled[i]
+            if task.status == TaskStatus.READY:
+                schedule_task_to_best_machine(task, machines, TimeType.EFT, hole_filling_type)
+                unscheduled.pop(i)
+            i += 1
+        wf.set_scheduled(True)
+
+    for wf in workflows:
+        __schedule_workflows(wf, machines, priority_type, hole_filling_type)
 
 
 def schedule_tasks_round_robin_heft(unscheduled, machines, n_wfs):
@@ -168,7 +198,7 @@ def find_an_entry_task(tasks):
 
 
 def construct_critical_path(tasks):
-    critical_path = list()
+    critical_path = []
 
     # Find an entry task
     entry_task = find_an_entry_task(tasks)

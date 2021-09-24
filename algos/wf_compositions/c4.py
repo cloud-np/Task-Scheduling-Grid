@@ -27,11 +27,11 @@ def multiple_workflows_c4(workflows, machines):
                 if rank_diff >= scp_entry.up_rank:
                     linkables.append(
                         (scp_entry, cp_task, rank_diff - scp_entry.up_rank))
-    for link in linkables:
-        # DEBUG
-        print(f"[{'A' if link[0].wf_id == 0 else 'B'}]-{link[0].str_col_id()} ---> "
-              f"[{'A' if link[1].wf_id == 0 else 'B'}]-{link[1].str_col_id()} "
-              f"diff = {Fore.GREEN}{link[2]}{Fore.RESET}")
+    # for link in linkables:
+    #     # DEBUG
+    #     print(f"[{'A' if link[0].wf_id == 0 else 'B'}]-{link[0].str_col_id()} ---> "
+    #           f"[{'A' if link[1].wf_id == 0 else 'B'}]-{link[1].str_col_id()} "
+    #           f"diff = {Fore.GREEN}{link[2]}{Fore.RESET}")
 
     all_tasks = list()
     for wf in workflows:

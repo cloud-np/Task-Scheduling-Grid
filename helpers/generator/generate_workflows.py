@@ -1,25 +1,25 @@
-from workflowhub import Trace, TraceAnalyzer, WorkflowGenerator
+from wfcommons import WorkflowGenerator
 from os.path import isfile
-from workflowhub.generator import SeismologyRecipe, MontageRecipe, EpigenomicsRecipe, CyclesRecipe, GenomeRecipe, SoyKBRecipe
-
+from wfcommons.wfchef.recipes import BlastRecipe, SrasearchRecipe, SeismologyRecipe, MontageRecipe, EpigenomicsRecipe, CyclesRecipe, GenomeRecipe, SoykbRecipe
 # To create a folder as well
 # import os
 # from time import gmtime, strftime
 # file_path = f'{path}/{wf_type} {strftime("%Y-%m-%d %H_%M_%S", gmtime())}' if unique_file else f'{path}/{wf_type}'
 # os.makedirs(file_path)
-WF_TYPES = ['cycles', 'epigenomics', 'genome', 'montage', 'seismology', 'soykbr']
-NUM_TASKS = [10, 14, 20, 30, 50, 100, 133, 200, 300, 400, 500, 1000]
+WF_TYPES = ['cycles', 'epigenomics', 'genome', 'montage', 'seismology', 'soykbr', 'blast', 'sra']
+NUM_TASKS = [10, 50, 100, 200, 500, 1000]
+# NUM_TASKS = [300, 400]
 
 
-def create_wfs(wf_type: str, path: str = './datasets', num_tasks: int = 200):
+def create_wfs(wf_type: str, path: str = './data', num_tasks: int = 200):
 
     if wf_type not in WF_TYPES:
         raise Exception('Not a valid name for a recipe!')
 
-    file_name = f'{path}/{wf_type}/{wf_type}_{num_tasks}.json'
+    file_name = f'{path}/{wf_type}/{wf_type}_{num_tasks}'
 
     # If the file exists already just return.
-    if isfile(file_name):
+    if isfile(f'{file_name}.json'):
         return
 
     try:
@@ -34,22 +34,30 @@ def create_wfs(wf_type: str, path: str = './datasets', num_tasks: int = 200):
         elif wf_type == 'seismology':
             recipe = SeismologyRecipe.from_num_tasks(num_tasks=num_tasks)
         elif wf_type == 'soykbr':
-            recipe = SoyKBRecipe.from_num_tasks(num_tasks=num_tasks)
+            recipe = SoykbRecipe.from_num_tasks(num_tasks=num_tasks)
+        elif wf_type == 'blast':
+            recipe = BlastRecipe.from_num_tasks(num_tasks=num_tasks)
+        elif wf_type == 'sra':
+            recipe = SrasearchRecipe.from_num_tasks(num_tasks=num_tasks)
         else:
             raise Exception('Not a valid name for a recipe!')
         generator = WorkflowGenerator(recipe)
         workflow = generator.build_workflow()
-        workflow.write_json(file_name)
-        print(f"Created -> {file_name}")
+        workflow.write_json(f'{file_name}.json')
+        workflow.write_dot(f'{file_name}.dot')
+        print(f"Created -> {file_name}.dot")
+        print(f"Created -> {file_name}.json")
     except ValueError:
         print(f"Low tasks for {wf_type}. (n >= 133 for montage and n >= 14 for soykbr)")
 
 
-for n_tasks in NUM_TASKS:
-    for w_type in WF_TYPES:
-        create_wfs(wf_type=w_type, num_tasks=n_tasks)
+def create_all_wfs():
+    for n_tasks in NUM_TASKS:
+        for w_type in WF_TYPES:
+            create_wfs(wf_type=w_type, num_tasks=n_tasks)
 
-# file_name = 'datasets/epigenomics-wf.json'
+
+# file_name = 'data/epigenomics-wf.json'
 # creating a Seismology workflow recipe based on the number
 # of pair of signals to estimate earthquake STFs
 # recipe = MontageRecipe.from_num_tasks(num_tasks=10)

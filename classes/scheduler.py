@@ -3,11 +3,11 @@ from typing import List, Any
 import os
 from colorama import Fore, Back
 from matplotlib.pyplot import fill
-from algos.holes_scheduling import holes_scheduling, holes2011, compute_execution_time
-from wf_compositions import c1
-from wf_compositions import c2
-from wf_compositions import c3
-from wf_compositions import c4
+import algos.schedule_wfs as algos
+from algos.wf_compositions import c1
+from algos.wf_compositions import c2
+from algos.wf_compositions import c3
+from algos.wf_compositions import c4
 
 
 class TimeType(Enum):
@@ -32,30 +32,30 @@ class FillMethod(Enum):
 
 
 class Scheduler:
-
-    def __init__(self, name, workflows, machines, time_types: List[str], fill_type, priority_type=None, output_path="./simulation_output"):
-        self.name = name
-        self.n_wfs = len(workflows)
+    def __init__(self, name: str, workflows, machines, time_types: List[str], fill_type: FillMethod, priority_type=None, output_path: str = "./simulation_output"):
+        self.name: str = name
+        self.n_wfs: int = len(workflows)
+        self.n_machines: int = len(machines)
         self.workflows = workflows
         self.machines = machines
-        self.output_path = output_path
+        self.output_path: str = output_path
         # E.g: sim_out/5.txt
-        self.output_file = f"{self.output_path}/{self.n_wfs}.txt"
+        self.output_file: str = f"{self.output_path}/wf_size_{len(workflows[0].tasks)}_machines_{self.n_machines}.txt"
 
         if time_types is not None:
             # Get time types e.g: EFT = earliest finish time
-            self.time_types = [self.get_time_type(
-                ttype) for ttype in time_types]
+            self.time_types: List[TimeType] = [self.get_time_type(ttype) for ttype in time_types]
 
         if priority_type is not None:
-            self.priority_type = self.get_priority_type(priority_type)
+            self.priority_type: PriorityType = self.get_priority_type(priority_type)
 
         # Get fill type e.g: FASTEST-FIT = pick the hole that has gives the best time.
-        self.fill_type = self.get_fill_type(fill_type)
+        # NOTE change this to fill_method
+        self.fill_type: FillMethod = self.get_fill_type(fill_type)
         # The method that we gonna run the schedule.
         self.schedule_method: Any = self.get_scheduling_method(name)
 
-        self.is_scheduling_done = False
+        self.is_scheduling_done: bool = False
 
     # This function schedules the task and returns the new
     @staticmethod
@@ -69,12 +69,6 @@ class Scheduler:
             machine.add_task(task)
         else:
             machine.add_task_to_hole(task, hole)
-    
-    def pick_first_avail_machine(task):
-        # We pick the "first" available machine
-        machine = min(self.machines, key=lambda m: m.schedule_len)
-        tmp_time = compute_execution_time(task, machine.id, machine.schedule_len)
-        return machine, tmp_time
 
     def get_slowest_machine(self):
         if self.is_scheduling_done is True:
@@ -85,8 +79,8 @@ class Scheduler:
     def info(self):
         print(f"\t{Back.MAGENTA}{Fore.LIGHTYELLOW_EX}{self.method_used_info()}{Fore.RESET}{Back.RESET}")
         if self.name.startswith("holes"):
-            for machine in self.machines:
-                print(machine.holes_filled)
+            # for machine in self.machines:
+            #     print(machine.holes_filled)
             print(
                 f"Time saved = {Fore.GREEN}{sum([m.holes_saved_time for m in self.machines])}{Fore.RESET}")
 
@@ -104,15 +98,12 @@ class Scheduler:
             return PriorityType.LSTF
 
     def run(self):
-        print(self.schedule_method.__name__)
-        if self.schedule_method.__name__.startswith("holes2011"):
+        if self.schedule_method.__name__.startswith("schedule_workflow_2011_paper"):
             if self.priority_type is None:
                 raise Exception("Please give a priority type!")
-            self.schedule_method(
-                self.workflows, self.machines, self.priority_type, self.fill_type)
+            self.schedule_method(self.workflows, self.machines, self.priority_type, self.fill_type)
         elif self.schedule_method.__name__.startswith("holes"):
-            self.schedule_method(
-                self.workflows, self.machines, self.time_types, self.fill_type)
+            self.schedule_method(self.workflows, self.machines, self.time_types, self.fill_type)
         else:
             self.schedule_method(self.workflows, self.machines)
         self.is_scheduling_done = True
@@ -157,14 +148,17 @@ class Scheduler:
 
         return [method_info, f"Holes Filled {holes_filled}", add_nl(time_saved), add_nl(m_id), add_nl(schedule_len)]
 
-    def get_info_for_files(self) -> List[str]:
+    def get_schedule_len(self):
         slowest_machine = self.get_slowest_machine()
-        schedule_len = slowest_machine.schedule_len
-        lines = [str(round(m.get_util_perc(), 2)) + "," for m in self.machines]
-        lines.insert(0, f"{self.name},")
-        lines.insert(1, f"{schedule_len},")
-        lines[len(lines) - 1] = lines[len(lines) - 1] + "\n"
-        return lines
+        return slowest_machine.schedule_len
+
+    def get_info_for_files(self) -> List[str]:
+        schedule_len = self.get_schedule_len()
+        machines_util_avg_perc = sum(m.get_util_perc() for m in self.machines) / self.n_machines
+
+        workflows_avg_schedule_len = sum(wf.schedule_len for wf in self.workflows) / self.n_wfs
+
+        return [f"{self.name},", f"{round(schedule_len)},", f"{round(machines_util_avg_perc)},", f"{round(workflows_avg_schedule_len)}\n"]
 
     # NOTE:
     # avg_util of machines
@@ -178,7 +172,7 @@ class Scheduler:
 
         # If the file does not exist then add the titles.
         if not os.path.exists(self.output_file):
-            titles: str = "Method Name,Total Makespan," + "".join([f"Machine Util-{m.id}," for m in self.machines])
+            titles: str = "Method Name,Total Makespan,Avg Machine util,Avg workflow makespan"
             lines.insert(0, titles + '\n')
 
         # Append to the correct file if it exists otherwise create it.
@@ -188,9 +182,9 @@ class Scheduler:
     @staticmethod
     def get_scheduling_method(name):
         if name.startswith("holes2011"):
-            return holes2011
+            return algos.schedule_workflow_2011_paper
         elif name.startswith("holes"):
-            return holes_scheduling
+            return algos.holes_scheduling
         elif name == "c1":
             return c1.multiple_workflows_c1
         elif name == "c2":
@@ -198,7 +192,8 @@ class Scheduler:
         elif name == "c3":
             return c3.multiple_workflows_c3
         elif name == "c4":
-            return c4.multiple_workflows_c4
+            raise Exception("c4 composition is not implemented yet!")
+            # return c4.multiple_workflows_c4
         else:
             raise ValueError(f"Not a valid method option: {name}")
 

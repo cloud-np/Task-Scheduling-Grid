@@ -8,7 +8,7 @@ class Visualizer:
 
     @staticmethod
     def compare_schedule_len(slowest_machines, n_workflows, save_fig=False, show_fig=True):
-        schedule_lens_x = [round(m["machine"].schedule_len) for m in slowest_machines]
+        schedule_lens_x: List[int] = [round(m["machine"].schedule_len) for m in slowest_machines]
 
         # Change the color of the smallest schedule_len
         bar_colors = ['b' for _ in schedule_lens_x]

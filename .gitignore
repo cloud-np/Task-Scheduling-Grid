@@ -1,7 +1,10 @@
 *.json
 pegasus-traces-master
 fits
-datasets
+datasets/
+data/
+data_old/
+testing.ipynb
 .idea
 .vscode
 */__pycache__/

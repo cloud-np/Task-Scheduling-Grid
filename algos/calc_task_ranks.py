@@ -20,7 +20,6 @@ def calculate_upward_ranks(tasks):
         task_costs = avg(curr_task.costs)
         max_rank = task_costs + max(all_ranks_of_curr_task)
 
-        # Set to the task their rank
         curr_task.up_rank = max_rank
         return max_rank
 
@@ -38,7 +37,7 @@ def calculate_downward_ranks(tasks):
             curr_task.down_rank = avg_cost
             return avg_cost
 
-        all_ranks_of_curr_task = list()
+        all_ranks_of_curr_task = []
         for parent_edge in curr_task.parents_edges:
             # Showing path/steps for debugging
             # if curr_task.wf_id == 0:

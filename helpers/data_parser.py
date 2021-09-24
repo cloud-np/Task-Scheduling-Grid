@@ -2,6 +2,7 @@ import csv
 import json
 from classes.task import Task, Edge
 import classes.machine as Machines
+from typing import List
 # from classes.Machine import NETWORK_KBPS
 from helpers.utils import get_id_from_name
 
@@ -31,7 +32,7 @@ def get_tasks_from_json_file(file_name, wf_id):
                 id_=job_id,
                 wf_id=wf_id,
                 name=job['name'],
-                costs=list(),
+                costs=[],
                 runtime=job['runtime'],
                 files=job['files'],
                 children_names=job['children'],
@@ -39,24 +40,24 @@ def get_tasks_from_json_file(file_name, wf_id):
             )
         )
 
+    # Calculate the the edges between the nodes and their weights in KBS.
+    # NOTE: not sure why but without the type notation this code below won't work..
+    # ( I mean accessing stuff from the Task class)
     for task in tasks:
-        # Calculate the the edges between the nodes and their weights in KBS.
-        # NOTE: not sure why but without the type notation this code below won't work..
-        # ( I mean accessing stuff from the Task class)
-        children: list = task.get_tasks_from_names(tasks, is_child_tasks=True)
-        parents: list = task.get_tasks_from_names(tasks, is_child_tasks=False)
+        children: List[Task] = task.get_tasks_from_names(tasks, is_child_tasks=True)
+        parents: List[Task] = task.get_tasks_from_names(tasks, is_child_tasks=False)
         # We need at least -> len(Edges) == len(children)
-        children_edges = [Edge(weight=0, node=child) for child in children]
-        parents_edges = [Edge(weight=0, node=parent) for parent in parents]
+        children_edges: List[Edge] = [Edge(weight=0, node=child) for child in children]
+        parents_edges: List[Edge] = [Edge(weight=0, node=parent) for parent in parents]
 
         for file in task.files:
             if file['link'] == 'output':
-                for i in range(len(children)):
-                    if children[i].is_file_in_task(file):
+                for i, child in enumerate(children):
+                    if child.is_file_in_task(file):
                         children_edges[i].weight += file['size']
             elif file['link'] == 'input':
-                for i in range(len(parents)):
-                    if parents[i].is_file_in_task(file):
+                for i, parent in enumerate(parents):
+                    if parent.is_file_in_task(file):
                         parents_edges[i].weight += file['size']
 
         if Machines.HAS_NETWORK:

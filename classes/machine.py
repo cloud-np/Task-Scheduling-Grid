@@ -3,9 +3,10 @@ from random import randint
 from classes.task import Task
 # import algos.calc_ex_time as time_calc
 from algos.calc_times_on_machines import compute_execution_time
-from typing import Set, Union
+from typing import Set, Union, List
+from dataclasses import dataclass
 
-NETWORK_KBPS = 200
+NETWORK_KBPS = 35 * 125
 # NETWORK_KBPS = 1
 HAS_NETWORK = True
 CORE_SPEED = 1200
@@ -43,13 +44,21 @@ class Hole:
             return None
 
 
+@dataclass
+class MachineBlueprint:
+    id_: int
+    name: str
+    n_cpu: int
+    speed: float
+
+
 class Machine:
 
-    def __init__(self, id_, name, n_cpu=None, speed=None, memory=None, cpti=None):
+    def __init__(self, id_, name, n_cpu, speed=None, memory=None, cpti=None):
         self.schedule_len = 0
         self.id: int = id_
         self.name: str = name
-        self.n_cpu: Union[int, None] = n_cpu
+        self.n_cpu: int = n_cpu
         # self.memory = memory
         # self.cpti = cpti  # cost per time interval
         self.speed = speed
@@ -59,14 +68,34 @@ class Machine:
         # self.network_speed = network_speed
         self.tasks: Set[Task] = set()
 
+    def reset(self):
+        self.schedule_len = 0
+        self.holes = set()
+        self.holes_saved_time = 0
+        self.holes_filled = 0
+        self.tasks: Set[Task] = set()
+
+    def get_blueprint(self):
+        return MachineBlueprint(self.id, self.name, self.n_cpu, self.speed)
+
+    @staticmethod
+    def blueprint_to_machine(blp: MachineBlueprint):
+        return Machine(id_=blp.id_, name=blp.name, n_cpu=blp.n_cpu, speed=blp.speed)
+
+    @staticmethod
+    def reset_many(machines) -> None:
+        [m.reset() for m in machines]
+
     def add_task(self, task):
         if DEBUG and (task in self.tasks):
-            raise Exception(f"The task has already been added. In machine {self.id}\n {task}")
+            raise Exception(
+                f"The task has already been added. In machine {self.id}\n {task}")
         self.tasks.add(task)
         gap = task.start - self.schedule_len
 
         if gap >= MIN_GAP_SIZE:
-            self.holes.add(Hole(start=self.schedule_len, end=task.start, gap=gap))
+            self.holes.add(
+                Hole(start=self.schedule_len, end=task.start, gap=gap))
 
         if self.schedule_len <= task.end:
             self.schedule_len = task.end
@@ -78,9 +107,11 @@ class Machine:
 
         # New holes get created based on the minimum gap we added.
         if before_start_gap >= MIN_GAP_SIZE:
-            self.holes.add(Hole(start=hole.start, end=task.start, gap=before_start_gap))
+            self.holes.add(
+                Hole(start=hole.start, end=task.start, gap=before_start_gap))
         elif after_end_gap >= MIN_GAP_SIZE:
-            self.holes.add(Hole(start=task.end, end=hole.end, gap=after_end_gap))
+            self.holes.add(
+                Hole(start=task.end, end=hole.end, gap=after_end_gap))
 
         hole.time_saved = hole.gap - before_start_gap - after_end_gap
         self.holes_saved_time += hole.time_saved
@@ -113,6 +144,10 @@ class Machine:
     def remove_hole(self, hole):
         self.holes_filled += 1
         self.holes.remove(hole)
+
+    @staticmethod
+    def create_random_machine(id_):
+        return Machine(id_=id_, name=f"M-{id_}", n_cpu=randint(1, 4), speed=CORE_SPEED)
 
     # If this returns false it means that the task is trying to finish or start after the gap e.g:
     # task_times = (12, 25)  gap = (10, 22)
@@ -213,6 +248,27 @@ class Machine:
         return machines
 
     @staticmethod
+    def load_n_static_machines(n: int):
+        cpus = [2, 1, 4, 2,  # 4
+                1, 4, 2, 3,  # 8
+                2, 1, 4, 2,
+                3, 4, 2, 3,  # 16
+                1, 1, 3, 4,
+                3, 4, 3, 4,
+                2, 2, 4, 2,
+                1, 4, 4, 1,  # 32
+                2, 1, 4, 2,
+                1, 4, 2, 3,
+                2, 1, 4, 2,
+                3, 4, 2, 3,
+                1, 1, 3, 4,
+                3, 4, 3, 4,
+                2, 2, 4, 2,
+                1, 4, 4, 1,  # 64
+                ]
+        return [Machine(id_=i, name=f"M-{i}", n_cpu=cpus[i], speed=CORE_SPEED - 100) for i in range(n)]
+
+    @staticmethod
     def load_4_machines():
         machines = [
             Machine(id_=0, name="M-0", n_cpu=2, speed=CORE_SPEED - 200),
@@ -231,6 +287,7 @@ class Machine:
     # for every task it doesn't change our wanted outcome.
     # We can't use the ceil or floor function here because the numbers
     # are quite small and we will be missing that information.
+    # ORR we can simply remove the speed and ignore
     def __generate_cost_for_task(self, runtime):
         return runtime + 1500 - self.speed / self.n_cpu
         # return runtime / self.n_cpu

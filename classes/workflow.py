@@ -2,16 +2,17 @@ from classes.task import Task, TaskStatus, Edge
 from algos.calc_task_ranks import calculate_downward_ranks, calculate_upward_ranks
 import algos.schedule_wfs as algos
 from colorama import Fore, Back
-from typing import Union, Any
+from typing import Union, Any, List, Dict
 from helpers.data_parser import get_tasks_from_json_file
-from example_data import NAMES_A, NAMES_B, COSTS_A, COSTS_B, \
+from helpers.examples.example_data import NAMES_A, NAMES_B, COSTS_A, COSTS_B, \
     TASK_DAG_A, TASK_DAG_B, PARENTS_DAG_A, PARENTS_DAG_B
 from helpers.checker import schedule_checker
 from random import choice
 
-WF_TYPES = ['cycles', 'epigenomics', 'genome',
-            'montage', 'seismology', 'soykbr']
-NUM_TASKS = [10, 14, 20, 30, 50, 100, 133, 200, 300, 400, 500, 1000]
+# 'montage' not working properly
+# 'soykbr' wfcommons 0.7 not working properly
+WF_TYPES = ['cycles', 'epigenomics', 'genome', 'seismology', 'soykbr', 'blast', 'sra']
+NUM_TASKS = [50, 100, 200, 300, 400, 500, 1000]
 CACHED_WFS = dict()
 
 
@@ -23,13 +24,16 @@ CACHED_WFS = dict()
 # in any CASE tho tasks and machines lists should NEVER change
 # at all. I should try to make them immutable later on.
 class Workflow:
-    def __init__(self, id_, wf_type, machines, add_dummies, file_path, name=None, tasks: Union[list, None] = None):
-        self.id = id_
+    def __init__(self, id_, wf_type, machines, add_dummies, file_path: str = None, name: str = None, tasks: Union[List[Task], None] = None):
+        self.id: int = id_
         self.type = wf_type  # type of the workflow e.g: LIGO, Montage, etc
-        self.name = name
-        self.tasks: Any = tasks
-        self.scheduled = False
+        self.name: str = name
+        self.schedule_len: float = 0
+        self.tasks: Union[List[Task], None] = tasks
+        self.scheduled: bool = False
+        self.finishing_time: float = -1.0
         self.avg_comp_cost: float = -1.0
+        self.file_path: str = file_path
         self.avg_com_cost: float = -1.0
         self.ccr: float = -1.0
 
@@ -41,9 +45,9 @@ class Workflow:
             if add_dummies:
                 self.__add_dummy_nodes()
 
-            # 3. Calculate the runtime cost for every machine
-            for m in machines:
-                m.assign_tasks_with_costs(tasks=self.tasks)
+        # 3. Calculate the runtime cost for every machine
+        for m in machines:
+            m.assign_tasks_with_costs(tasks=self.tasks)
 
         # 4. Generate critical path, up_rank and down_rank
         self.cp_info = {"critical_path": set(), "entry": None, "exit": None}
@@ -58,6 +62,28 @@ class Workflow:
         # Assign to all the tasks the wf_deadline
         for t in self.tasks:
             t.set_wf_deadline(self.deadline)
+
+    def reset(self) -> None:
+        sorted(self.tasks, key=lambda t: t.id)
+        [t.reset() for t in self.tasks]
+
+    @staticmethod
+    def reset_many(wfs) -> None:
+        [wf.reset() for wf in wfs]
+
+    def set_scheduled(self, is_scheduled: bool):
+        if is_scheduled:
+            # Since we have to check for the tasks to be scheduled
+            # I don't want to use max() just to be a bit faster even
+            # though by theory it would still be O(n)
+            for t in self.tasks:
+                if t.status != TaskStatus.SCHEDULED:
+                    raise Exception("Workflow can't be scheduled if all of his tasks haven't ended.")
+                elif t.end > self.schedule_len:
+                    self.schedule_len = t.end
+            self.scheduled = True
+        else:
+            self.scheduled = False
 
     def str_colored(self):
         return f"{self.str_col_id()}\n" \
@@ -75,8 +101,7 @@ class Workflow:
     # DO NOT CHANGE THE NAMING
     def __add_dummy_nodes(self):
         self.tasks.insert(0, Task.make_dummy_node(0, self.id, "Dummy-In"))
-        self.tasks.append(Task.make_dummy_node(
-            len(self.tasks), self.id, "Dummy-Out"))
+        self.tasks.append(Task.make_dummy_node(len(self.tasks), self.id, "Dummy-Out"))
 
         dummy_in = self.tasks[0]
         dummy_out = self.tasks[len(self.tasks) - 1]
@@ -102,12 +127,11 @@ class Workflow:
     '''
     @staticmethod
     def connect_wfs(workflows, machines):
-        dummy_in = Task.make_dummy_node(id_=-1, wf_id=-1, name="Dummy-In-BIG")
+        dummy_in: Task = Task.make_dummy_node(id_=-1, wf_id=-1, name="Dummy-In-BIG")
         # To find the dummy_out.id we need to calc all the tasks in all workflows
-        dummy_out = Task.make_dummy_node(
-            id_=sum([len(wf.tasks) for wf in workflows]), wf_id=-1, name="Dummy-Out-BIG")
-        all_tasks = [dummy_in]
-        dummy_in.costs = [0 for _ in machines]
+        dummy_out: Task = Task.make_dummy_node(id_=sum([len(wf.tasks) for wf in workflows]), wf_id=-1, name="Dummy-Out-BIG")
+        all_tasks: List[Task] = [dummy_in]
+        dummy_in.costs: List[int] = [0 for _ in machines]
 
         for wf in workflows:
             for task in wf.tasks:
@@ -189,7 +213,7 @@ class Workflow:
 
     @staticmethod
     def generate_multiple_workflows(n_wfs: int, machines, is_our_method: bool,
-                                    user_set_tasks: int = 0, path: str = './datasets'):
+                                    user_set_tasks: int = 0, path: str = './data'):
         workflows = list()
         i = 0
         while len(workflows) < n_wfs:
@@ -207,23 +231,31 @@ class Workflow:
         return workflows
 
     @staticmethod
-    def load_example_workflows(machines, n, path: str = './datasets'):
+    def load_all_types_wfs(machines, n, path: str = './data'):
+        workflows = [Workflow(id_=i, file_path=f"{path}/{wft}/{wft}_{n}.json",
+                     wf_type=wft, machines=machines, add_dummies=True) for i, wft in enumerate(WF_TYPES)]
+        return workflows
+
+    @staticmethod
+    def load_example_workflows(machines, n, path: str = './data'):
         num_tasks = [
-            10, 50, 20, 500, 30, 100, 14, 50, 400, 200,
-            500, 1000, 300, 500, 100, 50, 200, 300, 1000, 1000,
-            10, 50, 20, 500, 30, 100, 14, 50, 400, 200,
-            500, 1000, 300, 500, 100, 50, 200, 300, 1000, 1000,
-            500, 1000, 300, 500, 100, 50, 200, 300, 1000, 1000,
-            300, 50, 200
+            100, 100, 200, 200, 1000, 50,
+            200, 300, 400, 100, 500, 100, 50,
+            50, 100, 200, 1000, 50, 300, 200,
+            500, 50, 400, 100, 1000, 400,
+            1000, 500, 1000, 200, 300, 400, 50,
+            50, 100, 50, 300, 500, 50, 1000,
+            300, 500, 400, 200, 500, 300, 50,
+            200, 500, 1000
         ]
         wf_types = [
             'cycles', 'genome', 'seismology', 'cycles', 'soykbr', 'epigenomics',
             'genome', 'cycles', 'seismology', 'genome', 'cycles', 'genome', 'epigenomics',
-            'cycles', 'genome', 'epigenomics', 'seismology', 'genome', 'soykbr', 'soykbr',
-            'cycles', 'genome', 'seismology', 'cycles', 'soykbr', 'epigenomics',
-            'genome', 'cycles', 'seismology', 'genome', 'cycles', 'genome', 'epigenomics',
-            'cycles', 'genome', 'epigenomics', 'seismology', 'genome', 'soykbr', 'soykbr',
-            'cycles', 'genome', 'epigenomics', 'seismology', 'genome', 'soykbr', 'soykbr',
+            'blast', 'genome', 'blast', 'blast', 'sra', 'soykbr', 'blast',
+            'cycles', 'sra', 'blast', 'epigenomics', 'soykbr', 'genome',
+            'genome', 'cycles', 'seismology', 'blast', 'sra', 'genome', 'epigenomics',
+            'blast', 'genome', 'epigenomics', 'seismology', 'genome', 'sra', 'soykbr',
+            'cycles', 'genome', 'sra', 'blast', 'genome', 'soykbr', 'blast',
             'soykbr', 'epigenomics', 'cycles'
         ]
 
@@ -237,12 +269,8 @@ class Workflow:
     # NOTE: This can be written in one line.
     # Gets the starting tasks which are the entry tasks to begin with.
 
-    def starting_ready_tasks(self):
-        ready_tasks = list()
-        for child in self.tasks[0].children_edges:
-            if child.node.status == TaskStatus.READY:
-                ready_tasks.append(child.node)
-        return ready_tasks
+    def starting_ready_tasks(self) -> List[Task]:
+        return [child.node for child in self.tasks[0].children_edges if child.node.status == TaskStatus.READY]
 
     def str_id(self):
         return f"WORKFLOW    ID = {self.id}"
