@@ -25,7 +25,7 @@ class Simulation:
         self.schedulers: List[Scheduler] = [Scheduler(method['name'],
                                                       Example.re_create_one_example(workflows, machines),
                                                       time_types=method.get("time_types"),
-                                                      fill_type=method["fill_type"], priority_type=method.get("priority_type")) for method in run_methods]
+                                                      fill_method=method["fill_type"], priority_type=method.get("priority_type")) for method in run_methods]
 
     def run(self):
         slowest_machines = []

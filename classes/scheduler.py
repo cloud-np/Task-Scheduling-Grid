@@ -32,7 +32,7 @@ class FillMethod(Enum):
 
 
 class Scheduler:
-    def __init__(self, name: str, data, time_types: List[str], fill_type: FillMethod, priority_type=None, output_path: str = "./simulation_output"):
+    def __init__(self, name: str, data, time_types: List[str], fill_method: FillMethod, priority_type=None, output_path: str = "./simulation_output"):
         workflows, machines = data
         self.name: str = name
         self.n_wfs: int = len(workflows)
@@ -52,7 +52,7 @@ class Scheduler:
 
         # Get fill type e.g: FASTEST-FIT = pick the hole that has gives the best time.
         # NOTE change this to fill_method
-        self.fill_type: FillMethod = get_fill_type(fill_type)
+        self.fill_method: FillMethod = get_fill_type(fill_method)
         # The method that we gonna run the schedule.
         self.schedule_method: Any = self.get_scheduling_method(name)
 
@@ -110,25 +110,25 @@ class Scheduler:
         self.is_scheduling_done = True
 
     def method_used_info(self, concise=False):
-        fill_type = None
+        fill_method = None
         if self.name.startswith("holes"):
             if concise:
-                if self.fill_type == FillMethod.FASTEST_FIT:
-                    fill_type = "FST"
-                elif self.fill_type == FillMethod.BEST_FIT:
-                    fill_type = "B"
-                elif self.fill_type == FillMethod.FIRST_FIT:
-                    fill_type = "FR"
-                elif self.fill_type == FillMethod.WORST_FIT:
-                    fill_type = "W"
+                if self.fill_method == FillMethod.FASTEST_FIT:
+                    fill_method = "FST"
+                elif self.fill_method == FillMethod.BEST_FIT:
+                    fill_method = "B"
+                elif self.fill_method == FillMethod.FIRST_FIT:
+                    fill_method = "FR"
+                elif self.fill_method == FillMethod.WORST_FIT:
+                    fill_method = "W"
             else:
-                fill_type = get_fill_type(self.fill_type)
+                fill_method = get_fill_type(self.fill_method)
 
             if self.name.startswith("holes2011"):
-                return f"{fill_type} {self.priority_type}\n"
+                return f"{fill_method} {self.priority_type}\n"
             else:
                 ttypes = [get_time_type(t) for t in self.time_types]
-                return f"{fill_type}\n{ttypes[0]}-{ttypes[1]}\n"
+                return f"{fill_method}\n{ttypes[0]}-{ttypes[1]}\n"
         else:
             return self.name
 
@@ -197,7 +197,6 @@ class Scheduler:
         else:
             raise ValueError(f"Not a valid method option: {name}")
 
-
     def holes_scheduling(self):
         """This method is used to schedule with method holes.
 
@@ -230,20 +229,17 @@ class Scheduler:
 
         i = 0
         while len(unscheduled) > 0:
-            # before_pop = len(unscheduled)
             if i >= len(unscheduled):
                 i = 0
             un_task = unscheduled[i]
 
             if un_task.status == TaskStatus.READY:
-                Scheduler.schedule_task_to_best_machine(un_task, self.machines, time_type, self.fill_type)
+                Scheduler.schedule_task_to_best_machine(un_task, self.machines, time_type, self.fill_method)
                 unscheduled.pop(i)
                 i = 0
             else:
                 i += 1
 
-            # if before_pop == len(unscheduled):
-            #     raise Exception("None of the tasks are ready!!")
         wf.set_scheduled(True)
 
     def schedule_workflow_2011_paper(self, priority_type):
@@ -270,7 +266,7 @@ class Scheduler:
                     i = 0
                 task = unscheduled[i]
                 if task.status == TaskStatus.READY:
-                    Scheduler.schedule_task_to_best_machine(task, self.machines, TimeType.EFT, self.fill_type)
+                    Scheduler.schedule_task_to_best_machine(task, self.machines, TimeType.EFT, self.fill_method)
                     unscheduled.pop(i)
                 i += 1
             wf.set_scheduled(True)
@@ -355,22 +351,22 @@ class Scheduler:
         return time
 
     @staticmethod
-    def schedule_task_to_best_machine(task, machines, time_type, fill_type=FillMethod.NO_FILL):
+    def schedule_task_to_best_machine(task, machines, time_type, fill_method=FillMethod.NO_FILL):
         if task.status != TaskStatus.READY:
             raise Exception("Task status is not ready! ", task)
-        time_and_machine = Scheduler.find_best_machine(task, machines, time_type, fill_type)
+        time_and_machine = Scheduler.find_best_machine(task, machines, time_type, fill_method)
 
         Scheduler.schedule_task({'start': time_and_machine["start"], 'end': time_and_machine["end"]},
                                 task, machine=time_and_machine["machine"], hole=time_and_machine.get('hole'))
 
     @staticmethod
-    def find_best_machine(task, machines, time_type, fill_type=FillMethod.NO_FILL):
+    def find_best_machine(task, machines, time_type, fill_method=FillMethod.NO_FILL):
         holes_times = []
         task_times_on_machines = []
         best_time = None
         for machine in machines:
             # Try to find the existing holes (in the current machine) to fill.
-            if fill_type != FillMethod.NO_FILL:
+            if fill_method != FillMethod.NO_FILL:
                 for hole in machine.holes:
                     valid_hole_info = hole.is_fillable(task, machine.id)
                     if valid_hole_info is not None:
@@ -384,14 +380,14 @@ class Scheduler:
 
         # If there are holes to fill prioritize them.
         if len(holes_times) > 0:
-            if fill_type == FillMethod.FASTEST_FIT:
+            if fill_method == FillMethod.FASTEST_FIT:
                 best_time = Scheduler.pick_machine_based_on_timetype(time_type, holes_times)
-            elif fill_type == FillMethod.BEST_FIT:
+            elif fill_method == FillMethod.BEST_FIT:
                 best_time = min(holes_times, key=lambda t: t["gap_left"])
-            elif fill_type == FillMethod.FIRST_FIT:
+            elif fill_method == FillMethod.FIRST_FIT:
                 # We could write this to run faster but I think we will losse readility
                 best_time = holes_times[0]
-            elif fill_type == FillMethod.WORST_FIT:
+            elif fill_method == FillMethod.WORST_FIT:
                 best_time = max(holes_times, key=lambda t: t["gap_left"])
         # If no holes were found.
         else:
