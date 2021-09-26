@@ -2,8 +2,8 @@ from enum import Enum
 from typing import List, Any
 import os
 from colorama import Fore, Back
+from classes.task import TaskStatus
 from matplotlib.pyplot import fill
-import algos.schedule_wfs as algos
 from algos.wf_compositions import c1
 from algos.wf_compositions import c2
 from algos.wf_compositions import c3
@@ -32,7 +32,8 @@ class FillMethod(Enum):
 
 
 class Scheduler:
-    def __init__(self, name: str, workflows, machines, time_types: List[str], fill_type: FillMethod, priority_type=None, output_path: str = "./simulation_output"):
+    def __init__(self, name: str, data, time_types: List[str], fill_type: FillMethod, priority_type=None, output_path: str = "./simulation_output"):
+        workflows, machines = data
         self.name: str = name
         self.n_wfs: int = len(workflows)
         self.n_machines: int = len(machines)
@@ -44,14 +45,14 @@ class Scheduler:
 
         if time_types is not None:
             # Get time types e.g: EFT = earliest finish time
-            self.time_types: List[TimeType] = [self.get_time_type(ttype) for ttype in time_types]
+            self.time_types: List[TimeType] = [get_time_type(ttype) for ttype in time_types]
 
         if priority_type is not None:
             self.priority_type: PriorityType = self.get_priority_type(priority_type)
 
         # Get fill type e.g: FASTEST-FIT = pick the hole that has gives the best time.
         # NOTE change this to fill_method
-        self.fill_type: FillMethod = self.get_fill_type(fill_type)
+        self.fill_type: FillMethod = get_fill_type(fill_type)
         # The method that we gonna run the schedule.
         self.schedule_method: Any = self.get_scheduling_method(name)
 
@@ -101,9 +102,9 @@ class Scheduler:
         if self.schedule_method.__name__.startswith("schedule_workflow_2011_paper"):
             if self.priority_type is None:
                 raise Exception("Please give a priority type!")
-            self.schedule_method(self.workflows, self.machines, self.priority_type, self.fill_type)
+            self.schedule_method()
         elif self.schedule_method.__name__.startswith("holes"):
-            self.schedule_method(self.workflows, self.machines, self.time_types, self.fill_type)
+            self.schedule_method()
         else:
             self.schedule_method(self.workflows, self.machines)
         self.is_scheduling_done = True
@@ -121,12 +122,12 @@ class Scheduler:
                 elif self.fill_type == FillMethod.WORST_FIT:
                     fill_type = "W"
             else:
-                fill_type = self.get_fill_type(self.fill_type)
+                fill_type = get_fill_type(self.fill_type)
 
             if self.name.startswith("holes2011"):
                 return f"{fill_type} {self.priority_type}\n"
             else:
-                ttypes = [Scheduler.get_time_type(t) for t in self.time_types]
+                ttypes = [get_time_type(t) for t in self.time_types]
                 return f"{fill_type}\n{ttypes[0]}-{ttypes[1]}\n"
         else:
             return self.name
@@ -158,7 +159,7 @@ class Scheduler:
 
         workflows_avg_schedule_len = sum(wf.schedule_len for wf in self.workflows) / self.n_wfs
 
-        return [f"{self.name},", f"{round(schedule_len)},", f"{round(machines_util_avg_perc)},", f"{round(workflows_avg_schedule_len)}\n"]
+        return [f"{self.name}\t", f"{round(schedule_len)}\t", f"{round(machines_util_avg_perc)}\t", f"{round(workflows_avg_schedule_len)}\n"]
 
     # NOTE:
     # avg_util of machines
@@ -172,19 +173,18 @@ class Scheduler:
 
         # If the file does not exist then add the titles.
         if not os.path.exists(self.output_file):
-            titles: str = "Method Name,Total Makespan,Avg Machine util,Avg workflow makespan"
+            titles: str = "Method Name\tTotal Makespan\tAvg Machine util\tAvg workflow makespan"
             lines.insert(0, titles + '\n')
 
         # Append to the correct file if it exists otherwise create it.
         with open(self.output_file, "a+") as f:
             f.writelines(lines)
 
-    @staticmethod
-    def get_scheduling_method(name):
+    def get_scheduling_method(self, name):
         if name.startswith("holes2011"):
-            return algos.schedule_workflow_2011_paper
+            return self.schedule_workflow_2011_paper
         elif name.startswith("holes"):
-            return algos.holes_scheduling
+            return self.holes_scheduling
         elif name == "c1":
             return c1.multiple_workflows_c1
         elif name == "c2":
@@ -197,51 +197,306 @@ class Scheduler:
         else:
             raise ValueError(f"Not a valid method option: {name}")
 
-    @staticmethod
-    def get_time_type(ttype):
-        if ttype.__class__ == str:
-            if ttype == "EFT":
-                return TimeType.EFT
-            elif ttype == "EST":
-                return TimeType.EST
-            elif ttype == "LST":
-                return TimeType.LST
-            elif ttype == "LFT":
-                return TimeType.LFT
-        else:
-            if ttype == TimeType.EFT:
-                return "EFT"
-            elif ttype == TimeType.EST:
-                return "EST"
-            elif ttype == TimeType.LST:
-                return "LST"
-            elif ttype == TimeType.LFT:
-                return "LFT"
-        raise ValueError(f"Not supported Time Type: {ttype}")
+
+    def holes_scheduling(self):
+        """This method is used to schedule with method holes.
+
+        This basically tries to creates as many holes it can in the schedule
+        on perpuse so it can fill them later with tasks with high computation
+        cost and low communication cost.
+
+        Args:
+            workflows (list(Workflow)): Contains information about the workflows.
+            machines (list(Machine)): Contains information about the machines.
+            time_types (list(TimeType)): Shows the time type we should use for each workflow to be schedules with. e.g: EFT - EST
+        """
+        # sorted_wfs = sorted(workflows, key=lambda wf_: wf_.ccr, reverse=True)
+        sorted_wfs = sorted(self.workflows, key=lambda wf_: wf_.ccr)
+
+        j = len(sorted_wfs) - 1
+        for i in range(len(sorted_wfs) // 2):
+            self.schedule_workflow(sorted_wfs[i], self.time_types[0])
+            self.schedule_workflow(sorted_wfs[j], self.time_types[1])
+            j -= 1
+
+        # This is incase we have an odd number of workflows so one is left out without a pair.
+        # Not the cleanest way to handle this but works for now.
+        for wf in self.workflows:
+            if wf.scheduled is False:
+                self.schedule_workflow(wf, self.time_types[0])
+
+    def schedule_workflow(self, wf, time_type):
+        unscheduled = sorted(wf.tasks, key=lambda t: t.up_rank, reverse=True)
+
+        i = 0
+        while len(unscheduled) > 0:
+            # before_pop = len(unscheduled)
+            if i >= len(unscheduled):
+                i = 0
+            un_task = unscheduled[i]
+
+            if un_task.status == TaskStatus.READY:
+                Scheduler.schedule_task_to_best_machine(un_task, self.machines, time_type, self.fill_type)
+                unscheduled.pop(i)
+                i = 0
+            else:
+                i += 1
+
+            # if before_pop == len(unscheduled):
+            #     raise Exception("None of the tasks are ready!!")
+        wf.set_scheduled(True)
+
+    def schedule_workflow_2011_paper(self, priority_type):
+        def __schedule_workflows(wf, priority_type):
+            # 1. Sort tasks in workflows based on the priority_type
+            #   - EDF:  The deadline time from each workflow.
+            #   - HLF:  Up-rank as usual.
+            #   - LSTF: wf_deadline - curr_time - up_rank
+            unscheduled = []
+
+            if priority_type == PriorityType.HLF:
+                unscheduled = sorted(wf.tasks, key=lambda t: t.up_rank)
+            elif priority_type == PriorityType.EDF:
+                for t in wf.tasks:
+                    if t.wf_deadline is None:
+                        raise Exception("deadline is NONE")
+                unscheduled = sorted(wf.tasks, key=lambda t: t.wf_deadline)
+            elif priority_type == PriorityType.LSTF:
+                unscheduled = sorted(wf.tasks, key=lambda t: t.calc_lstf(time=0))
+
+            i = 0
+            while len(unscheduled) > 0:
+                if i >= len(unscheduled):
+                    i = 0
+                task = unscheduled[i]
+                if task.status == TaskStatus.READY:
+                    Scheduler.schedule_task_to_best_machine(task, self.machines, TimeType.EFT, self.fill_type)
+                    unscheduled.pop(i)
+                i += 1
+            wf.set_scheduled(True)
+
+        for wf in self.workflows:
+            __schedule_workflows(wf, priority_type)
+
+    def schedule_tasks_round_robin_heft(unscheduled, machines, n_wfs):
+        diff_wfs = set()
+
+        i = 0
+        wfs_remaining = n_wfs
+        # Schedule the first connecting dag because its wf_id is -1
+        Scheduler.schedule_task_to_best_machine(unscheduled.pop(0), machines, TimeType.EFT)
+        while unscheduled:
+            if len(unscheduled) == i:
+                i = 0
+            task = unscheduled[i]
+
+            # Task is not ready yet go to the next one
+            if task.parents_till_ready != 0 or task.wf_id in diff_wfs:
+                i += 1
+            else:
+                Scheduler.schedule_task_to_best_machine(task, machines, TimeType.EFT)
+                if task.name.startswith("Dummy-Out") or (task.children_names is not None and len(task.children_names)) == 0:
+                    wfs_remaining -= 1
+                diff_wfs.add(task.wf_id)
+                # print(f"Scheduled: {task}")
+                # print(task.str_colored())
+                unscheduled.pop(i)
+                i -= 1
+
+            # If we end up looping through all the workflows
+            # then go ahead and reset the set.
+            if len(diff_wfs) >= wfs_remaining:
+                diff_wfs = set()
 
     @staticmethod
-    def get_fill_type(ftype):
-        if ftype.__class__ == str:
-            if ftype == "FASTEST-FIT":
-                return FillMethod.FASTEST_FIT
-            elif ftype == "BEST-FIT":
-                return FillMethod.BEST_FIT
-            elif ftype == "FIRST-FIT":
-                return FillMethod.FIRST_FIT
-            elif ftype == "WORST-FIT":
-                return FillMethod.WORST_FIT
-            elif ftype == "NO-FILL":
-                return FillMethod.NO_FILL
-        else:
-            if ftype == FillMethod.FASTEST_FIT:
-                return "FASTEST"
-            elif ftype == FillMethod.BEST_FIT:
-                return "BEST"
-            elif ftype == FillMethod.FIRST_FIT:
-                return "FIRST"
-            elif ftype == FillMethod.WORST_FIT:
-                return "WORST"
-            elif ftype == FillMethod.NO_FILL:
-                return "NO"
+    def schedule_tasks_heft(self, unscheduled, machines):
+        for task in unscheduled:
+            Scheduler.schedule_task_to_best_machine(task, machines, TimeType.EFT)
 
-        raise ValueError(f"Not supported Fill Type: {ftype}")
+    def schedule_tasks_cpop(self, queue, critical_info):
+        critical_path = critical_info[0]
+        critical_machine_id = critical_info[1]
+
+        while queue:
+            # mpt -> max priority task
+            # probably can make these two together later on
+            mpt = max(queue, key=lambda t: t.priority)
+            for i in range(len(queue)):
+                if queue[i].id == mpt.id:
+                    queue.pop(i)
+                    break
+            if mpt in critical_path:
+                # Here we send on purpose only the critical_machine
+                Scheduler.schedule_tasks_heft([mpt], [self.machines[critical_machine_id]])
+            else:
+                # You run schedule_tasks and you simply send just one task so it works fine.
+                Scheduler.schedule_tasks_heft([mpt], self.machines)
+            for child_edge in mpt.children_edges:
+                child = child_edge.node
+                # The status of the child gets updated by the parent. In more details the every task
+                # has a counter called "parents_till_ready" every parent that gets scheduled reduce
+                # this value by once for his children.
+                if child.status == TaskStatus.READY:
+                    queue.append(child)
+
+    @staticmethod
+    def pick_machine_based_on_timetype(time_type, times):
+        # Prioritize to fill the holes first.
+        if time_type == TimeType.EST:
+            time = min(times, key=compare_start)
+        elif time_type == TimeType.EFT:
+            time = min(times, key=compare_end)
+        elif time_type == TimeType.LST:
+            time = max(times, key=compare_start)
+        elif time_type == TimeType.LFT:
+            time = max(times, key=compare_end)
+        else:
+            raise ValueError(f"This is not a valid time_type: {time_type}")
+        return time
+
+    @staticmethod
+    def schedule_task_to_best_machine(task, machines, time_type, fill_type=FillMethod.NO_FILL):
+        if task.status != TaskStatus.READY:
+            raise Exception("Task status is not ready! ", task)
+        time_and_machine = Scheduler.find_best_machine(task, machines, time_type, fill_type)
+
+        Scheduler.schedule_task({'start': time_and_machine["start"], 'end': time_and_machine["end"]},
+                                task, machine=time_and_machine["machine"], hole=time_and_machine.get('hole'))
+
+    @staticmethod
+    def find_best_machine(task, machines, time_type, fill_type=FillMethod.NO_FILL):
+        holes_times = []
+        task_times_on_machines = []
+        best_time = None
+        for machine in machines:
+            # Try to find the existing holes (in the current machine) to fill.
+            if fill_type != FillMethod.NO_FILL:
+                for hole in machine.holes:
+                    valid_hole_info = hole.is_fillable(task, machine.id)
+                    if valid_hole_info is not None:
+                        holes_times.append({"machine": machine, "hole": hole, **valid_hole_info})
+
+            # If no valid holes were found try to look into the current machine
+            # and find the execution time of the specific task in the machine.
+            if len(holes_times) == 0:
+                [start, end] = compute_execution_time(task, machine.id, machine.schedule_len)
+                task_times_on_machines.append({"machine": machine, "start": start, "end": end})
+
+        # If there are holes to fill prioritize them.
+        if len(holes_times) > 0:
+            if fill_type == FillMethod.FASTEST_FIT:
+                best_time = Scheduler.pick_machine_based_on_timetype(time_type, holes_times)
+            elif fill_type == FillMethod.BEST_FIT:
+                best_time = min(holes_times, key=lambda t: t["gap_left"])
+            elif fill_type == FillMethod.FIRST_FIT:
+                # We could write this to run faster but I think we will losse readility
+                best_time = holes_times[0]
+            elif fill_type == FillMethod.WORST_FIT:
+                best_time = max(holes_times, key=lambda t: t["gap_left"])
+        # If no holes were found.
+        else:
+            best_time = Scheduler.pick_machine_based_on_timetype(time_type, task_times_on_machines)
+
+        if best_time is None:
+            raise ValueError(
+                f"No machine or hole was assigned to: {task}")
+        return best_time
+    # @staticmethod
+    # def pick_machine_for_critical_path(critical_path, machines):
+    #     machines_costs = []
+    #     for machine in machines:
+    #         machine_critical_cost = 0
+    #         for task in critical_path:
+    #             machine_critical_cost += task.costs[machine.id]
+    #         machines_costs.append((machine_critical_cost, machine.id))
+
+    #     # Machine selected for the critical path
+    #     return min(machines_costs, key=lambda tup: tup[0])[1]
+
+
+# Running this function means we already have
+# as a fact that all the parent tasks are done
+# before we get in here and check for the slowest parent
+def compute_execution_time(task, m_id, start_time):
+    # TODO: Maybe can just change this to DummyIn
+    #       not worth looking atm...
+    if task.name.startswith('Dummy'):
+        # This is only for the dummy OUT node
+        if task.is_exit is True:
+            return [start_time, start_time]
+        # This is only for the dummy IN node
+        else:
+            return [0, 0]
+        # If between the child and the parent the machine doesn't change
+        # then the communication cost is 0.
+    elif task.is_entry:
+        return [start_time, start_time + task.costs[m_id]]
+    elif task.slowest_parent['parent_task'].machine_id == m_id:
+        communication_time = 0
+    else:
+        # The com_time was calculated at the parsing phase.
+        communication_time = task.slowest_parent['communication_time']
+
+    #  parent_end + communication_time + cost_of_task_in_this_machine
+    # We pick the one that is bigger so we can ensure the child task starts
+    # after the parent.
+    start = max(task.slowest_parent['parent_task'].end + communication_time, start_time)
+    end = start + task.costs[m_id]
+    return [start, end]
+
+
+def compare_start(times):
+    return times["start"]
+
+
+def compare_end(times):
+    return times["end"]
+
+
+def get_time_type(ttype):
+    if ttype.__class__ == str:
+        if ttype == "EFT":
+            return TimeType.EFT
+        elif ttype == "EST":
+            return TimeType.EST
+        elif ttype == "LST":
+            return TimeType.LST
+        elif ttype == "LFT":
+            return TimeType.LFT
+    else:
+        if ttype == TimeType.EFT:
+            return "EFT"
+        elif ttype == TimeType.EST:
+            return "EST"
+        elif ttype == TimeType.LST:
+            return "LST"
+        elif ttype == TimeType.LFT:
+            return "LFT"
+    raise ValueError(f"Not supported Time Type: {ttype}")
+
+
+def get_fill_type(ftype):
+    if ftype.__class__ == str:
+        if ftype == "FASTEST-FIT":
+            return FillMethod.FASTEST_FIT
+        elif ftype == "BEST-FIT":
+            return FillMethod.BEST_FIT
+        elif ftype == "FIRST-FIT":
+            return FillMethod.FIRST_FIT
+        elif ftype == "WORST-FIT":
+            return FillMethod.WORST_FIT
+        elif ftype == "NO-FILL":
+            return FillMethod.NO_FILL
+    else:
+        if ftype == FillMethod.FASTEST_FIT:
+            return "FASTEST"
+        elif ftype == FillMethod.BEST_FIT:
+            return "BEST"
+        elif ftype == FillMethod.FIRST_FIT:
+            return "FIRST"
+        elif ftype == FillMethod.WORST_FIT:
+            return "WORST"
+        elif ftype == FillMethod.NO_FILL:
+            return "NO"
+
+    raise ValueError(f"Not supported Fill Type: {ftype}")

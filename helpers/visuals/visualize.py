@@ -158,7 +158,7 @@ class Visualizer:
         import plotly.express as px
         import pandas as pd
 
-        all_tasks = list()
+        all_tasks = []
         ordered_tasks = [sorted(m.tasks, key=lambda t: t.start) for m in machines]
         for tasks in ordered_tasks:
             for task in tasks:

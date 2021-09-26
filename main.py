@@ -1,6 +1,8 @@
-from helpers.simulation.simulation import run_n_sims, run_sim, run_save_n_sims_to_excel
 from algos.paper_2011_algos.paper_method import Paper2011
 from helpers.examples.example_data import HOLE_METHOD_VARIATIONS
+from helpers.visuals.visualize import Visualizer
+from helpers.examples.example_gen import Example
+from helpers.simulation.simulation import Simulation
 
 
 if __name__ == "__main__":
@@ -10,8 +12,14 @@ if __name__ == "__main__":
     #    {"name": "c2", "time_types": ["EST"], "fill_type": "NO-FILL"},
     #    {"name": "c3", "time_types": ["EST"], "fill_type": "NO-FILL"}]
     # run_methods = [HOLE_METHOD_VARIATIONS["EFT_variations"], HOLE_METHOD_VARIATIONS["holes-paper-2011"], HOLE_METHOD_VARIATIONS["compositions"]]
-    run_methods = [{"name": "holes2011 FASTEST-EDF", "fill_type": "FASTEST-FIT", "priority_type": "EDF"}]
-    run_sim(run_methods, n_size=50, n_machines=4)
+    run_methods = HOLE_METHOD_VARIATIONS["EFT_variations"]
+    # run_methods = [{"name": "holes2011 FASTEST-EDF", "fill_type": "FASTEST-FIT", "priority_type": "EDF"}]
+    # machines, workflows = Example.load_small_example()
+    machines, workflows = Example.load_medium_example()
+    Simulation(run_methods, machines, workflows, True, False, True, False).run()
+
+    # schedules, _, machines = run_sim(run_methods[0], machines, workflows, visuals=True, show_fig=True, save_sim=True)
+    # Visualizer.visualize_machines(machines)
     # run_methods = sum(run_methods, [])
 
     # run_methods = HOLE_METHOD_VARIATIONS["holes-2011-BEST-FIT"]

@@ -1,11 +1,13 @@
+from classes.task import TaskBlueprint, Edge, TaskStatus
+
 HOLE_METHOD_VARIATIONS = {
 
     "EFT_variations": [
         # EST - EST
-        {"name": "holes FASTEST-FIT",
-         "time_types": ["EST", "EST"], "fill_type": "FASTEST-FIT"},
         {"name": "holes BEST-FIT",
          "time_types": ["EST", "EST"], "fill_type": "BEST-FIT"},
+        {"name": "holes FASTEST-FIT",
+         "time_types": ["EST", "EST"], "fill_type": "FASTEST-FIT"},
         {"name": "holes FIRST-FIT",
          "time_types": ["EST", "EST"], "fill_type": "FIRST-FIT"},
         {"name": "holes WORST-FIT",
@@ -99,6 +101,35 @@ HOLE_METHOD_VARIATIONS = {
         {"name": "c3", "time_types": ["EST"], "fill_type": "NO-FILL"},
     ]
 
+}
+
+SMALL_EXAMPLE = {
+    "machines": [
+        (0, 'M-0', 1),
+        (1, 'M-1', 2),
+        (2, 'M-2', 4)
+    ],
+    "workflows":
+    [
+        [
+            TaskBlueprint(0, 0, 'T-A', 2, [{"weight": 2, "name": 'T-B'}, {"weight": 5, "name": 'T-C'}], [], TaskStatus.READY, True, False),
+            TaskBlueprint(1, 0, 'T-B', 14, [{"weight": 2, "name": 'T-D'}], [{"weight": 2, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
+            TaskBlueprint(2, 0, 'T-C', 21, [{"weight": 2, "name": 'T-E'}], [{"weight": 5, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
+            TaskBlueprint(3, 0, 'T-D', 2, [{"weight": 1, "name": 'T-E'}], [{"weight": 2, "name": 'T-B'}], TaskStatus.UNSCHEDULED, False, False),
+            TaskBlueprint(4, 0, 'T-E', 10, [], [{"weight": 1, "name": 'T-D'}, {"weight": 2, "name": 'T-C'}], TaskStatus.UNSCHEDULED, False, True),
+        ],
+        [
+            TaskBlueprint(0, 1, 'T-A', 3, [{"weight": 3, "name": 'T-B'}, {"weight": 4, "name": 'T-C'}], [], TaskStatus.READY, True, False),
+            TaskBlueprint(1, 1, 'T-B', 15, [{"weight": 6, "name": 'T-D'}], [{"weight": 3, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
+            TaskBlueprint(2, 1, 'T-C', 41, [{"weight": 2, "name": 'T-D'}], [{"weight": 4, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
+            TaskBlueprint(4, 1, 'T-D', 10, [], [{"weight": 6, "name": 'T-B'}, {"weight": 2, "name": 'T-C'}], TaskStatus.UNSCHEDULED, False, True),
+        ],
+        [
+            TaskBlueprint(0, 2, 'T-A', 5, [{"weight": 31, "name": 'T-B'}], [], TaskStatus.READY, True, False),
+            TaskBlueprint(1, 2, 'T-B', 7, [{"weight": 25, "name": 'T-C'}], [{"weight": 31, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
+            TaskBlueprint(4, 2, 'T-C', 3, [], [{"weight": 25, "name": 'T-B'}], TaskStatus.UNSCHEDULED, False, True),
+        ],
+    ]
 }
 
 

@@ -38,8 +38,8 @@ class TaskBlueprint:
     wf_id: int
     name: str
     runtime: float
-    children_edges: List['Task']
-    parents_edges: List['Task']
+    children_names: dict
+    parents_names: dict
     status: TaskStatus
     is_entry: bool
     is_exit: bool
@@ -76,23 +76,18 @@ class Task:
         self.is_exit: bool = False
         self.is_entry: bool = False
 
-        if self.is_entry == self.is_exit is True:
+        if (self.is_entry, self.is_exit) == (True, True):
             raise Exception(f"Node[ {self.id} ] is not connected in the dag!")
 
-    def reset(self):
-        self.machine_id = -1
-        self.start = None
-        self.end = None
-        self.status = TaskStatus.READY if self.is_entry else TaskStatus.UNSCHEDULED
-        self.slowest_parent: dict = {'parent_task': None, 'communication_time': 0}
-        self.set_edges(self.children_edges, self.parents_edges)
-
     def get_blueprint(self):
-        return TaskBlueprint(self.id, self.wf_id, self.name, self.runtime, self.children_edges, self.parents_edges, self.status, self.is_entry, self.is_exit)
+        return TaskBlueprint(self.id, self.wf_id, self.name, self.runtime, [{"weight": e.weight, "name": e.node.name} for e in self.children_edges], [{"weight": e.weight, "name": e.node.name} for e in self.parents_edges], self.status, self.is_entry, self.is_exit)
+
+    def create_edges(self, tasks: List['Task']):
+        self.set_edges([Edge(e['weight'], Task.find_task_by_name(tasks, e['name'])) for e in self.children_names],
+                       [Edge(e['weight'], Task.find_task_by_name(tasks, e['name'])) for e in self.parents_names])
 
     @staticmethod
     def blueprint_to_task(blp: TaskBlueprint):
-        print(blp)
         t = Task(
             id_=blp.id_,
             wf_id=blp.wf_id,
@@ -101,10 +96,8 @@ class Task:
             runtime=blp.runtime,
             status=blp.status,
             files=None,
-            children_names=None,
-            parents_names=None)
-        t.set_edges([Edge(e.weight, e.node) for e in blp.children_edges],
-                    [Edge(e.weight, e.node) for e in blp.parents_edges])
+            children_names=blp.children_names,
+            parents_names=blp.parents_names)
         return t
 
     def set_wf_deadline(self, deadline):
@@ -202,7 +195,7 @@ class Task:
         return sum([child.weight for child in self.children_edges]) / size
 
     def avg_cost(self):
-        # len(self.costs) cannot be 0 or it least it shouldn't
+        # len(self.costs) cannot be 0 or at least it shouldn't
         return sum(self.costs) / len(self.costs)
 
     @staticmethod
@@ -225,7 +218,8 @@ class Task:
         for name in names:
             tmp = Task.find_task_by_name(tasks, name)
             if tmp is None:
-                raise ValueError(f"Can't find task name in given tasks: {name}")
+                raise ValueError(
+                    f"Can't find task name in given tasks: {name}")
             else:
                 adj_tasks.append(tmp)
         return adj_tasks

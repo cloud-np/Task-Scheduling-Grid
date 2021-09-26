@@ -1,5 +1,5 @@
 from algos.calc_task_ranks import calculate_upward_ranks
-import algos.schedule_wfs as scheduler
+import classes.scheduler as scheduler
 
 
 def heft(tasks, machines):

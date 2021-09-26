@@ -1,6 +1,5 @@
 from classes.task import Task, TaskStatus, Edge
 from algos.calc_task_ranks import calculate_downward_ranks, calculate_upward_ranks
-import algos.schedule_wfs as algos
 from colorama import Fore, Back
 from typing import Union, Any, List, Dict
 from helpers.data_parser import get_tasks_from_json_file
@@ -55,6 +54,8 @@ class Workflow:
 
         # Calc ccr which means also the avg_comp and avg_com costs
         self.ccr = self.calc_ccr()
+        # print(self)
+        # print(f"avg_comm: {self.avg_com_cost} avg_comp: {self.avg_comp_cost} ccr: {self.ccr}")
 
         # From the avg comp cost of the tasks add them all together * some number and get the deadline
         self.deadline = self.avg_comp_cost * 10
@@ -84,6 +85,12 @@ class Workflow:
             self.scheduled = True
         else:
             self.scheduled = False
+
+    @staticmethod
+    def blueprint_to_workflow(id_, tasks, machines):
+        for t in tasks:
+            t.create_edges(tasks)
+        return Workflow(id_=id_, machines=machines, tasks=tasks, wf_type="Random", add_dummies=False)
 
     def str_colored(self):
         return f"{self.str_col_id()}\n" \
@@ -164,9 +171,40 @@ class Workflow:
                 print(task)
             task.set_priority(task.down_rank + task.up_rank)
 
-        critical_path, [entry_task, exit_task] = algos.construct_critical_path(self.tasks)
+        critical_path, [entry_task, exit_task] = self.construct_critical_path()
         self.cp_info = {"critical_path": critical_path,
                         "entry": entry_task, "exit": exit_task}
+        return critical_path, [entry_task, exit_task]
+
+    def find_an_entry_task(self):
+        for task in self.tasks:
+            if task.is_entry:
+                return task
+        raise Exception("NO entry task found! func: [find_an_entry_task]")
+
+    def construct_critical_path(self):
+        critical_path = []
+
+        # Find an entry task
+        entry_task = self.find_an_entry_task()
+
+        entry_priority = round(entry_task.priority, 5)
+        temp_task = entry_task
+        critical_path.append(temp_task)
+
+        # Start from an entry task and run until you find an exit task.
+        # Then the critical path would be ready.
+        counter = 0
+        while temp_task.is_exit is False:
+            for child_edge in temp_task.children_edges:
+                counter += 1
+                diff: float = entry_priority - child_edge.node.priority
+                if abs(diff) < 0.90:
+                    temp_task = child_edge.node
+                    critical_path.append(child_edge.node)
+                    break
+        exit_task = temp_task
+        # The second return is supposed to be the initialised
         return critical_path, [entry_task, exit_task]
 
     @staticmethod
@@ -237,7 +275,7 @@ class Workflow:
         return workflows
 
     @staticmethod
-    def load_example_workflows(machines, n, path: str = './data'):
+    def load_random_workflows(machines, n, path: str = './data'):
         num_tasks = [
             100, 100, 200, 200, 1000, 50,
             200, 300, 400, 100, 500, 100, 50,
@@ -278,13 +316,16 @@ class Workflow:
     def str_col_id(self):
         return f"{Back.RED}WORKFLOW    ID = {self.id}{Back.RESET}"
 
-    # FIXME: THIS IS NOT AVG check later!!
     def calc_avg_comp_cost(self):
-        self.avg_comp_cost = sum([task.avg_cost() for task in self.tasks])
+        self.avg_comp_cost = sum(task.avg_cost() for task in self.tasks)
         return self.avg_comp_cost
 
     def calc_avg_com_cost(self):
-        self.avg_com_cost = sum([task.avg_com_cost() for task in self.tasks])
+        # Get all the edges and remove the duplicates
+        all_edges = [task.children_edges for task in self.tasks]
+        all_edges = set(sum(all_edges, []))
+
+        self.avg_com_cost = sum(e.weight for e in all_edges)
         return self.avg_com_cost
 
     # ccr = Communication to computation ratio.

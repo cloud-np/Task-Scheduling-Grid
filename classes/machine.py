@@ -1,8 +1,7 @@
 from colorama import Fore
 from random import randint
 from classes.task import Task
-# import algos.calc_ex_time as time_calc
-from algos.calc_times_on_machines import compute_execution_time
+import classes.scheduler as scheduler
 from typing import Set, Union, List
 from dataclasses import dataclass
 
@@ -37,7 +36,7 @@ class Hole:
         # Check if the parent end interfere with the child start
         # pred: predicted
         # pred_start, pred_end = time_calc.compute_execution_time(task, m_id, self.start)
-        pred_start, pred_end = compute_execution_time(task, m_id, self.start)
+        pred_start, pred_end = scheduler.compute_execution_time(task, m_id, self.start)
         if pred_end <= self.end:
             return {"start": pred_start, "end": pred_end, "gap_left": self.gap - (pred_end - pred_start)}
         else:
@@ -289,8 +288,7 @@ class Machine:
     # are quite small and we will be missing that information.
     # ORR we can simply remove the speed and ignore
     def __generate_cost_for_task(self, runtime):
-        return runtime + 1500 - self.speed / self.n_cpu
-        # return runtime / self.n_cpu
+        return runtime / self.n_cpu
 
     def assign_tasks_with_costs(self, tasks):
         for task in tasks:

@@ -6,73 +6,51 @@ from classes.workflow import Workflow
 from classes.scheduler import Scheduler
 from helpers.checker import schedule_checker
 from helpers.visuals.visualize import Visualizer
-from helpers.examples.example_gen import re_create_one_example, create_small_example
+from helpers.examples.example_gen import Example
 import xlsxwriter
 import numpy as np
 import matplotlib.pyplot as plt
 import io
 
 
-# TODO One idea is to pass schedule functions to the
-# run() method of the Schedule obj. This sounds a bit cleaner.
-# than making it pick a the correct function as init time.
-def run_sim(run_methods, n_size: int = -1, n_machines: int = -1, load_example=False, visuals=False, save_fig=False, show_fig=True, save_sim=False):
-    slowest_machines = []
-    schedules = []
-    fig = None
-    workflows = []
-    machines = []
-    first_loop = True
-    for method in run_methods:
-        if not load_example:
-            if -1 in (n_size, n_machines):
-                raise ValueError("Please set n_workflows and n_machines")
-            machines = Machine.load_n_static_machines(n_machines)
-            workflows = Workflow.load_all_types_wfs(machines, n=n_size)
-            # workflows = Workflow.load_example_workflows(machines=machines, n=n_workflows)
-        else:
-            if first_loop:
-                workflows, machines, blp_tasks, blp_machines = re_create_one_example()
-            else:
-                workflows, machines = re_create_one_example(blp_tasks, blp_machines)
+class Simulation:
+    def __init__(self, run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=True, save_sim=False):
+        self.run_methods: List[dict] = run_methods
+        self.machines: List[Machine] = machines
+        self.workflows: List[Workflow] = workflows
+        self.visuals: bool = visuals
+        self.save_fig: bool = save_fig
+        self.show_fig: bool = show_fig
+        self.save_sim: bool = save_sim
+        self.schedulers: List[Scheduler] = [Scheduler(method['name'],
+                                                      Example.re_create_one_example(workflows, machines),
+                                                      time_types=method.get("time_types"),
+                                                      fill_type=method["fill_type"], priority_type=method.get("priority_type")) for method in run_methods]
 
-        schedule = Scheduler(name=method['name'], workflows=workflows, machines=machines, time_types=method.get("time_types"), fill_type=method["fill_type"], priority_type=method.get("priority_type"))
-        schedule.run()
-        schedule.info()
+    def run(self):
+        slowest_machines = []
+        for s in self.schedulers:
+            s.run()
+            slowest_machines.append({
+                "machine": s.get_slowest_machine(),
+                "method_used": s.method_used_info(concise=True)})
+            if self.save_sim:
+                s.save_output_to_file()
 
-        slowest_machines.append({"machine": schedule.get_slowest_machine(), "method_used": schedule.method_used_info(concise=True)})
+        if self.visuals is True:
+            Visualizer.compare_schedule_len(slowest_machines, len(self.workflows), save_fig=self.save_fig, show_fig=self.show_fig)
 
-        schedules.append(schedule)
-        # Workflow.reset_many(workflows)
-        # Machine.reset_many(machines)
+# def run_save_n_sims_to_excel(ns, run_methods):
+#     workbook = xlsxwriter.Workbook('simulation_info.xlsx')
+#     wks = workbook.add_worksheet('Runned Simulation Info')
+#     bold = workbook.add_format({'bold': True})
+#     for i, n in enumerate(ns):
+#         schedules, fig = run_sim(
+#             n, run_methods, visuals=True, save_fig=False, show_fig=False, save_sim=False)
+#         print("Finished simulating for n = ", n)
 
-    if visuals is True:
-        fig = Visualizer.compare_schedule_len(slowest_machines, len(workflows), save_fig=save_fig, show_fig=show_fig)
-    if save_sim:
-        for s in schedules:
-            s.save_output_to_file()
-    if load_example:
-        return schedules, workflows, machines
-    return schedules, fig
-
-
-def run_n_sims(ns_wfs_sizes: List[int], run_methods, ns_machines: int, visuals=False, save_fig=False, show_fig=False, save_sim=False):
-    for nm in ns_machines:
-        for nwf in ns_wfs_sizes:
-            schedules, fig = run_sim(n_size=nwf, run_methods=run_methods, n_machines=nm, visuals=visuals, save_fig=save_fig, show_fig=show_fig, save_sim=save_sim)
-            print(f"Finished sim for wfs_of_size = {nwf} and n_mas = {nm}")
-
-
-def run_save_n_sims_to_excel(ns, run_methods):
-    workbook = xlsxwriter.Workbook('simulation_info.xlsx')
-    wks = workbook.add_worksheet('Runned Simulation Info')
-    bold = workbook.add_format({'bold': True})
-    for i, n in enumerate(ns):
-        schedules, fig = run_sim(n, run_methods, visuals=True, save_fig=False, show_fig=False, save_sim=False)
-        print("Finished simulating for n = ", n)
-
-        write_to_excel(schedules, fig, wks, bold, s_pos=[2 + i * 40, 0])
-    workbook.close()
+#         write_to_excel(schedules, fig, wks, bold, s_pos=[2 + i * 40, 0])
+#     workbook.close()
 
 
 def write_to_excel(schedules: List[Scheduler], fig, wks, bold, s_pos: List[int] = [2, 0]):
