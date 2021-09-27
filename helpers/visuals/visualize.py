@@ -7,15 +7,15 @@ import numpy as np
 class Visualizer:
 
     @staticmethod
-    def compare_schedule_len(slowest_machines, n_workflows, save_fig=False, show_fig=True):
-        schedule_lens_x: List[int] = [round(m["machine"].schedule_len) for m in slowest_machines]
+    def compare_data(data, methods_used, n_workflows, save_fig=False, show_fig=True):
+        data_on_x: List[int] = [round(d) for d in data]
 
         # Change the color of the smallest schedule_len
-        bar_colors = ['b' for _ in schedule_lens_x]
-        min_len_index = schedule_lens_x.index(min(schedule_lens_x))
+        bar_colors = ['b' for _ in data_on_x]
+        min_len_index = data_on_x.index(min(data_on_x))
         bar_colors[min_len_index] = 'r'
 
-        labels = [m["method_used"] for m in slowest_machines]
+        labels = [m for m in methods_used]
 
         plt.style.use("seaborn-dark")
         x = np.arange(len(labels))
@@ -23,7 +23,7 @@ class Visualizer:
 
         fig, ax = plt.subplots()
 
-        rects = ax.bar(x - width / 2, schedule_lens_x, width, color=bar_colors)
+        rects = ax.bar(x - width / 2, data_on_x, width, color=bar_colors)
 
         ax.set_xticks(x)
         ax.set_xticklabels(labels)
@@ -43,18 +43,18 @@ class Visualizer:
         return fig
 
     @staticmethod
-    def compare_hole_filling_methods(slowest_machines):
+    def compare_hole_filling_methods(data):
 
         methods_order = list()
         infos: Dict[str, List[int]] = dict()
-        for i, m in enumerate(slowest_machines):
+        for i, m in enumerate(data):
             ttypes, method = m['method_used'].split()
             if i < 4:
                 methods_order.append(method)
             if infos.get(ttypes) is not None:
-                infos[ttypes].append(round(m['machine'].schedule_len))
+                infos[ttypes].append(round(m['machine'].time_on_machine))
             else:
-                infos[ttypes] = [round(m['machine'].schedule_len)]
+                infos[ttypes] = [round(m['machine'].time_on_machine)]
 
         bars = list()
         for key, info in infos.items():

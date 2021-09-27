@@ -97,7 +97,7 @@ HOLE_METHOD_VARIATIONS = {
 
     "compositions": [
         {"name": "c1", "time_types": ["EST"], "fill_type": "NO-FILL"},
-        {"name": "c2", "time_types": ["EST"], "fill_type": "NO-FILL"},
+        # {"name": "c2", "time_types": ["EST"], "fill_type": "NO-FILL"},
         {"name": "c3", "time_types": ["EST"], "fill_type": "NO-FILL"},
     ]
 

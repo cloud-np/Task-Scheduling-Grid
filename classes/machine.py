@@ -54,7 +54,7 @@ class MachineBlueprint:
 class Machine:
 
     def __init__(self, id_, name, n_cpu, speed=None, memory=None, cpti=None):
-        self.schedule_len = 0
+        self.time_on_machine = 0
         self.id: int = id_
         self.name: str = name
         self.n_cpu: int = n_cpu
@@ -65,13 +65,6 @@ class Machine:
         self.holes_saved_time = 0
         self.holes_filled = 0
         # self.network_speed = network_speed
-        self.tasks: Set[Task] = set()
-
-    def reset(self):
-        self.schedule_len = 0
-        self.holes = set()
-        self.holes_saved_time = 0
-        self.holes_filled = 0
         self.tasks: Set[Task] = set()
 
     def get_blueprint(self):
@@ -90,14 +83,14 @@ class Machine:
             raise Exception(
                 f"The task has already been added. In machine {self.id}\n {task}")
         self.tasks.add(task)
-        gap = task.start - self.schedule_len
+        gap = task.start - self.time_on_machine
 
         if gap >= MIN_GAP_SIZE:
             self.holes.add(
-                Hole(start=self.schedule_len, end=task.start, gap=gap))
+                Hole(start=self.time_on_machine, end=task.start, gap=gap))
 
-        if self.schedule_len <= task.end:
-            self.schedule_len = task.end
+        if self.time_on_machine <= task.end:
+            self.time_on_machine = task.end
 
     # This runs only after the task.machine_id is already set.
     def add_task_to_hole(self, task, hole):
@@ -116,8 +109,14 @@ class Machine:
         self.holes_saved_time += hole.time_saved
         self.remove_hole(hole)
 
-    def get_util_time(self):
-        return self.schedule_len - self.get_idle_time()
+    # def get_util_time(self, schedule_len):
+    #     return (schedule_len + self.get_idle_time()) - self.time_on_machine
+
+    # def get_util_time(self, schedule_len):
+    #     return schedule_len - self.get_busy_time()
+
+    def get_busy_time(self):
+        return sum([t.end - t.start for t in self.tasks])
 
     def get_idle_time(self):
         # t.start can't be None since the task is "inside" the
@@ -130,11 +129,12 @@ class Machine:
             old_end = t.end
         return idle_time
 
-    def get_util_perc(self):
-        return (self.get_util_time() / self.schedule_len) * 100
+    def get_util_perc(self, schedule_len):
+        # return (self.get_util_time(schedule_len) / schedule_len) * 100
+        return (self.get_busy_time() / schedule_len) * 100
 
     def get_idle_perc(self):
-        return (self.get_idle_time() / self.schedule_len) * 100
+        return (self.get_idle_time() / self.time_on_machine) * 100
 
     @staticmethod
     def get_potential_hole_time_saved(task, hole):
@@ -194,10 +194,10 @@ class Machine:
         return tmp_str
 
     def str_col_schedule_len(self):
-        return f'{Fore.BLUE}TOTAL LEN:{Fore.RESET} {self.schedule_len}'
+        return f'{Fore.BLUE}TOTAL LEN:{Fore.RESET} {self.time_on_machine}'
 
     def str_schedule_len(self):
-        return f'TOTAL LEN: {self.schedule_len}'
+        return f'TOTAL LEN: {self.time_on_machine}'
 
     # def print_info(self):
     #     for task in self.tasks:
@@ -211,19 +211,19 @@ class Machine:
 
     def clear(self):
         self.tasks = set()
-        self.schedule_len = 0
+        self.time_on_machine = 0
 
     def update_schedule(self, task):
-        self.schedule_len = task.end if self.schedule_len <= task.end else self.schedule_len
+        self.time_on_machine = task.end if self.time_on_machine <= task.end else self.time_on_machine
 
     def remove_task(self, task):
         # Check if that task is the last on the schedule
-        if self.schedule_len == task.end:
+        if self.time_on_machine == task.end:
             if task.slowest_parent['parent_task'].machine_id.id == task.machine_id.id:
                 communication_time = 0
             else:
                 communication_time = task.slowest_parent['communication_time']
-            self.schedule_len = task.start - communication_time
+            self.time_on_machine = task.start - communication_time
             # print(f"{task} changed was the last task in the list")
             self.tasks.remove(task)
 

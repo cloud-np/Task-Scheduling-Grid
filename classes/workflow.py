@@ -27,7 +27,7 @@ class Workflow:
         self.id: int = id_
         self.type = wf_type  # type of the workflow e.g: LIGO, Montage, etc
         self.name: str = name
-        self.schedule_len: float = 0
+        self.wf_len: float = 0
         self.tasks: Union[List[Task], None] = tasks
         self.scheduled: bool = False
         self.finishing_time: float = -1.0
@@ -80,8 +80,8 @@ class Workflow:
             for t in self.tasks:
                 if t.status != TaskStatus.SCHEDULED:
                     raise Exception("Workflow can't be scheduled if all of his tasks haven't ended.")
-                elif t.end > self.schedule_len:
-                    self.schedule_len = t.end
+                elif t.end > self.wf_len:
+                    self.wf_len = t.end
             self.scheduled = True
         else:
             self.scheduled = False
@@ -277,7 +277,7 @@ class Workflow:
     @staticmethod
     def load_random_workflows(machines, n, path: str = './data'):
         num_tasks = [
-            100, 100, 200, 200, 1000, 50,
+            100, 100, 200, 200, 500, 50,
             200, 300, 400, 100, 500, 100, 50,
             50, 100, 200, 1000, 50, 300, 200,
             500, 50, 400, 100, 1000, 400,

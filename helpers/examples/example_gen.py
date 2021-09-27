@@ -42,10 +42,21 @@ class Example:
     #                     best_example = {'workflows': workflows, 'machines': machines, 'schedules': schedules, 'diff': diff}
 
     #         print(f"{lowest_shc.name} = {lowest_shc.get_schedule_len()}")
+    @staticmethod
+    def load_all_types(n_machines, n_tasks):
+        machines = Machine.load_n_static_machines(n_machines)
+        workflows = Workflow.load_all_types_wfs(machines, n=n_tasks)
+        return machines, workflows
+
+    @staticmethod
+    def load_big_example():
+        machines = Machine.load_n_static_machines(4)
+        workflows = Workflow.load_random_workflows(machines, n=30)
+        return machines, workflows
 
     @staticmethod
     def load_medium_example():
-        machines = Machine.load_n_static_machines(3)
+        machines = Machine.load_n_static_machines(4)
         workflows = Workflow.load_random_workflows(machines, n=10)
         return machines, workflows
 
@@ -80,17 +91,17 @@ class Example:
         return [[t.get_blueprint() for t in wf.tasks] for wf in workflows], [m.get_blueprint() for m in machines]
 
     @staticmethod
-    def re_create_one_example(workflows, machines):
+    def re_create_example(workflows, machines):
         blp_tasks, blp_machines = Example.blueprint_example(workflows, machines)
         # Flatten tasks
         blp_tasks = sum(blp_tasks, [])
         machines = [Machine.blueprint_to_machine(blp_m) for blp_m in blp_machines]
-        workflows = []
+        new_workflows = []
 
-        for wf_id in range(N_WORKFLOWS):
+        for wf_id in range(len(workflows)):
             tasks = [Task.blueprint_to_task(blp_t) for blp_t in blp_tasks if blp_t.wf_id == wf_id]
-            workflows.append(Workflow.blueprint_to_workflow(wf_id, tasks, machines))
-        return workflows, machines
+            new_workflows.append(Workflow.blueprint_to_workflow(wf_id, tasks, machines))
+        return new_workflows, machines
 
     @staticmethod
     def create_edges_for_example(tasks):

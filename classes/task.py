@@ -29,7 +29,7 @@ class Edge:
         return f'--- {self.weight} --> {self.node.str_col_id()}'
 
     def __str__(self):
-        return f'--- {self.weight} --> {self.node.str_id()}'
+        return f'--- {round(self.weight, 3)} --> {self.node.str_id()}'
 
 
 @dataclass

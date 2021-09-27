@@ -40,7 +40,7 @@ def multiple_workflows_c4(workflows, machines):
         if min_link is not None:
             create_link(min_link, wf)
         all_tasks.extend(wf.tasks)
-    return heft(all_tasks, machines)
+    # return heft(all_tasks, machines)
 
 
 def create_link(min_link, small_wf):

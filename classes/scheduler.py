@@ -2,12 +2,16 @@ from enum import Enum
 from typing import List, Any
 import os
 from colorama import Fore, Back
+from classes.workflow import Workflow
 from classes.task import TaskStatus
 from matplotlib.pyplot import fill
-from algos.wf_compositions import c1
-from algos.wf_compositions import c2
-from algos.wf_compositions import c3
-from algos.wf_compositions import c4
+from algos.calc_task_ranks import calculate_upward_ranks
+import algos.wf_compositions.c1 as c1
+import algos.wf_compositions.c2 as c2
+import algos.wf_compositions.c3 as c3
+# from algos.wf_compositions import c2
+# from algos.wf_compositions import c3
+# from algos.wf_compositions import c4
 
 
 class TimeType(Enum):
@@ -42,16 +46,16 @@ class Scheduler:
         self.output_path: str = output_path
         # E.g: sim_out/5.txt
         self.output_file: str = f"{self.output_path}/wf_size_{len(workflows[0].tasks)}_machines_{self.n_machines}.txt"
+        self.time_types_str = time_types
 
         if time_types is not None:
             # Get time types e.g: EFT = earliest finish time
             self.time_types: List[TimeType] = [get_time_type(ttype) for ttype in time_types]
 
-        if priority_type is not None:
-            self.priority_type: PriorityType = self.get_priority_type(priority_type)
+        self.priority_type_str = priority_type
+        self.priority_type: PriorityType = get_priority_type(priority_type)
 
         # Get fill type e.g: FASTEST-FIT = pick the hole that has gives the best time.
-        # NOTE change this to fill_method
         self.fill_method: FillMethod = get_fill_type(fill_method)
         # The method that we gonna run the schedule.
         self.schedule_method: Any = self.get_scheduling_method(name)
@@ -73,7 +77,7 @@ class Scheduler:
 
     def get_slowest_machine(self):
         if self.is_scheduling_done is True:
-            return max(self.machines, key=lambda m: m.schedule_len)
+            return max(self.machines, key=lambda m: m.time_on_machine)
         else:
             raise Exception("You should run the scheduling method first.")
 
@@ -82,31 +86,20 @@ class Scheduler:
         if self.name.startswith("holes"):
             # for machine in self.machines:
             #     print(machine.holes_filled)
-            print(
-                f"Time saved = {Fore.GREEN}{sum([m.holes_saved_time for m in self.machines])}{Fore.RESET}")
+            print(f"Time saved = {Fore.GREEN}{sum([m.holes_saved_time for m in self.machines])}{Fore.RESET}")
 
         slowest_machine = self.get_slowest_machine()
-        print(
-            f'\n{slowest_machine.str_col_id()}\n{slowest_machine.str_col_schedule_len()}\n')
+        print(f'\n{slowest_machine.str_col_id()}\n{slowest_machine.str_col_schedule_len()}\n')
 
-    @staticmethod
-    def get_priority_type(priority):
-        if priority == "EDF":
-            return PriorityType.EDF
-        elif priority == "HLF":
-            return PriorityType.HLF
-        elif priority == "LSTF":
-            return PriorityType.LSTF
+    def get_whole_idle_time(self):
+        return sum([m.get_idle_time() for m in self.machines])
 
     def run(self):
-        if self.schedule_method.__name__.startswith("schedule_workflow_2011_paper"):
-            if self.priority_type is None:
-                raise Exception("Please give a priority type!")
-            self.schedule_method()
-        elif self.schedule_method.__name__.startswith("holes"):
-            self.schedule_method()
-        else:
-            self.schedule_method(self.workflows, self.machines)
+        self.schedule_method()
+        # if self.schedule_method.__name__.startswith("holes"):
+        #     self.schedule_method()
+        # else:
+        #     self.schedule_method(self.workflows, self.machines)
         self.is_scheduling_done = True
 
     def method_used_info(self, concise=False):
@@ -125,7 +118,7 @@ class Scheduler:
                 fill_method = get_fill_type(self.fill_method)
 
             if self.name.startswith("holes2011"):
-                return f"{fill_method} {self.priority_type}\n"
+                return f"{fill_method} {self.priority_type_str}\n"
             else:
                 ttypes = [get_time_type(t) for t in self.time_types]
                 return f"{fill_method}\n{ttypes[0]}-{ttypes[1]}\n"
@@ -136,30 +129,32 @@ class Scheduler:
         def add_nl(_str):
             return f"{_str}\n"
         method_info = self.method_used_info()
-        holes_filled: int = 0
         time_saved = None
         if self.name.startswith("holes"):
-            for machine in self.machines:
-                holes_filled += machine.holes_filled
             time_saved = sum([m.holes_saved_time for m in self.machines])
 
         slowest_machine = self.get_slowest_machine()
         m_id = slowest_machine.str_id()
         schedule_len = slowest_machine.str_schedule_len()
 
-        return [method_info, f"Holes Filled {holes_filled}", add_nl(time_saved), add_nl(m_id), add_nl(schedule_len)]
+        return [method_info, f"Holes Filled {self.get_holes_filled()}", add_nl(time_saved), add_nl(m_id), add_nl(schedule_len)]
+
+    def get_holes_filled(self):
+        return sum([m.holes_filled for m in self.machines])
 
     def get_schedule_len(self):
         slowest_machine = self.get_slowest_machine()
-        return slowest_machine.schedule_len
+        return slowest_machine.time_on_machine
 
     def get_info_for_files(self) -> List[str]:
         schedule_len = self.get_schedule_len()
-        machines_util_avg_perc = sum(m.get_util_perc() for m in self.machines) / self.n_machines
+        self.machines_util_avg_perc = sum(m.get_util_perc(schedule_len) for m in self.machines) / self.n_machines
 
-        workflows_avg_schedule_len = sum(wf.schedule_len for wf in self.workflows) / self.n_wfs
+        self.workflows_avg_schedule_len = sum(wf.wf_len for wf in self.workflows) / self.n_wfs
 
-        return [f"{self.name}\t", f"{round(schedule_len)}\t", f"{round(machines_util_avg_perc)}\t", f"{round(workflows_avg_schedule_len)}\n"]
+        name_info = "".join([f"-{time_type}" for time_type in self.time_types_str] if self.time_types_str is not None else "")
+
+        return [f"{self.name}-{name_info} ", f"{schedule_len}\t", f"{self.machines_util_avg_perc}\t", f"{self.workflows_avg_schedule_len}\n"]
 
     # NOTE:
     # avg_util of machines
@@ -182,15 +177,15 @@ class Scheduler:
 
     def get_scheduling_method(self, name):
         if name.startswith("holes2011"):
-            return self.schedule_workflow_2011_paper
+            return self.holes2011
         elif name.startswith("holes"):
             return self.holes_scheduling
         elif name == "c1":
-            return c1.multiple_workflows_c1
+            return self.multiple_workflows_c1
         elif name == "c2":
-            return c2.multiple_workflows_c2
+            return self.multiple_workflows_c2
         elif name == "c3":
-            return c3.multiple_workflows_c3
+            return self.multiple_workflows_c3
         elif name == "c4":
             raise Exception("c4 composition is not implemented yet!")
             # return c4.multiple_workflows_c4
@@ -209,7 +204,8 @@ class Scheduler:
             machines (list(Machine)): Contains information about the machines.
             time_types (list(TimeType)): Shows the time type we should use for each workflow to be schedules with. e.g: EFT - EST
         """
-        # sorted_wfs = sorted(workflows, key=lambda wf_: wf_.ccr, reverse=True)
+        # sorted_wfs = sorted(self.workflows, key=lambda wf_: wf_.ccr, reverse=True)
+        # sorted_wfs = self.workflows
         sorted_wfs = sorted(self.workflows, key=lambda wf_: wf_.ccr)
 
         j = len(sorted_wfs) - 1
@@ -242,7 +238,7 @@ class Scheduler:
 
         wf.set_scheduled(True)
 
-    def schedule_workflow_2011_paper(self, priority_type):
+    def holes2011(self):
         def __schedule_workflows(wf, priority_type):
             # 1. Sort tasks in workflows based on the priority_type
             #   - EDF:  The deadline time from each workflow.
@@ -272,7 +268,7 @@ class Scheduler:
             wf.set_scheduled(True)
 
         for wf in self.workflows:
-            __schedule_workflows(wf, priority_type)
+            __schedule_workflows(wf, self.priority_type)
 
     def schedule_tasks_round_robin_heft(unscheduled, machines, n_wfs):
         diff_wfs = set()
@@ -305,7 +301,7 @@ class Scheduler:
                 diff_wfs = set()
 
     @staticmethod
-    def schedule_tasks_heft(self, unscheduled, machines):
+    def schedule_tasks_heft(unscheduled, machines):
         for task in unscheduled:
             Scheduler.schedule_task_to_best_machine(task, machines, TimeType.EFT)
 
@@ -375,7 +371,7 @@ class Scheduler:
             # If no valid holes were found try to look into the current machine
             # and find the execution time of the specific task in the machine.
             if len(holes_times) == 0:
-                [start, end] = compute_execution_time(task, machine.id, machine.schedule_len)
+                [start, end] = compute_execution_time(task, machine.id, machine.time_on_machine)
                 task_times_on_machines.append({"machine": machine, "start": start, "end": end})
 
         # If there are holes to fill prioritize them.
@@ -397,6 +393,57 @@ class Scheduler:
             raise ValueError(
                 f"No machine or hole was assigned to: {task}")
         return best_time
+
+    @staticmethod
+    def heft(tasks, machines):
+        # Phase 1
+        calculate_upward_ranks(tasks)
+        # We sort the tasks based of their up_rank
+        tasks.sort(key=lambda task: task.up_rank, reverse=True)
+        # Phase 2
+        Scheduler.schedule_tasks_heft(tasks, machines)
+        return {'tasks': tasks, 'machines': machines}
+
+    @staticmethod
+    def round_robin_heft(tasks, machines, n_wfs):
+        calculate_upward_ranks(tasks)
+        tasks.sort(key=lambda task: task.up_rank, reverse=True)
+
+        Scheduler.schedule_tasks_round_robin_heft(tasks, machines, n_wfs)
+
+        return {'tasks': tasks, 'machines': machines}
+
+    @staticmethod
+    def cpop(wf):
+        critical_path, [entry_node, _] = wf.create_critical_path()
+        critical_machine_id = Scheduler.pick_machine_for_critical_path(
+            critical_path, wf.machines)
+        Scheduler.schedule_tasks_cpop(wf.machines, [entry_node], (critical_path, critical_machine_id))
+        return {'tasks': wf.tasks, 'machines': wf.machines}
+
+    def multiple_workflows_c1(self):
+        all_tasks = Workflow.connect_wfs(self.workflows, self.machines)
+        return Scheduler.heft(all_tasks, self.machines)
+
+    def multiple_workflows_c2(self):
+        all_tasks = Workflow.connect_wfs(self.workflows, self.machines)
+        return Scheduler.heft(all_tasks, self.machines)
+        # 1. Connect all workflows with one "BIG" entry node and one "BIG" exit node.
+        all_tasks = Workflow.connect_wfs(self.workflows, self.machines)
+        # 2. Get the level for each task.
+        levels = Workflow.level_order(all_tasks)
+
+        # 3. Schedule based of the order of their level
+        # Maybe we should run heft based of how many levels we have.
+        for level, tasks in levels.items():
+            if len(tasks) > 0:
+                return Scheduler.heft(tasks, self.machines)
+
+    def multiple_workflows_c3(self):
+        # 1. Connect all workflows with one "BIG" entry node and one "BIG" exit node.
+        all_tasks = Workflow.connect_wfs(self.workflows, self.machines)
+        # 2. Run HEFT in round-robin-fashion
+        return Scheduler.round_robin_heft(all_tasks, self.machines, len(self.workflows))
     # @staticmethod
     # def pick_machine_for_critical_path(critical_path, machines):
     #     machines_costs = []
@@ -496,3 +543,14 @@ def get_fill_type(ftype):
             return "NO"
 
     raise ValueError(f"Not supported Fill Type: {ftype}")
+
+
+def get_priority_type(priority):
+    if priority is None:
+        return priority
+    if priority == "EDF":
+        return PriorityType.EDF
+    elif priority == "HLF":
+        return PriorityType.HLF
+    elif priority == "LSTF":
+        return PriorityType.LSTF

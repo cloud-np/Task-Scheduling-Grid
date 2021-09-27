@@ -14,16 +14,17 @@ import io
 
 
 class Simulation:
-    def __init__(self, run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=True, save_sim=False):
+    def __init__(self, run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=True, save_sim=False, show_machines=False):
         self.run_methods: List[dict] = run_methods
         self.machines: List[Machine] = machines
         self.workflows: List[Workflow] = workflows
         self.visuals: bool = visuals
         self.save_fig: bool = save_fig
+        self.show_machines: bool = show_machines
         self.show_fig: bool = show_fig
         self.save_sim: bool = save_sim
         self.schedulers: List[Scheduler] = [Scheduler(method['name'],
-                                                      Example.re_create_one_example(workflows, machines),
+                                                      data=Example.re_create_example(workflows, machines),
                                                       time_types=method.get("time_types"),
                                                       fill_method=method["fill_type"], priority_type=method.get("priority_type")) for method in run_methods]
 
@@ -31,14 +32,19 @@ class Simulation:
         slowest_machines = []
         for s in self.schedulers:
             s.run()
+            s.info()
+            # print(s.get_holes_filled())
             slowest_machines.append({
                 "machine": s.get_slowest_machine(),
                 "method_used": s.method_used_info(concise=True)})
             if self.save_sim:
                 s.save_output_to_file()
+            if self.show_machines:
+                Visualizer.visualize_machines(s.machines)
 
         if self.visuals is True:
-            Visualizer.compare_schedule_len(slowest_machines, len(self.workflows), save_fig=self.save_fig, show_fig=self.show_fig)
+            Visualizer.compare_data([sm['machine'].time_on_machine for sm in slowest_machines], [sm['method_used'] for sm in slowest_machines], len(self.workflows), save_fig=self.save_fig, show_fig=self.show_fig)
+            # Visualizer.compare_data([s.get_whole_idle_time() for s in self.schedulers], [sm['method_used'] for sm in slowest_machines], len(self.workflows), save_fig=self.save_fig, show_fig=self.show_fig)
 
 # def run_save_n_sims_to_excel(ns, run_methods):
 #     workbook = xlsxwriter.Workbook('simulation_info.xlsx')
