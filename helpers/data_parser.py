@@ -3,11 +3,10 @@ import json
 from classes.task import Task, Edge
 import classes.machine as Machines
 from typing import List
-# from classes.Machine import NETWORK_KBPS
 from helpers.utils import get_id_from_name
 
 
-def get_tasks_from_json_file(file_name, wf_id):
+def get_tasks_from_json_file(file_name, wf_id, network_kbps):
     with open(file_name) as f:
         data = json.load(f)
 
@@ -63,10 +62,10 @@ def get_tasks_from_json_file(file_name, wf_id):
         if Machines.HAS_NETWORK:
             for child_edge in children_edges:
                 # child_edge.weight = 0
-                child_edge.weight /= Machines.NETWORK_KBPS
+                child_edge.weight /= network_kbps
             for parent_edge in parents_edges:
                 # parent_edge.weight = 0
-                parent_edge.weight /= Machines.NETWORK_KBPS
+                parent_edge.weight /= network_kbps
 
         # We use this function to check if everything went smoothly in the parsing
         task.set_edges(children_edges, parents_edges)

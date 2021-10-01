@@ -43,8 +43,8 @@ class Example:
 
     #         print(f"{lowest_shc.name} = {lowest_shc.get_schedule_len()}")
     @staticmethod
-    def load_all_types(n_machines, n_tasks):
-        machines = Machine.load_n_static_machines(n_machines)
+    def load_all_types(m_info, n_tasks):
+        machines = Machine.load_n_static_machines(m_info[0], m_info[1])
         workflows = Workflow.load_all_types_wfs(machines, n=n_tasks)
         return machines, workflows
 

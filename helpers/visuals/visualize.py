@@ -25,9 +25,9 @@ class Visualizer:
 
         rects = ax.bar(x - width / 2, data_on_x, width, color=bar_colors)
 
-        ax.set_xticks(x)
+        plt.xticks(x, rotation='vertical')
         ax.set_xticklabels(labels)
-        autolabel(rects, ax)
+        # autolabel(rects, ax)
         ax.legend()
         ax.set_ylabel("Method Used")
         # plt.grid(True)
@@ -154,6 +154,41 @@ class Visualizer:
         # return G
 
     @staticmethod
+    def compare_schedule_len(data, labels):
+
+        x = np.arange(len(labels))
+        width = 0.35
+
+        fig, ax = plt.subplots()
+
+        rects = []
+        # for key, val in data.items():
+        # rect = ax.bar(x - width / 2, val, width, label=str(key))
+        rects1 = ax.bar(x - width / 2, data['BEST'], width, label='Men')
+        rects.append(rects1)
+        # rects = [ax.bar(x - width / 2, val, width, label=str(key)) for key, val in data.items()]
+
+        ax.set_ylabel('Scores')
+        ax.set_title('Scores by group and gender')
+        ax.set_xticks(x)
+        ax.set_xticklabels(labels)
+        ax.legend()
+
+        def __autolabel(rects):
+            for rect in rects:
+                height = rect.get_height()
+                ax.annotate('{}'.format(height),
+                            xy=(rect.get_x() + rect.get_width() / 2, height),
+                            xytext=(0, 3),  # 3 points vertical offset
+                            textcoords="offset points",
+                            ha='center', va='bottom')
+
+        for r in rects:
+            __autolabel(r)
+
+        plt.show()
+
+    @staticmethod
     def visualize_machines(machines):
         import plotly.express as px
         import pandas as pd
@@ -166,6 +201,7 @@ class Visualizer:
                 all_tasks.append(
                     dict(
                         TaskName=task.name,
+                        TaskID=task.id,
                         SlowestParent=f"{slp['parent_task'].name if slp['parent_task'] is not None else 'None'} "
                                       f" w: {slp['communication_time']}",
                         Start=task.start, Finish=task.end, Machine=f"M-{task.machine_id}", WF_ID=task.wf_id))
@@ -174,7 +210,7 @@ class Visualizer:
         df = pd.DataFrame(all_tasks)
         df['delta'] = df['Finish'] - df['Start']
 
-        fig = px.timeline(df, x_start="Start", x_end="Finish", y="Machine", hover_data=["TaskName", "SlowestParent"], color="WF_ID")
+        fig = px.timeline(df, x_start="Start", x_end="Finish", y="Machine", hover_data=["TaskName", "SlowestParent", "TaskID"], color="WF_ID")
         fig.update_yaxes(autorange="reversed")
 
         fig.layout.xaxis.type = 'linear'

@@ -1,6 +1,18 @@
 from classes.task import TaskBlueprint, Edge, TaskStatus
 
 HOLE_METHOD_VARIATIONS = {
+    "criticals_unsorted": [
+        {"name": "crit_u BEST-FIT", "fill_type": "BEST-FIT"},
+        {"name": "crit_u FASTEST-FIT", "fill_type": "FASTEST-FIT"},
+        {"name": "crit_u FIRST-FIT", "fill_type": "FIRST-FIT"},
+        {"name": "crit_u WORST-FIT", "fill_type": "WORST-FIT"},
+    ],
+    "criticals_sorted": [
+        {"name": "crit BEST-FIT", "fill_type": "BEST-FIT"},
+        {"name": "crit FASTEST-FIT", "fill_type": "FASTEST-FIT"},
+        {"name": "crit FIRST-FIT", "fill_type": "FIRST-FIT"},
+        {"name": "crit WORST-FIT", "fill_type": "WORST-FIT"},
+    ],
 
     "EFT_variations": [
         # EST - EST

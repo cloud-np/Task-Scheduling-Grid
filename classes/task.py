@@ -66,6 +66,8 @@ class Task:
         self.wf_deadline: Union[int, None] = None
         self.children_till_ready: int = 0
         self.parents_till_ready: int = 0
+        self.is_critical: bool = False
+        self.added_to_hole: bool = False
         self.children_edges: List[Edge] = []
         self.parents_edges: List[Edge] = []
 
@@ -126,9 +128,11 @@ class Task:
         format_str = ''
         times = f"{self.str_col_times()}" \
             if self.start is not None and self.end is not None else ''
-        up_rank = f'up-rank: {Fore.YELLOW}{round(self.up_rank, ROUND_DIGIT)}{Fore.RESET}' \
-            if self.up_rank is not None else ''
-        down_rank = f'level: {Fore.YELLOW}{round(self.down_rank, ROUND_DIGIT)}{Fore.RESET} ' \
+        # up_rank = f'up-rank: {Fore.YELLOW}{round(self.up_rank, ROUND_DIGIT)}{Fore.RESET}' \
+        #     if self.up_rank is not None else ''
+        # down_rank = f'level: {Fore.YELLOW}{round(self.down_rank, ROUND_DIGIT)}{Fore.RESET} ' \
+        #     if self.down_rank is not None else ''
+        runtime = f'runtime: {Fore.YELLOW}{round(self.runtime, ROUND_DIGIT)}{Fore.RESET} ' \
             if self.down_rank is not None else ''
 
         format_str += f'{Fore.CYAN}{self.name}{Fore.RESET} ' if self.name.startswith("Dummy") \
@@ -136,7 +140,7 @@ class Task:
         # format_str += f'cost: {Fore.RED}{[round(cost, ROUND_DIGIT) for cost in self.costs]}{Fore.RESET} '
 
         format_str += self.str_col_wf_id()
-        format_str += f'{times} {up_rank} {down_rank} '
+        format_str += f'{times} {runtime} '
         format_str += f'M[{self.machine_id}]' if self.machine_id != -1 else ''
         return format_str
 
@@ -144,16 +148,18 @@ class Task:
         format_str = ''
         times = f" times --> {self.str_times()}" \
             if self.start is not None and self.end is not None else ''
-        up_rank = f'up-rank: {round(self.up_rank, ROUND_DIGIT)}' \
-            if self.up_rank is not None else ''
-        down_rank = f'down_rank: {round(self.down_rank, ROUND_DIGIT)} ' \
+        # up_rank = f'up-rank: {round(self.up_rank, ROUND_DIGIT)}' \
+        #     if self.up_rank is not None else ''
+        # down_rank = f'down_rank: {round(self.down_rank, ROUND_DIGIT)} ' \
+        #     if self.down_rank is not None else ''
+        runtime = f'runtime: {Fore.YELLOW}{round(self.runtime, ROUND_DIGIT)}{Fore.RESET} ' \
             if self.down_rank is not None else ''
 
-        format_str += f'{self.name} ' if self.name.startswith("Dummy") else f'{self.str_id()} '
-        # format_str += f'cost: {Fore.RED}{[round(cost, ROUND_DIGIT) for cost in self.costs]}{Fore.RESET} '
+        format_str += f'{Fore.CYAN}{self.name}{Fore.RESET} ' if self.name.startswith("Dummy") \
+            else f'{self.str_col_id()} '
 
-        format_str += self.str_wf_id()
-        format_str += f'{times} {up_rank} {down_rank} '
+        format_str += self.str_col_wf_id()
+        format_str += f'{times} {runtime} '
         format_str += f'M[{self.machine_id}]' if self.machine_id != -1 else ''
         return format_str
 

@@ -32,13 +32,14 @@ class Workflow:
         self.scheduled: bool = False
         self.finishing_time: float = -1.0
         self.avg_comp_cost: float = -1.0
+        self.machines = machines
         self.file_path: str = file_path
         self.avg_com_cost: float = -1.0
         self.ccr: float = -1.0
 
         if tasks is None:
             # 1. Parse the workflow tasks
-            self.tasks = get_tasks_from_json_file(file_path, id_)
+            self.tasks = get_tasks_from_json_file(file_path, id_, self.machines[0].network_kbps)
 
             # 2. add dummy nodes
             if add_dummies:
@@ -320,6 +321,9 @@ class Workflow:
         self.avg_comp_cost = sum(task.avg_cost() for task in self.tasks)
         return self.avg_comp_cost
 
+    def get_ready_unscheduled_tasks(self):
+        return [t for t in self.tasks if t.status in (TaskStatus.READY, TaskStatus.UNSCHEDULED)]
+
     def calc_avg_com_cost(self):
         # Get all the edges and remove the duplicates
         all_edges = [task.children_edges for task in self.tasks]
@@ -392,6 +396,9 @@ class Workflow:
         if sort_tasks is True:
             self.tasks.sort(key=lambda t: t.id)
 
-
-def check_workflow(workflow):
-    schedule_checker(workflow.tasks, workflow.machines)
+    def view_machine_holes(self):
+        for m in self.machines:
+            # print(f"M[{m.id}]")
+            print(m)
+            for hole in m.holes:
+                print(f"\t{hole}")

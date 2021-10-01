@@ -3,7 +3,7 @@ from typing import List
 from classes.machine import Machine
 from colorama import Fore, Back
 from classes.workflow import Workflow
-from classes.scheduler import Scheduler
+from classes.scheduler import Scheduler, get_fill_method, FillMethod
 from helpers.checker import schedule_checker
 from helpers.visuals.visualize import Visualizer
 from helpers.examples.example_gen import Example
@@ -29,21 +29,28 @@ class Simulation:
                                                       fill_method=method["fill_type"], priority_type=method.get("priority_type")) for method in run_methods]
 
     def run(self):
-        slowest_machines = []
+        # slowest_machines = []
         for s in self.schedulers:
             s.run()
-            s.info()
             # print(s.get_holes_filled())
-            slowest_machines.append({
-                "machine": s.get_slowest_machine(),
-                "method_used": s.method_used_info(concise=True)})
             if self.save_sim:
                 s.save_output_to_file()
-            if self.show_machines:
-                Visualizer.visualize_machines(s.machines)
+            # if s.name.startswith("crit"):
+            #     print(len(s.critical_tasks))
+            # if self.show_machines:
 
+        min_s = min(self.schedulers, key=lambda s: s.get_slowest_machine().time_on_machine)
+        min_s.info()
+
+        if self.show_machines:
+            Visualizer.visualize_machines(min_s.machines)
+            # schedule_checker2(min_s.machines)
+            # for t in wf_3.tasks:
+            #     print(f"T[{t.id}] start: {round(t.start)} end: {round(t.end)}")
+            # for t in wf_4.tasks:
+            #     print(f"T[{t.id}] start: {round(t.start)} end: {round(t.end)}")
         if self.visuals is True:
-            Visualizer.compare_data([sm['machine'].time_on_machine for sm in slowest_machines], [sm['method_used'] for sm in slowest_machines], len(self.workflows), save_fig=self.save_fig, show_fig=self.show_fig)
+            Visualizer.compare_data([s.get_slowest_machine().time_on_machine for s in self.schedulers], [s.method_used_info(concise=True) for s in self.schedulers], len(self.workflows), save_fig=self.save_fig, show_fig=self.show_fig)
             # Visualizer.compare_data([s.get_whole_idle_time() for s in self.schedulers], [sm['method_used'] for sm in slowest_machines], len(self.workflows), save_fig=self.save_fig, show_fig=self.show_fig)
 
 # def run_save_n_sims_to_excel(ns, run_methods):
