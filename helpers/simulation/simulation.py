@@ -1,4 +1,5 @@
 from matplotlib.pyplot import savefig
+from collections import defaultdict
 from typing import List
 from classes.machine import Machine
 from colorama import Fore, Back
@@ -35,23 +36,27 @@ class Simulation:
             # print(s.get_holes_filled())
             if self.save_sim:
                 s.save_output_to_file()
-            # if s.name.startswith("crit"):
-            #     print(len(s.critical_tasks))
-            # if self.show_machines:
 
-        min_s = min(self.schedulers, key=lambda s: s.get_slowest_machine().time_on_machine)
+        min_s = min(self.schedulers, key=lambda s: s.workflows_avg_schedule_len)
+        for m in min_s.machines:
+            occurrence = defaultdict(lambda: 0)
+            for t in m.tasks:
+                occurrence[t.wf_id] += 1
+            # if any([True if occurrence[wf_id] > 0 else False for wf_id in range(len(min_s.workflows))]) is True:
+            #     return False
         min_s.info()
+
+        if min_s.fill_method == FillMethod.FASTEST_FIT:
+            min_s.save_blueprint()
+        else:
+            return False
 
         if self.show_machines:
             Visualizer.visualize_machines(min_s.machines)
-            # schedule_checker2(min_s.machines)
-            # for t in wf_3.tasks:
-            #     print(f"T[{t.id}] start: {round(t.start)} end: {round(t.end)}")
-            # for t in wf_4.tasks:
-            #     print(f"T[{t.id}] start: {round(t.start)} end: {round(t.end)}")
         if self.visuals is True:
             Visualizer.compare_data([s.get_slowest_machine().time_on_machine for s in self.schedulers], [s.method_used_info(concise=True) for s in self.schedulers], len(self.workflows), save_fig=self.save_fig, show_fig=self.show_fig)
             # Visualizer.compare_data([s.get_whole_idle_time() for s in self.schedulers], [sm['method_used'] for sm in slowest_machines], len(self.workflows), save_fig=self.save_fig, show_fig=self.show_fig)
+        return True
 
 # def run_save_n_sims_to_excel(ns, run_methods):
 #     workbook = xlsxwriter.Workbook('simulation_info.xlsx')

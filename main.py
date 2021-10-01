@@ -13,19 +13,34 @@ if __name__ == "__main__":
     #    {"name": "c1", "time_types": ["EST"], "fill_type": "NO-FILL"},
     #    {"name": "c2", "time_types": ["EST"], "fill_type": "NO-FILL"},
     #    {"name": "c3", "time_types": ["EST"], "fill_type": "NO-FILL"}]
-    run_methods = [HOLE_METHOD_VARIATIONS["EFT_variations"], HOLE_METHOD_VARIATIONS['criticals_unsorted'], HOLE_METHOD_VARIATIONS['criticals_sorted'], HOLE_METHOD_VARIATIONS["holes-paper-2011"], HOLE_METHOD_VARIATIONS["compositions"]]
+    run_methods = [
+        {"name": "holes FASTEST-FIT",
+         "time_types": ["EFT", "EFT"], "fill_type": "FASTEST-FIT"},
+        {"name": "holes BEST-FIT",
+         "time_types": ["EFT", "EFT"], "fill_type": "BEST-FIT"},
+        {"name": "holes FIRST-FIT",
+         "time_types": ["EFT", "EFT"], "fill_type": "FIRST-FIT"},
+        {"name": "holes WORST-FIT",
+         "time_types": ["EFT", "EFT"], "fill_type": "WORST-FIT"},
+    ]
+
     # run_methods = [HOLE_METHOD_VARIATIONS["EFT_variations"]]
     # run_methods = [{"name": "c1", "time_types": ["EST"], "fill_type": "NO-FILL"}]
-    run_methods = sum(run_methods, [])
+    # run_methods = sum(run_methods, [])
     # run_methods = HOLE_METHOD_VARIATIONS["EFT_variations"]
     # run_methods = [{"name": "holes2011 FASTEST-EDF", "fill_type": "FASTEST-FIT", "priority_type": "EDF"}]
-    for wf_size in [50, 100, 200, 300, 400, 500, 1000]:
-        for network in [50, 500]:
-            for n_cores in [4, 8, 16, 32]:
-                # machines = Machine.load_n_static_machines(n_cores, network * 125)
-                # workflows = Workflow.load_random_workflows(machines, wf_size)
-                machines, workflows = Example.load_all_types([n_cores, network * 125], wf_size)
-                Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=True, save_sim=True, show_machines=False).run()
+    # for wf_size in [50, 100, 200, 300, 400, 500, 1000]:
+    #     for network in [50, 500]:
+    #         for n_cores in [4, 8, 16, 32]:
+    #             # machines = Machine.load_n_static_machines(n_cores, network * 125)
+    #             # workflows = Workflow.load_random_workflows(machines, wf_size)
+    #             machines, workflows = Example.load_all_types([n_cores, network * 125], wf_size)
+    #             Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=True, save_sim=True, show_machines=False).run()
+    done = False
+    while not done:
+        machines, workflows = Example.load_small_example()
+        # avg_makespan from both for each bin packing method
+        done = Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=True, save_sim=True, show_machines=True).run()
 
     # machines, workflows = Example.load_medium_example()
     # machines = Machine.load_n_static_machines(2)

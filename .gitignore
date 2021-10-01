@@ -13,6 +13,7 @@ __pycache__/
 *.zip
 test.py
 helpers/githubHeft
+*.txt
 venv/
 linux_env/
 simulation_info.xlsx

@@ -117,30 +117,46 @@ HOLE_METHOD_VARIATIONS = {
 
 SMALL_EXAMPLE = {
     "machines": [
-        (0, 'M-0', 1),
-        (1, 'M-1', 2),
-        (2, 'M-2', 4)
+        (0, 'M-0', 1, 1),
+        (1, 'M-1', 2, 1),
+        # (2, 'M-2', 4, 1)
     ],
     "workflows":
     [
         [
-            TaskBlueprint(0, 0, 'T-A', 2, [{"weight": 2, "name": 'T-B'}, {"weight": 5, "name": 'T-C'}], [], TaskStatus.READY, True, False),
-            TaskBlueprint(1, 0, 'T-B', 14, [{"weight": 2, "name": 'T-D'}], [{"weight": 2, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
-            TaskBlueprint(2, 0, 'T-C', 21, [{"weight": 2, "name": 'T-E'}], [{"weight": 5, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
-            TaskBlueprint(3, 0, 'T-D', 2, [{"weight": 1, "name": 'T-E'}], [{"weight": 2, "name": 'T-B'}], TaskStatus.UNSCHEDULED, False, False),
-            TaskBlueprint(4, 0, 'T-E', 10, [], [{"weight": 1, "name": 'T-D'}, {"weight": 2, "name": 'T-C'}], TaskStatus.UNSCHEDULED, False, True),
+            TaskBlueprint(0, 0, "T-A", 67, [{'weight': 1, 'name': 'T-B'}, {'weight': 50, 'name': 'T-C'}, {'weight': 26, 'name': 'T-D'}], [], 1, True, False),
+            TaskBlueprint(1, 0, "T-B", 54, [{'weight': 51, 'name': 'T-E'}], [{'weight': 1, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 0, "T-C", 63, [{'weight': 56, 'name': 'T-E'}], [{'weight': 50, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(3, 0, "T-D", 26, [{'weight': 98, 'name': 'T-E'}], [{'weight': 26, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(4, 0, "T-E", 25, [{'weight': 73, 'name': 'T-F'}, {'weight': 33, 'name': 'T-G'}], [{'weight': 51, 'name': 'T-B'}, {'weight': 56, 'name': 'T-C'}, {'weight': 98, 'name': 'T-D'}], 0, False, False),
+            TaskBlueprint(5, 0, "T-F", 26, [{'weight': 16, 'name': 'T-H'}], [{'weight': 73, 'name': 'T-E'}], 0, False, False),
+            TaskBlueprint(6, 0, "T-G", 7, [{'weight': 41, 'name': 'T-H'}], [{'weight': 33, 'name': 'T-E'}], 0, False, False),
+            TaskBlueprint(7, 0, "T-H", 61, [], [{'weight': 16, 'name': 'T-F'}, {'weight': 41, 'name': 'T-G'}], 0, False, True)
         ],
         [
-            TaskBlueprint(0, 1, 'T-A', 3, [{"weight": 3, "name": 'T-B'}, {"weight": 4, "name": 'T-C'}], [], TaskStatus.READY, True, False),
-            TaskBlueprint(1, 1, 'T-B', 15, [{"weight": 6, "name": 'T-D'}], [{"weight": 3, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
-            TaskBlueprint(2, 1, 'T-C', 41, [{"weight": 2, "name": 'T-D'}], [{"weight": 4, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
-            TaskBlueprint(4, 1, 'T-D', 10, [], [{"weight": 6, "name": 'T-B'}, {"weight": 2, "name": 'T-C'}], TaskStatus.UNSCHEDULED, False, True),
-        ],
-        [
-            TaskBlueprint(0, 2, 'T-A', 5, [{"weight": 31, "name": 'T-B'}], [], TaskStatus.READY, True, False),
-            TaskBlueprint(1, 2, 'T-B', 7, [{"weight": 25, "name": 'T-C'}], [{"weight": 31, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
-            TaskBlueprint(4, 2, 'T-C', 3, [], [{"weight": 25, "name": 'T-B'}], TaskStatus.UNSCHEDULED, False, True),
-        ],
+            TaskBlueprint(0, 1, "T-A", 32, [{'weight': 69, 'name': 'T-B'}], [], 1, True, False),
+            TaskBlueprint(1, 1, "T-B", 20, [{'weight': 95, 'name': 'T-C'}], [{'weight': 69, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 1, "T-C", 65, [{'weight': 11, 'name': 'T-D'}], [{'weight': 95, 'name': 'T-B'}], 0, False, False),
+            TaskBlueprint(3, 1, "T-D", 7, [], [{'weight': 11, 'name': 'T-C'}], 0, False, True),
+        ]
+        # [
+        #     TaskBlueprint(0, 0, 'T-A', 20, [{"weight": 12, "name": 'T-B'}, {"weight": 15, "name": 'T-C'}, {"weight": 15, "name": 'T-C'}], [], TaskStatus.READY, True, False),
+        #     TaskBlueprint(1, 0, 'T-B', 50, [{"weight": 10, "name": 'T-D'}], [{"weight": 12, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
+        #     TaskBlueprint(2, 0, 'T-C', 90, [{"weight": 5, "name": 'T-E'}], [{"weight": 15, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
+        #     TaskBlueprint(3, 0, 'T-D', 60, [{"weight": 10, "name": 'T-E'}], [{"weight": 10, "name": 'T-B'}], TaskStatus.UNSCHEDULED, False, False),
+        #     TaskBlueprint(4, 0, 'T-E', 20, [], [{"weight": 10, "name": 'T-D'}, {"weight": 5, "name": 'T-C'}], TaskStatus.UNSCHEDULED, False, True),
+        # ],
+        # [
+        #     TaskBlueprint(0, 1, 'T-A', 3, [{"weight": 3, "name": 'T-B'}, {"weight": 4, "name": 'T-C'}], [], TaskStatus.READY, True, False),
+        #     TaskBlueprint(1, 1, 'T-B', 15, [{"weight": 6, "name": 'T-D'}], [{"weight": 3, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
+        #     TaskBlueprint(2, 1, 'T-C', 41, [{"weight": 2, "name": 'T-D'}], [{"weight": 4, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
+        #     TaskBlueprint(3, 1, 'T-D', 10, [], [{"weight": 6, "name": 'T-B'}, {"weight": 2, "name": 'T-C'}], TaskStatus.UNSCHEDULED, False, True),
+        # ],
+        # [
+        #     TaskBlueprint(0, 2, 'T-A', 5, [{"weight": 31, "name": 'T-B'}], [], TaskStatus.READY, True, False),
+        #     TaskBlueprint(1, 2, 'T-B', 7, [{"weight": 25, "name": 'T-C'}], [{"weight": 31, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
+        #     TaskBlueprint(2, 2, 'T-C', 3, [], [{"weight": 25, "name": 'T-B'}], TaskStatus.UNSCHEDULED, False, True),
+        # ],
     ]
 }
 

@@ -177,6 +177,12 @@ class Workflow:
                         "entry": entry_task, "exit": exit_task}
         return critical_path, [entry_task, exit_task]
 
+    def show_task_and_edges(self):
+        for t in self.tasks:
+            print(t)
+            for e in t.children_edges:
+                print(f"\t{e}")
+
     def find_an_entry_task(self):
         for task in self.tasks:
             if task.is_entry:

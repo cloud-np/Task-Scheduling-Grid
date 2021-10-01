@@ -3,7 +3,8 @@ from typing import List, Any
 import os
 from colorama import Fore, Back
 from classes.workflow import Workflow
-from classes.task import TaskStatus
+from dataclasses import dataclass
+from classes.task import TaskStatus, TaskBlueprint
 from matplotlib.pyplot import fill
 from helpers.checker import schedule_checker
 from algos.calc_task_ranks import calculate_upward_ranks
@@ -28,6 +29,15 @@ class FillMethod(Enum):
     BEST_FIT = 1
     FIRST_FIT = 2
     WORST_FIT = 3
+
+
+@dataclass
+class ScheduleBlueprint:
+    workflows: List[List[TaskBlueprint]]
+    machines: List[Any]
+    priority_type: PriorityType
+    fill_method: FillMethod
+    time_types: List[TimeType]
 
 
 class Scheduler:
@@ -84,7 +94,22 @@ class Scheduler:
 
         slowest_machine = self.get_slowest_machine()
         print(f'\n{slowest_machine.str_col_schedule_len()}')
-        print(f"wfs: {Fore.MAGENTA}{len(self.workflows[0].tasks)}{Fore.RESET} machines: {Fore.MAGENTA}{self.n_machines}{Fore.RESET} network: {Fore.MAGENTA}{self.machines[0].network_kbps / 125}{Fore.RESET}\n")
+        print(f"wfs: {Fore.MAGENTA}{len(self.workflows[0].tasks)}{Fore.RESET} machines: {Fore.MAGENTA}{self.n_machines}{Fore.RESET} network: {Fore.MAGENTA}{self.machines[0].network_kbps}{Fore.RESET}\n")
+
+    def get_blueprint(self):
+        return ScheduleBlueprint([[t.get_blueprint() for t in wf.tasks] for wf in self.workflows], self.machines, self.priority_type, self.fill_method, self.time_types)
+
+    def save_blueprint(self):
+        blp_self = self.get_blueprint()
+
+        lines = [f"({m.id}, {m.name}, {m.n_cpu}, {m.speed}, {m.network_kbps})\n" for m in self.machines]
+        lines.insert(0, f"{self.priority_type}, {self.fill_method}, {self.time_types}\n")
+        for blp_tasks in blp_self.workflows:
+            for bt in blp_tasks:
+                lines.append(f"TaskBlueprint({bt.id_}, {bt.wf_id}, \"{bt.name}\", {bt.runtime}, {str(bt.children_names)}, {str(bt.parents_names)}, {1 if bt.is_entry else 0}, {bt.is_entry}, {bt.is_exit}),\n")
+
+        with open(f"./{get_fill_method(self.fill_method)}.txt", "w") as f:
+            f.writelines(lines)
 
     def get_whole_idle_time(self):
         return sum([m.get_idle_time() for m in self.machines])
