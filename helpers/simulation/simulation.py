@@ -130,7 +130,7 @@ class Simulation:
             t.machine_id = 1
 
         # make a wf_len for the workflow
-        workflows.wf_len = t_7.end
+        # workflows.wf_len = t_7.end
 
     def run(self):
         # slowest_machines = []

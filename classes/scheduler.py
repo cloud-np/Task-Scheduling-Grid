@@ -278,6 +278,7 @@ class Scheduler:
     def holes_scheduling1(self):
         self.schedule_workflow(self.workflows[1], self.time_types[0])
         self.avg_workflow_makespan = sum(wf.wf_len for wf in self.workflows) / self.n_wfs
+        print(self.avg_workflow_makespan)
 
     def schedule_workflow(self, wf, time_type):
         unscheduled = sorted(wf.get_ready_unscheduled_tasks(), key=lambda t: t.up_rank, reverse=True)
