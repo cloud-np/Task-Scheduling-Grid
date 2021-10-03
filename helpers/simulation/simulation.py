@@ -61,8 +61,8 @@ class Simulation:
             if s.fill_method == FillMethod.WORST_FIT:
                 ws = s
 
-        if min_s.fill_method == FillMethod.FASTEST_FIT:
-            all_avg = (fs.avg_workflow_makespan, bs.avg_workflow_makespan, ws.avg_workflow_makespan)
+        if min_s.fill_method == FillMethod.WORST_FIT:
+            all_avg = (fs.avg_workflow_makespan, bs.avg_workflow_makespan, frs.avg_workflow_makespan)
             for m in min_s.machines:
                 ok = False
                 for t in m.tasks:
@@ -128,6 +128,9 @@ class Simulation:
         for t in [t_0, t_1, t_3, t_4, t_5]:
             machines[1].tasks.append(t)
             t.machine_id = 1
+
+        # make a wf_len for the workflow
+        workflows.wf_len = t_7.end
 
     def run(self):
         # slowest_machines = []
