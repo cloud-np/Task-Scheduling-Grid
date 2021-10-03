@@ -3,6 +3,7 @@ from random import randint
 from helpers.examples.example_data import SMALL_EXAMPLE
 from classes.machine import Machine, MachineBlueprint, CORE_SPEED
 from classes.task import Task, TaskStatus, Edge, TaskBlueprint
+from random import randint, seed
 
 N_WORKFLOWS = 3
 
@@ -103,14 +104,34 @@ class Example:
         ) for i, blp_tasks in enumerate(blp_worklows)]
 
     @staticmethod
-    def load_small_example():
+    def load_small_example(best_of='workflows'):
+        machines = [Machine.blueprint_to_machine(MachineBlueprint(m_info[0], m_info[1], m_info[2], CORE_SPEED, m_info[3])) for m_info in SMALL_EXAMPLE['machines']]
+        ab = randint(1, 100)
+        ac = randint(1, 100)
+        bd = randint(1, 100)
+        cd = randint(1, 100)
+        # SMALL_EXAMPLE[best_of].append([
+        #     # TaskBlueprint(0, 1, "T-A", randint(1, 100), [{'weight': ab, 'name': 'T-B'}, {'weight': ac, 'name': 'T-C'}], [], 1, True, False),
+        #     # TaskBlueprint(1, 1, "T-B", randint(1, 100), [{'weight': bd, 'name': 'T-D'}], [{'weight': ab, 'name': 'T-A'}], 0, False, False),
+        #     # TaskBlueprint(2, 1, "T-C", randint(1, 100), [{'weight': cd, 'name': 'T-D'}], [{'weight': ac, 'name': 'T-A'}], 0, False, False),
+        #     # TaskBlueprint(3, 1, "T-D", randint(1, 100), [], [{'weight': bd, 'name': 'T-B'}, {'weight': cd, 'name': 'T-C'}], 0, False, True),
+        # ])
+        return machines, [
+            Workflow.blueprint_to_workflow(
+                id_=i,
+                tasks=[Task.blueprint_to_task(blp_t) for blp_t in blp_tasks],
+                machines=machines
+            ) for i, blp_tasks in enumerate(SMALL_EXAMPLE[best_of])]
+
+    @staticmethod
+    def load_small_example1(best_of='workflows'):
         machines = [Machine.blueprint_to_machine(MachineBlueprint(m_info[0], m_info[1], m_info[2], CORE_SPEED, m_info[3])) for m_info in SMALL_EXAMPLE['machines']]
         return machines, [
             Workflow.blueprint_to_workflow(
                 id_=i,
                 tasks=[Task.blueprint_to_task(blp_t) for blp_t in blp_tasks],
                 machines=machines
-            ) for i, blp_tasks in enumerate(SMALL_EXAMPLE['workflows'])]
+            ) for i, blp_tasks in enumerate(SMALL_EXAMPLE[best_of])]
 
     @staticmethod
     def create_random_small_example():

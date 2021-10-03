@@ -121,6 +121,10 @@ class Task:
             raise Exception("Wf deadline is None!")
         return self.wf_deadline - time - self.up_rank
 
+    def set_times(self, start, end):
+        self.start = start
+        self.end = end
+
     def set_priority(self, priority_value):
         self.priority = priority_value
 

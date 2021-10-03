@@ -114,6 +114,9 @@ class Scheduler:
     def get_whole_idle_time(self):
         return sum([m.get_idle_time() for m in self.machines])
 
+    def example(self):
+        self.holes_scheduling1()
+
     def run(self):
         self.schedule_method()
         # if self.schedule_method.__name__.startswith("holes"):
@@ -124,7 +127,7 @@ class Scheduler:
         self.schedule_len = self.get_schedule_len()
         self.machines_util_avg_perc = sum(m.get_util_perc(self.schedule_len) for m in self.machines) / self.n_machines
         self.workflows_avg_schedule_len = sum(wf.wf_len for wf in self.workflows) / self.n_wfs
-        schedule_checker(self)
+        # schedule_checker(self)
 
     def method_used_info(self, concise=False):
         fill_method = None
@@ -271,6 +274,9 @@ class Scheduler:
         for wf in self.workflows:
             if wf.scheduled is False:
                 self.schedule_workflow(wf, self.time_types[0])
+
+    def holes_scheduling1(self):
+        self.schedule_workflow(self.workflows[1], self.time_types[0])
 
     def schedule_workflow(self, wf, time_type):
         unscheduled = sorted(wf.get_ready_unscheduled_tasks(), key=lambda t: t.up_rank, reverse=True)
@@ -429,7 +435,7 @@ class Scheduler:
                 best_time = min(holes_times, key=lambda t: t["gap_left"])
             elif fill_method == FillMethod.FIRST_FIT:
                 # We could write this to run faster but I think we will losse readility
-                best_time = holes_times[0]
+                best_time = sorted(holes_times, key=lambda t: t['start'])[0]
             elif fill_method == FillMethod.WORST_FIT:
                 best_time = max(holes_times, key=lambda t: t["gap_left"])
         # If no holes were found.

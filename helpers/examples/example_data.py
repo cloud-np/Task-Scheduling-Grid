@@ -118,8 +118,103 @@ HOLE_METHOD_VARIATIONS = {
 SMALL_EXAMPLE = {
     "machines": [
         (0, 'M-0', 1, 1),
-        (1, 'M-1', 2, 1),
+        (1, 'M-1', 1, 1),
         # (2, 'M-2', 4, 1)
+    ],
+
+    "first-fit":
+    [
+        [
+            TaskBlueprint(0, 0, "T-A", 1, [{'weight': 15, 'name': 'T-B'}, {'weight': 13, 'name': 'T-C'}, {'weight': 1, 'name': 'T-D'}], [], 1, True, False),
+            TaskBlueprint(1, 0, "T-B", 74, [{'weight': 38, 'name': 'T-E'}], [{'weight': 15, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 0, "T-C", 34, [{'weight': 27, 'name': 'T-E'}], [{'weight': 13, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(3, 0, "T-D", 2, [{'weight': 56, 'name': 'T-E'}], [{'weight': 1, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(4, 0, "T-E", 73, [{'weight': 16, 'name': 'T-F'}, {'weight': 97, 'name': 'T-G'}], [{'weight': 38, 'name': 'T-B'}, {'weight': 27, 'name': 'T-C'}, {'weight': 56, 'name': 'T-D'}], 0, False, False),
+            TaskBlueprint(5, 0, "T-F", 23, [{'weight': 34, 'name': 'T-H'}], [{'weight': 16, 'name': 'T-E'}], 0, False, False),
+            TaskBlueprint(6, 0, "T-G", 79, [{'weight': 53, 'name': 'T-H'}], [{'weight': 97, 'name': 'T-E'}], 0, False, False),
+            TaskBlueprint(7, 0, "T-H", 100, [], [{'weight': 34, 'name': 'T-F'}, {'weight': 53, 'name': 'T-G'}], 0, False, True),
+        ],
+        [
+            TaskBlueprint(0, 1, "T-A", 14, [{'weight': 46, 'name': 'T-B'}], [], 1, True, False),
+            TaskBlueprint(1, 1, "T-B", 65, [{'weight': 48, 'name': 'T-C'}], [{'weight': 46, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 1, "T-C", 79, [{'weight': 77, 'name': 'T-D'}], [{'weight': 48, 'name': 'T-B'}], 0, False, False),
+            TaskBlueprint(3, 1, "T-D", 30, [], [{'weight': 77, 'name': 'T-C'}], 0, False, True),
+        ]
+    ],
+    "fastest-fit":
+    [
+        [
+            TaskBlueprint(0, 0, "T-A", 76, [{'weight': 86, 'name': 'T-B'}, {'weight': 9, 'name': 'T-C'}, {'weight': 70, 'name': 'T-D'}], [], 1, True, False),
+            TaskBlueprint(1, 0, "T-B", 79, [{'weight': 55, 'name': 'T-E'}], [{'weight': 86, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 0, "T-C", 50, [{'weight': 50, 'name': 'T-E'}], [{'weight': 9, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(3, 0, "T-D", 61, [{'weight': 77, 'name': 'T-E'}], [{'weight': 70, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(4, 0, "T-E", 76, [{'weight': 26, 'name': 'T-F'}, {'weight': 21, 'name': 'T-G'}], [{'weight': 55, 'name': 'T-B'}, {'weight': 50, 'name': 'T-C'}, {'weight': 77, 'name': 'T-D'}], 0, False, False),
+            TaskBlueprint(5, 0, "T-F", 38, [{'weight': 67, 'name': 'T-H'}], [{'weight': 26, 'name': 'T-E'}], 0, False, False),
+            TaskBlueprint(6, 0, "T-G", 94, [{'weight': 92, 'name': 'T-H'}], [{'weight': 21, 'name': 'T-E'}], 0, False, False),
+            TaskBlueprint(7, 0, "T-H", 28, [], [{'weight': 67, 'name': 'T-F'}, {'weight': 92, 'name': 'T-G'}], 0, False, True)
+        ],
+        [
+            TaskBlueprint(0, 1, "T-A", 100, [{'weight': 60, 'name': 'T-B'}], [], 1, True, False),
+            TaskBlueprint(1, 1, "T-B", 39, [{'weight': 87, 'name': 'T-C'}], [{'weight': 60, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 1, "T-C", 88, [{'weight': 39, 'name': 'T-D'}], [{'weight': 87, 'name': 'T-B'}], 0, False, False),
+            TaskBlueprint(3, 1, "T-D", 50, [], [{'weight': 39, 'name': 'T-C'}], 0, False, True),
+        ]
+    ],
+    "worst-fit":
+    [
+        [
+            TaskBlueprint(0, 0, "T-A", 28, [{'weight': 13, 'name': 'T-B'}, {'weight': 21, 'name': 'T-C'}, {'weight': 29, 'name': 'T-D'}], [], 1, True, False),
+            TaskBlueprint(1, 0, "T-B", 73, [{'weight': 23, 'name': 'T-E'}], [{'weight': 13, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 0, "T-C", 84, [{'weight': 97, 'name': 'T-E'}], [{'weight': 21, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(3, 0, "T-D", 69, [{'weight': 80, 'name': 'T-E'}], [{'weight': 29, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(4, 0, "T-E", 94, [{'weight': 72, 'name': 'T-F'}, {'weight': 22, 'name': 'T-G'}], [{'weight': 23, 'name': 'T-B'}, {'weight': 97, 'name': 'T-C'}, {'weight': 80, 'name': 'T-D'}], 0, False, False),
+            TaskBlueprint(5, 0, "T-F", 7, [{'weight': 62, 'name': 'T-H'}], [{'weight': 72, 'name': 'T-E'}], 0, False, False),
+            TaskBlueprint(6, 0, "T-G", 80, [{'weight': 17, 'name': 'T-H'}], [{'weight': 22, 'name': 'T-E'}], 0, False, False),
+            TaskBlueprint(7, 0, "T-H", 91, [], [{'weight': 62, 'name': 'T-F'}, {'weight': 17, 'name': 'T-G'}], 0, False, True),
+        ],
+        [
+            TaskBlueprint(0, 1, "T-A", 20, [{'weight': 77, 'name': 'T-B'}], [], 1, True, False),
+            TaskBlueprint(1, 1, "T-B", 27, [{'weight': 99, 'name': 'T-C'}], [{'weight': 77, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 1, "T-C", 16, [{'weight': 74, 'name': 'T-D'}], [{'weight': 99, 'name': 'T-B'}], 0, False, False),
+            TaskBlueprint(3, 1, "T-D", 46, [], [{'weight': 74, 'name': 'T-C'}], 0, False, True),
+        ]
+    ],
+    "example": [
+        [
+            TaskBlueprint(0, 0, "T-A", 69, [{'weight': 12, 'name': 'T-B'}, {'weight': 3, 'name': 'T-C'}, {'weight': 13, 'name': 'T-D'}], [], 1, True, False),
+            TaskBlueprint(1, 0, "T-B", 92, [{'weight': 34, 'name': 'T-E'}], [{'weight': 12, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 0, "T-C", 50, [{'weight': 24, 'name': 'T-E'}], [{'weight': 3, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(3, 0, "T-D", 78, [{'weight': 32, 'name': 'T-E'}], [{'weight': 13, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(4, 0, "T-E", 24, [{'weight': 26, 'name': 'T-F'}, {'weight': 5, 'name': 'T-G'}], [{'weight': 34, 'name': 'T-B'}, {'weight': 24, 'name': 'T-C'}, {'weight': 32, 'name': 'T-D'}], 0, False, False),
+            TaskBlueprint(5, 0, "T-F", 33, [{'weight': 75, 'name': 'T-H'}], [{'weight': 26, 'name': 'T-E'}], 0, False, False),
+            TaskBlueprint(6, 0, "T-G", 20, [{'weight': 18, 'name': 'T-H'}], [{'weight': 5, 'name': 'T-E'}], 0, False, False),
+            TaskBlueprint(7, 0, "T-H", 89, [], [{'weight': 75, 'name': 'T-F'}, {'weight': 18, 'name': 'T-G'}], 0, False, True),
+        ],
+        # [
+        #     TaskBlueprint(0, 1, "T-A", 38, [{'weight': 85, 'name': 'T-B'}, {'weight': 85, 'name': 'T-C'}], [], 1, True, False),
+        #     TaskBlueprint(1, 1, "T-B", 24, [{'weight': 70, 'name': 'T-D'}], [{'weight': 85, 'name': 'T-A'}], 0, False, False),
+        #     TaskBlueprint(2, 1, "T-C", 100, [{'weight': 78, 'name': 'T-D'}], [{'weight': 85, 'name': 'T-A'}], 0, False, False),
+        #     TaskBlueprint(3, 1, "T-D", 75, [], [{'weight': 70, 'name': 'T-B'}, {'weight': 78, 'name': 'T-C'}], 0, False, True),
+        # ]
+    ],
+    "best-fit":
+    [
+        [
+            TaskBlueprint(0, 0, "T-A", 69, [{'weight': 12, 'name': 'T-B'}, {'weight': 3, 'name': 'T-C'}, {'weight': 13, 'name': 'T-D'}], [], 1, True, False),
+            TaskBlueprint(1, 0, "T-B", 92, [{'weight': 34, 'name': 'T-E'}], [{'weight': 12, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 0, "T-C", 50, [{'weight': 24, 'name': 'T-E'}], [{'weight': 3, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(3, 0, "T-D", 78, [{'weight': 32, 'name': 'T-E'}], [{'weight': 13, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(4, 0, "T-E", 24, [{'weight': 26, 'name': 'T-F'}, {'weight': 5, 'name': 'T-G'}], [{'weight': 34, 'name': 'T-B'}, {'weight': 24, 'name': 'T-C'}, {'weight': 32, 'name': 'T-D'}], 0, False, False),
+            TaskBlueprint(5, 0, "T-F", 33, [{'weight': 75, 'name': 'T-H'}], [{'weight': 26, 'name': 'T-E'}], 0, False, False),
+            TaskBlueprint(6, 0, "T-G", 20, [{'weight': 18, 'name': 'T-H'}], [{'weight': 5, 'name': 'T-E'}], 0, False, False),
+            TaskBlueprint(7, 0, "T-H", 89, [], [{'weight': 75, 'name': 'T-F'}, {'weight': 18, 'name': 'T-G'}], 0, False, True),
+        ],
+        [
+            TaskBlueprint(0, 1, "T-A", 38, [{'weight': 85, 'name': 'T-B'}, ], [], 1, True, False),
+            TaskBlueprint(1, 1, "T-B", 24, [{'weight': 70, 'name': 'T-C'}], [{'weight': 85, 'name': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 1, "T-C", 100, [{'weight': 78, 'name': 'T-D'}], [{'weight': 70, 'name': 'T-B'}], 0, False, False),
+            TaskBlueprint(3, 1, "T-D", 75, [], [{'weight': 78, 'name': 'T-C'}], 0, False, True),
+        ]
     ],
     "workflows":
     [

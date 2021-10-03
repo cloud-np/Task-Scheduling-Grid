@@ -16,12 +16,12 @@ if __name__ == "__main__":
     run_methods = [
         {"name": "holes FASTEST-FIT",
          "time_types": ["EFT", "EFT"], "fill_type": "FASTEST-FIT"},
-        {"name": "holes BEST-FIT",
-         "time_types": ["EFT", "EFT"], "fill_type": "BEST-FIT"},
-        {"name": "holes FIRST-FIT",
-         "time_types": ["EFT", "EFT"], "fill_type": "FIRST-FIT"},
-        {"name": "holes WORST-FIT",
-         "time_types": ["EFT", "EFT"], "fill_type": "WORST-FIT"},
+        # {"name": "holes BEST-FIT",
+        #  "time_types": ["EFT", "EFT"], "fill_type": "BEST-FIT"},
+        # {"name": "holes FIRST-FIT",
+        #  "time_types": ["EFT", "EFT"], "fill_type": "FIRST-FIT"},
+        # {"name": "holes WORST-FIT",
+        #  "time_types": ["EFT", "EFT"], "fill_type": "WORST-FIT"},
     ]
 
     # run_methods = [HOLE_METHOD_VARIATIONS["EFT_variations"]]
@@ -36,11 +36,19 @@ if __name__ == "__main__":
     #             # workflows = Workflow.load_random_workflows(machines, wf_size)
     #             machines, workflows = Example.load_all_types([n_cores, network * 125], wf_size)
     #             Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=True, save_sim=True, show_machines=False).run()
+    # avg_makespan from both for each bin packing method
+    import random
+    i = 0
     done = False
     while not done:
-        machines, workflows = Example.load_small_example()
-        # avg_makespan from both for each bin packing method
-        done = Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=True, save_sim=True, show_machines=True).run()
+        random.seed(i)
+        done = Simulation.load_paper_example(i)
+        i += 1
+    print(i - 1)
+
+    # BEST-FIT 35
+    # WORST-FIT 28
+    # Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=True, save_sim=True, show_machines=True).run()
 
     # machines, workflows = Example.load_medium_example()
     # machines = Machine.load_n_static_machines(2)
