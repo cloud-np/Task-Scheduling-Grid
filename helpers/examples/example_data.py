@@ -118,7 +118,7 @@ HOLE_METHOD_VARIATIONS = {
 SMALL_EXAMPLE = {
     "machines": [
         (0, 'M-0', 1, 1),
-        (1, 'M-1', 1, 1),
+        (1, 'M-1', 2, 1),
         # (2, 'M-2', 4, 1)
     ],
 

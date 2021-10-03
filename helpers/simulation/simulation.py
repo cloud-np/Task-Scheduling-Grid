@@ -44,16 +44,44 @@ class Simulation:
         for s in schedulers:
             Simulation.fake_schedule_fist_workflow(s.machines, s.workflows)
             s.example()
-            # avg_makespan = sum(wf.wf_len for wf in s.workflows) / s.n_wfs
-            # print(f"{avg_makespan}", end=" ")
+            avg_makespan = sum(wf.wf_len for wf in s.workflows) / s.n_wfs
+            print(f"{s.fill_method} {avg_makespan}")
+            for t in s.workflows[1].tasks:
+                print(t)
         print(f" iter: {count}")
 
-        min_s = min([(sum(wf.wf_len for wf in s.workflows) / s.n_wfs, s) for s in schedulers], key=lambda _s: _s[0])[1]
+        min_s = min(schedulers, key=lambda s: s.avg_workflow_makespan)
+        for s in schedulers:
+            if s.fill_method == FillMethod.FIRST_FIT:
+                fs = s
+            if s.fill_method == FillMethod.FASTEST_FIT:
+                frs = s
+            if s.fill_method == FillMethod.BEST_FIT:
+                bs = s
+            if s.fill_method == FillMethod.WORST_FIT:
+                ws = s
 
-        if min_s.fill_method == FillMethod.FIRST_FIT:
-            Visualizer.visualize_machines(min_s.machines)
-            return True
-        return False
+        if min_s.fill_method == FillMethod.FASTEST_FIT:
+            all_avg = (fs.avg_workflow_makespan, bs.avg_workflow_makespan, ws.avg_workflow_makespan)
+            for m in min_s.machines:
+                ok = False
+                for t in m.tasks:
+                    if t.wf_id == 1:
+                        ok = True
+                if ok is False:
+                    return False
+            if min_s.avg_workflow_makespan not in all_avg:
+                print(min_s.fill_method)
+                Visualizer.visualize_machines(min_s.machines)
+                return True
+            else:
+                return False
+        else:
+            return False
+        # if min_s.fill_method == FillMethod.WORST_FIT:
+        Visualizer.visualize_machines(min_s.machines)
+        #     return True
+        # return False
         # if self.visuals is True:
         #     Visualizer.compare_data([s.get_slowest_machine().time_on_machine for s in self.schedulers], [s.method_used_info(concise=True) for s in self.schedulers], len(self.workflows), save_fig=self.save_fig, show_fig=self.show_fig)
 

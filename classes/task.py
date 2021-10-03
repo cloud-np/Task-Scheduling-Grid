@@ -150,19 +150,19 @@ class Task:
 
     def __str__(self):
         format_str = ''
-        times = f" times --> {self.str_times()}" \
+        times = f"--> {self.str_times()}" \
             if self.start is not None and self.end is not None else ''
         # up_rank = f'up-rank: {round(self.up_rank, ROUND_DIGIT)}' \
         #     if self.up_rank is not None else ''
         # down_rank = f'down_rank: {round(self.down_rank, ROUND_DIGIT)} ' \
         #     if self.down_rank is not None else ''
-        runtime = f'runtime: {Fore.YELLOW}{round(self.runtime, ROUND_DIGIT)}{Fore.RESET} ' \
+        runtime = f'cost: {Fore.YELLOW}{round(self.runtime, ROUND_DIGIT)}{Fore.RESET} ' \
             if self.down_rank is not None else ''
 
         format_str += f'{Fore.CYAN}{self.name}{Fore.RESET} ' if self.name.startswith("Dummy") \
             else f'{self.str_col_id()} '
 
-        format_str += self.str_col_wf_id()
+        # format_str += self.str_col_wf_id()
         format_str += f'{times} {runtime} '
         format_str += f'M[{self.machine_id}]' if self.machine_id != -1 else ''
         return format_str

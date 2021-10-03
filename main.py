@@ -40,14 +40,19 @@ if __name__ == "__main__":
     import random
     i = 0
     done = False
+    # seed = 1
+    # random.seed(seed)
+    # done = Simulation.load_paper_example(seed)
     while not done:
         random.seed(i)
         done = Simulation.load_paper_example(i)
         i += 1
     print(i - 1)
 
-    # BEST-FIT 35
-    # WORST-FIT 28
+    # FIRST-FIT 89
+    # FASTEST-FIT 3
+    # BEST-FIT 1
+    # WORST-FIT 0
     # Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=True, save_sim=True, show_machines=True).run()
 
     # machines, workflows = Example.load_medium_example()
