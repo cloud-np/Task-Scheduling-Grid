@@ -75,6 +75,7 @@ class Simulation:
 
         t_2.set_times(37.5, 87.5)
         t_6.set_times(156.5, 176.5)
+        m_0.holes.add(Hole(0, t_2.start, t_6.start - 0))
         m_0.holes.add(Hole(t_2.end, t_6.start, t_6.start - t_2.end))
 
         t_7.set_times(270, 300)
