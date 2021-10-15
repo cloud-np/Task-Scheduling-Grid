@@ -15,3 +15,7 @@ def get_id_from_name(name):
         if flag:
             str_id += name[i]
     return int(str_id)
+
+
+def find_perc_diff(a, b):
+    return round(((a - b) / a) * 100, 2)

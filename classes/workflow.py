@@ -51,7 +51,11 @@ class Workflow:
 
         # 4. Generate critical path, up_rank and down_rank
         self.cp_info = {"critical_path": set(), "entry": None, "exit": None}
-        self.create_critical_path()
+
+        # Calculate downward and upward ranks
+        calculate_upward_ranks(self.tasks)
+        # calculate_downward_ranks(self.tasks)
+        # self.create_critical_path()
 
         # Calc ccr which means also the avg_comp and avg_com costs
         self.ccr = self.calc_ccr()
@@ -64,14 +68,6 @@ class Workflow:
         # Assign to all the tasks the wf_deadline
         for t in self.tasks:
             t.set_wf_deadline(self.deadline)
-
-    def reset(self) -> None:
-        sorted(self.tasks, key=lambda t: t.id)
-        [t.reset() for t in self.tasks]
-
-    @staticmethod
-    def reset_many(wfs) -> None:
-        [wf.reset() for wf in wfs]
 
     def set_scheduled(self, is_scheduled: bool):
         if is_scheduled:
@@ -163,10 +159,6 @@ class Workflow:
         return all_tasks
 
     def create_critical_path(self):
-        # Calculate downward and upward ranks
-        calculate_upward_ranks(self.tasks)
-        calculate_downward_ranks(self.tasks)
-
         for task in self.tasks:
             if task.down_rank is None:
                 print(task)
@@ -240,10 +232,8 @@ class Workflow:
                 parents: list = task.get_tasks_from_names(
                     tasks[wf_id], is_child_tasks=False)
                 # We need at least -> len(Edges) == len(children)
-                children_edges = [Edge(weight=children_dags[wf_id][task.id - 1]
-                                       [i]["weight"], node=child) for i, child in enumerate(children)]
-                parents_edges = [Edge(weight=parents_dags[wf_id][task.id - 1][i]
-                                      ["weight"], node=parent) for i, parent in enumerate(parents)]
+                children_edges = [Edge(weight=children_dags[wf_id][task.id - 1][i]["w"], node=child) for i, child in enumerate(children)]
+                parents_edges = [Edge(weight=parents_dags[wf_id][task.id - 1][i]["w"], node=parent) for i, parent in enumerate(parents)]
                 # We use this function to check if everything went smoothly in the parsing
                 task.set_edges(children_edges, parents_edges)
 
@@ -276,8 +266,8 @@ class Workflow:
         return workflows
 
     @staticmethod
-    def load_all_types_wfs(machines, n, path: str = './data'):
-        workflows = [Workflow(id_=i, file_path=f"{path}/{wft}/{wft}_{n}.json",
+    def load_all_types_wfs(machines, n, n_tasks, path: str = './data'):
+        workflows = [Workflow(id_=i + (n * len(WF_TYPES)), file_path=f"{path}/{wft}/{wft}_{n_tasks}_{n}.json",
                      wf_type=wft, machines=machines, add_dummies=True) for i, wft in enumerate(WF_TYPES)]
         return workflows
 
@@ -401,10 +391,3 @@ class Workflow:
 
         if sort_tasks is True:
             self.tasks.sort(key=lambda t: t.id)
-
-    def view_machine_holes(self):
-        for m in self.machines:
-            # print(f"M[{m.id}]")
-            print(m)
-            for hole in m.holes:
-                print(f"\t{hole}")

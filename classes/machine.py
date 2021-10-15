@@ -36,15 +36,9 @@ class Hole:
     def __str__(self):
         return f"gap: {round(self.gap, 3)} ({round(self.start, 2)} - {round(self.end, 2)})"
 
-    def is_fillable(self, task, m_id):
+    def is_fillable(self, end):
         # Check if the parent end interfere with the child start
-        # pred: predicted
-        # pred_start, pred_end = time_calc.compute_execution_time(task, m_id, self.start)
-        pred_start, pred_end = scheduler.compute_execution_time(task, m_id, self.start)
-        if pred_end <= self.end:
-            return {"start": pred_start, "end": pred_end, "gap_left": self.gap - (pred_end - pred_start)}
-        else:
-            return None
+        return end <= self.end
 
 
 @dataclass
@@ -67,7 +61,7 @@ class Machine:
         # self.memory = memory
         # self.cpti = cpti  # cost per time interval
         self.speed = speed
-        self.holes: Set = set()
+        self.holes: Set[Hole] = set()
         self.holes_saved_time = 0
         self.holes_filled = 0
         # self.network_speed = network_speed
@@ -76,44 +70,70 @@ class Machine:
     def get_blueprint(self):
         return MachineBlueprint(self.id, self.name, self.n_cpu, self.speed, self.network_kbps)
 
+    def contains_wf_id(self, wf_id):
+        for t in self.tasks:
+            if t.wf_id == wf_id:
+                return True
+        return False
+
     @staticmethod
     def blueprint_to_machine(blp: MachineBlueprint):
         return Machine(id_=blp.id_, name=blp.name, n_cpu=blp.n_cpu, speed=blp.speed, network_kbps=blp.network_kbps)
 
+    def find_holes(self):
+        old_end = 0
+        for t in sorted(self.tasks, key=lambda t: t.start):
+            gap = t.start - old_end
+            if gap >= MIN_GAP_SIZE:
+                self.holes.add(Hole(start=old_end, end=t.start, gap=gap))
+            old_end = t.end
+
+    def add_task_to_hole(self, task, hole):
+        self.add_task(task)
+        self.holes_filled += 1
+        self.holes_saved_time += task.end - task.start
+        self.remove_hole(hole)
+
     def add_task(self, task):
-        if DEBUG and (task in self.tasks):
-            raise Exception(
-                f"The task has already been added. In machine {self.id}\n {task}")
-        gap = task.start - self.time_on_machine
-
-        if gap >= MIN_GAP_SIZE:
-            self.holes.add(Hole(start=self.time_on_machine, end=task.start, gap=gap))
-
+        self.find_holes()
         if self.time_on_machine <= task.end:
             self.time_on_machine = task.end
-
-        task.added_to_hole = False
         self.tasks.append(task)
 
-    # This runs only after the task.machine_id is already set.
-    def add_task_to_hole(self, task, hole):
-        if task.end != 0:
-            before_start_gap = task.start - hole.start
-            after_end_gap = hole.end - task.end
+    # def add_task1(self, task):
+    #     if DEBUG and (task in self.tasks):
+    #         raise Exception(
+    #             f"The task has already been added. In machine {self.id}\n {task}")
+    #     gap = task.start - self.time_on_machine
 
-            # New holes get created based on the minimum gap we added.
-            if before_start_gap >= MIN_GAP_SIZE:
-                self.holes.add(
-                    Hole(start=hole.start, end=task.start, gap=before_start_gap))
-            elif after_end_gap >= MIN_GAP_SIZE:
-                self.holes.add(
-                    Hole(start=task.end, end=hole.end, gap=after_end_gap))
+    #     if gap >= MIN_GAP_SIZE:
+    #         self.holes.add(Hole(start=self.time_on_machine, end=task.start, gap=gap))
 
-            task.added_to_hole = hole
-            hole.time_saved = hole.gap - before_start_gap - after_end_gap
-            self.holes_saved_time += hole.time_saved
-            self.remove_hole(hole)
-        self.tasks.append(task)
+    #     if self.time_on_machine <= task.end:
+    #         self.time_on_machine = task.end
+
+    #     task.added_to_hole = False
+    #     self.tasks.append(task)
+
+    # # This runs only after the task.machine_id is already set.
+    # def add_task_to_hole1(self, task, hole):
+    #     if task.end != 0:
+    #         before_start_gap = task.start - hole.start
+    #         after_end_gap = hole.end - task.end
+
+    #         # New holes get created based on the minimum gap we added.
+    #         if before_start_gap >= MIN_GAP_SIZE:
+    #             self.holes.add(
+    #                 Hole(start=hole.start, end=task.start, gap=before_start_gap))
+    #         elif after_end_gap >= MIN_GAP_SIZE:
+    #             self.holes.add(
+    #                 Hole(start=task.end, end=hole.end, gap=after_end_gap))
+
+    #         task.added_to_hole = hole
+    #         hole.time_saved = hole.gap - before_start_gap - after_end_gap
+    #         self.holes_saved_time += hole.time_saved
+    #         self.remove_hole(hole)
+    #     self.tasks.append(task)
     # def get_util_time(self, schedule_len):
     #     return (schedule_len + self.get_idle_time()) - self.time_on_machine
 
@@ -254,6 +274,7 @@ class Machine:
     @staticmethod
     def load_n_static_machines(n: int, network):
         cpus = [2, 1, 4, 2,  # 4
+        # cpus = [4, 4, 4, 4,  # 4
                 1, 4, 2, 3,  # 8
                 2, 1, 4, 2,
                 3, 4, 2, 3,  # 16

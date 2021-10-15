@@ -16,6 +16,7 @@ helpers/githubHeft
 *.txt
 venv/
 linux_env/
-simulation_info.xlsx
 sim_files/
 simulation_output/
+sim*.txt
+sim*.xlsx

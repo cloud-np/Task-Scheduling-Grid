@@ -16,32 +16,32 @@ HOLE_METHOD_VARIATIONS = {
 
     "EFT_variations": [
         # EST - EST
-        {"name": "holes BEST-FIT",
-         "time_types": ["EST", "EST"], "fill_type": "BEST-FIT"},
-        {"name": "holes FASTEST-FIT",
-         "time_types": ["EST", "EST"], "fill_type": "FASTEST-FIT"},
-        {"name": "holes FIRST-FIT",
-         "time_types": ["EST", "EST"], "fill_type": "FIRST-FIT"},
-        {"name": "holes WORST-FIT",
-         "time_types": ["EST", "EST"], "fill_type": "WORST-FIT"},
+        # {"name": "holes BEST-FIT",
+        #  "time_types": ["EST", "EST"], "fill_type": "BEST-FIT"},
+        # {"name": "holes FASTEST-FIT",
+        #  "time_types": ["EST", "EST"], "fill_type": "FASTEST-FIT"},
+        # {"name": "holes FIRST-FIT",
+        #  "time_types": ["EST", "EST"], "fill_type": "FIRST-FIT"},
+        # {"name": "holes WORST-FIT",
+        #  "time_types": ["EST", "EST"], "fill_type": "WORST-FIT"},
         # EFT - EST
-        {"name": "holes FASTEST-FIT",
-         "time_types": ["EFT", "EST"], "fill_type": "FASTEST-FIT"},
-        {"name": "holes BEST-FIT",
-         "time_types": ["EFT", "EST"], "fill_type": "BEST-FIT"},
-        {"name": "holes FIRST-FIT",
-         "time_types": ["EFT", "EST"], "fill_type": "FIRST-FIT"},
-        {"name": "holes WORST-FIT",
-         "time_types": ["EFT", "EST"], "fill_type": "WORST-FIT"},
-        # EFT - EFT
-        {"name": "holes FASTEST-FIT",
-         "time_types": ["EFT", "EFT"], "fill_type": "FASTEST-FIT"},
-        {"name": "holes BEST-FIT",
-         "time_types": ["EFT", "EFT"], "fill_type": "BEST-FIT"},
-        {"name": "holes FIRST-FIT",
-         "time_types": ["EFT", "EFT"], "fill_type": "FIRST-FIT"},
-        {"name": "holes WORST-FIT",
-         "time_types": ["EFT", "EFT"], "fill_type": "WORST-FIT"},
+        # {"name": "holes FASTEST-FIT",
+        #  "time_types": ["EFT", "EST"], "fill_type": "FASTEST-FIT"},
+        # {"name": "holes BEST-FIT",
+        #  "time_types": ["EFT", "EST"], "fill_type": "BEST-FIT"},
+        # {"name": "holes FIRST-FIT",
+        #  "time_types": ["EFT", "EST"], "fill_type": "FIRST-FIT"},
+        # {"name": "holes WORST-FIT",
+        #  "time_types": ["EFT", "EST"], "fill_type": "WORST-FIT"},
+        # # EFT - EFT
+        # {"name": "holes FASTEST-FIT",
+        #  "time_types": ["EFT", "EFT"], "fill_type": "FASTEST-FIT"},
+        # {"name": "holes BEST-FIT",
+        #  "time_types": ["EFT", "EFT"], "fill_type": "BEST-FIT"},
+        # {"name": "holes FIRST-FIT",
+        #  "time_types": ["EFT", "EFT"], "fill_type": "FIRST-FIT"},
+        # {"name": "holes WORST-FIT",
+        #  "time_types": ["EFT", "EFT"], "fill_type": "WORST-FIT"},
         # EST - EFT
         {"name": "holes FASTEST-FIT",
          "time_types": ["EST", "EFT"], "fill_type": "FASTEST-FIT"},
@@ -110,7 +110,7 @@ HOLE_METHOD_VARIATIONS = {
     "compositions": [
         {"name": "c1", "time_types": ["EST"], "fill_type": "NO-FILL"},
         # {"name": "c2", "time_types": ["EST"], "fill_type": "NO-FILL"},
-        {"name": "c3", "time_types": ["EST"], "fill_type": "NO-FILL"},
+        # {"name": "c3", "time_types": ["EST"], "fill_type": "NO-FILL"},
     ]
 
 }
@@ -125,132 +125,132 @@ SMALL_EXAMPLE = {
     "first-fit":
     [
         [
-            TaskBlueprint(0, 0, "T-A", 1, [{'weight': 15, 'name': 'T-B'}, {'weight': 13, 'name': 'T-C'}, {'weight': 1, 'name': 'T-D'}], [], 1, True, False),
-            TaskBlueprint(1, 0, "T-B", 74, [{'weight': 38, 'name': 'T-E'}], [{'weight': 15, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 0, "T-C", 34, [{'weight': 27, 'name': 'T-E'}], [{'weight': 13, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(3, 0, "T-D", 2, [{'weight': 56, 'name': 'T-E'}], [{'weight': 1, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(4, 0, "T-E", 73, [{'weight': 16, 'name': 'T-F'}, {'weight': 97, 'name': 'T-G'}], [{'weight': 38, 'name': 'T-B'}, {'weight': 27, 'name': 'T-C'}, {'weight': 56, 'name': 'T-D'}], 0, False, False),
-            TaskBlueprint(5, 0, "T-F", 23, [{'weight': 34, 'name': 'T-H'}], [{'weight': 16, 'name': 'T-E'}], 0, False, False),
-            TaskBlueprint(6, 0, "T-G", 79, [{'weight': 53, 'name': 'T-H'}], [{'weight': 97, 'name': 'T-E'}], 0, False, False),
-            TaskBlueprint(7, 0, "T-H", 100, [], [{'weight': 34, 'name': 'T-F'}, {'weight': 53, 'name': 'T-G'}], 0, False, True),
+            TaskBlueprint(0, 0, "T-A", 1, [{'w': 15, 'n': 'T-B'}, {'w': 13, 'n': 'T-C'}, {'w': 1, 'n': 'T-D'}], [], 1, True, False),
+            TaskBlueprint(1, 0, "T-B", 74, [{'w': 38, 'n': 'T-E'}], [{'w': 15, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 0, "T-C", 34, [{'w': 27, 'n': 'T-E'}], [{'w': 13, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(3, 0, "T-D", 2, [{'w': 56, 'n': 'T-E'}], [{'w': 1, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(4, 0, "T-E", 73, [{'w': 16, 'n': 'T-F'}, {'w': 97, 'n': 'T-G'}], [{'w': 38, 'n': 'T-B'}, {'w': 27, 'n': 'T-C'}, {'w': 56, 'n': 'T-D'}], 0, False, False),
+            TaskBlueprint(5, 0, "T-F", 23, [{'w': 34, 'n': 'T-H'}], [{'w': 16, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(6, 0, "T-G", 79, [{'w': 53, 'n': 'T-H'}], [{'w': 97, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(7, 0, "T-H", 100, [], [{'w': 34, 'n': 'T-F'}, {'w': 53, 'n': 'T-G'}], 0, False, True),
         ],
         [
-            TaskBlueprint(0, 1, "T-A", 14, [{'weight': 46, 'name': 'T-B'}], [], 1, True, False),
-            TaskBlueprint(1, 1, "T-B", 65, [{'weight': 48, 'name': 'T-C'}], [{'weight': 46, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 1, "T-C", 79, [{'weight': 77, 'name': 'T-D'}], [{'weight': 48, 'name': 'T-B'}], 0, False, False),
-            TaskBlueprint(3, 1, "T-D", 30, [], [{'weight': 77, 'name': 'T-C'}], 0, False, True),
+            TaskBlueprint(0, 1, "T-A", 14, [{'w': 46, 'n': 'T-B'}], [], 1, True, False),
+            TaskBlueprint(1, 1, "T-B", 65, [{'w': 48, 'n': 'T-C'}], [{'w': 46, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 1, "T-C", 79, [{'w': 77, 'n': 'T-D'}], [{'w': 48, 'n': 'T-B'}], 0, False, False),
+            TaskBlueprint(3, 1, "T-D", 30, [], [{'w': 77, 'n': 'T-C'}], 0, False, True),
         ]
     ],
     "fastest-fit":
     [
         [
-            TaskBlueprint(0, 0, "T-A", 76, [{'weight': 86, 'name': 'T-B'}, {'weight': 9, 'name': 'T-C'}, {'weight': 70, 'name': 'T-D'}], [], 1, True, False),
-            TaskBlueprint(1, 0, "T-B", 79, [{'weight': 55, 'name': 'T-E'}], [{'weight': 86, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 0, "T-C", 50, [{'weight': 50, 'name': 'T-E'}], [{'weight': 9, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(3, 0, "T-D", 61, [{'weight': 77, 'name': 'T-E'}], [{'weight': 70, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(4, 0, "T-E", 76, [{'weight': 26, 'name': 'T-F'}, {'weight': 21, 'name': 'T-G'}], [{'weight': 55, 'name': 'T-B'}, {'weight': 50, 'name': 'T-C'}, {'weight': 77, 'name': 'T-D'}], 0, False, False),
-            TaskBlueprint(5, 0, "T-F", 38, [{'weight': 67, 'name': 'T-H'}], [{'weight': 26, 'name': 'T-E'}], 0, False, False),
-            TaskBlueprint(6, 0, "T-G", 94, [{'weight': 92, 'name': 'T-H'}], [{'weight': 21, 'name': 'T-E'}], 0, False, False),
-            TaskBlueprint(7, 0, "T-H", 28, [], [{'weight': 67, 'name': 'T-F'}, {'weight': 92, 'name': 'T-G'}], 0, False, True)
+            TaskBlueprint(0, 0, "T-A", 76, [{'w': 86, 'n': 'T-B'}, {'w': 9, 'n': 'T-C'}, {'w': 70, 'n': 'T-D'}], [], 1, True, False),
+            TaskBlueprint(1, 0, "T-B", 79, [{'w': 55, 'n': 'T-E'}], [{'w': 86, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 0, "T-C", 50, [{'w': 50, 'n': 'T-E'}], [{'w': 9, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(3, 0, "T-D", 61, [{'w': 77, 'n': 'T-E'}], [{'w': 70, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(4, 0, "T-E", 76, [{'w': 26, 'n': 'T-F'}, {'w': 21, 'n': 'T-G'}], [{'w': 55, 'n': 'T-B'}, {'w': 50, 'n': 'T-C'}, {'w': 77, 'n': 'T-D'}], 0, False, False),
+            TaskBlueprint(5, 0, "T-F", 38, [{'w': 67, 'n': 'T-H'}], [{'w': 26, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(6, 0, "T-G", 94, [{'w': 92, 'n': 'T-H'}], [{'w': 21, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(7, 0, "T-H", 28, [], [{'w': 67, 'n': 'T-F'}, {'w': 92, 'n': 'T-G'}], 0, False, True)
         ],
         [
-            TaskBlueprint(0, 1, "T-A", 100, [{'weight': 60, 'name': 'T-B'}], [], 1, True, False),
-            TaskBlueprint(1, 1, "T-B", 39, [{'weight': 87, 'name': 'T-C'}], [{'weight': 60, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 1, "T-C", 88, [{'weight': 39, 'name': 'T-D'}], [{'weight': 87, 'name': 'T-B'}], 0, False, False),
-            TaskBlueprint(3, 1, "T-D", 50, [], [{'weight': 39, 'name': 'T-C'}], 0, False, True),
+            TaskBlueprint(0, 1, "T-A", 100, [{'w': 60, 'n': 'T-B'}], [], 1, True, False),
+            TaskBlueprint(1, 1, "T-B", 39, [{'w': 87, 'n': 'T-C'}], [{'w': 60, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 1, "T-C", 88, [{'w': 39, 'n': 'T-D'}], [{'w': 87, 'n': 'T-B'}], 0, False, False),
+            TaskBlueprint(3, 1, "T-D", 50, [], [{'w': 39, 'n': 'T-C'}], 0, False, True),
         ]
     ],
     "worst-fit":
     [
         [
-            TaskBlueprint(0, 0, "T-A", 28, [{'weight': 13, 'name': 'T-B'}, {'weight': 21, 'name': 'T-C'}, {'weight': 29, 'name': 'T-D'}], [], 1, True, False),
-            TaskBlueprint(1, 0, "T-B", 73, [{'weight': 23, 'name': 'T-E'}], [{'weight': 13, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 0, "T-C", 84, [{'weight': 97, 'name': 'T-E'}], [{'weight': 21, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(3, 0, "T-D", 69, [{'weight': 80, 'name': 'T-E'}], [{'weight': 29, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(4, 0, "T-E", 94, [{'weight': 72, 'name': 'T-F'}, {'weight': 22, 'name': 'T-G'}], [{'weight': 23, 'name': 'T-B'}, {'weight': 97, 'name': 'T-C'}, {'weight': 80, 'name': 'T-D'}], 0, False, False),
-            TaskBlueprint(5, 0, "T-F", 7, [{'weight': 62, 'name': 'T-H'}], [{'weight': 72, 'name': 'T-E'}], 0, False, False),
-            TaskBlueprint(6, 0, "T-G", 80, [{'weight': 17, 'name': 'T-H'}], [{'weight': 22, 'name': 'T-E'}], 0, False, False),
-            TaskBlueprint(7, 0, "T-H", 91, [], [{'weight': 62, 'name': 'T-F'}, {'weight': 17, 'name': 'T-G'}], 0, False, True),
+            TaskBlueprint(0, 0, "T-A", 28, [{'w': 13, 'n': 'T-B'}, {'w': 21, 'n': 'T-C'}, {'w': 29, 'n': 'T-D'}], [], 1, True, False),
+            TaskBlueprint(1, 0, "T-B", 73, [{'w': 23, 'n': 'T-E'}], [{'w': 13, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 0, "T-C", 84, [{'w': 97, 'n': 'T-E'}], [{'w': 21, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(3, 0, "T-D", 69, [{'w': 80, 'n': 'T-E'}], [{'w': 29, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(4, 0, "T-E", 94, [{'w': 72, 'n': 'T-F'}, {'w': 22, 'n': 'T-G'}], [{'w': 23, 'n': 'T-B'}, {'w': 97, 'n': 'T-C'}, {'w': 80, 'n': 'T-D'}], 0, False, False),
+            TaskBlueprint(5, 0, "T-F", 7, [{'w': 62, 'n': 'T-H'}], [{'w': 72, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(6, 0, "T-G", 80, [{'w': 17, 'n': 'T-H'}], [{'w': 22, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(7, 0, "T-H", 91, [], [{'w': 62, 'n': 'T-F'}, {'w': 17, 'n': 'T-G'}], 0, False, True),
         ],
         [
-            TaskBlueprint(0, 1, "T-A", 20, [{'weight': 77, 'name': 'T-B'}], [], 1, True, False),
-            TaskBlueprint(1, 1, "T-B", 27, [{'weight': 99, 'name': 'T-C'}], [{'weight': 77, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 1, "T-C", 16, [{'weight': 74, 'name': 'T-D'}], [{'weight': 99, 'name': 'T-B'}], 0, False, False),
-            TaskBlueprint(3, 1, "T-D", 46, [], [{'weight': 74, 'name': 'T-C'}], 0, False, True),
+            TaskBlueprint(0, 1, "T-A", 20, [{'w': 77, 'n': 'T-B'}], [], 1, True, False),
+            TaskBlueprint(1, 1, "T-B", 27, [{'w': 99, 'n': 'T-C'}], [{'w': 77, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 1, "T-C", 16, [{'w': 74, 'n': 'T-D'}], [{'w': 99, 'n': 'T-B'}], 0, False, False),
+            TaskBlueprint(3, 1, "T-D", 46, [], [{'w': 74, 'n': 'T-C'}], 0, False, True),
         ]
     ],
     "example": [
         [
-            TaskBlueprint(0, 0, "T-A", 69, [{'weight': 12, 'name': 'T-B'}, {'weight': 3, 'name': 'T-C'}, {'weight': 13, 'name': 'T-D'}], [], 1, True, False),
-            TaskBlueprint(1, 0, "T-B", 92, [{'weight': 34, 'name': 'T-E'}], [{'weight': 12, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 0, "T-C", 50, [{'weight': 24, 'name': 'T-E'}], [{'weight': 3, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(3, 0, "T-D", 78, [{'weight': 32, 'name': 'T-E'}], [{'weight': 13, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(4, 0, "T-E", 24, [{'weight': 26, 'name': 'T-F'}, {'weight': 5, 'name': 'T-G'}], [{'weight': 34, 'name': 'T-B'}, {'weight': 24, 'name': 'T-C'}, {'weight': 32, 'name': 'T-D'}], 0, False, False),
-            TaskBlueprint(5, 0, "T-F", 33, [{'weight': 75, 'name': 'T-H'}], [{'weight': 26, 'name': 'T-E'}], 0, False, False),
-            TaskBlueprint(6, 0, "T-G", 20, [{'weight': 18, 'name': 'T-H'}], [{'weight': 5, 'name': 'T-E'}], 0, False, False),
-            TaskBlueprint(7, 0, "T-H", 89, [], [{'weight': 75, 'name': 'T-F'}, {'weight': 18, 'name': 'T-G'}], 0, False, True),
+            TaskBlueprint(0, 0, "T-A", 69, [{'w': 12, 'n': 'T-B'}, {'w': 3, 'n': 'T-C'}, {'w': 13, 'n': 'T-D'}], [], 1, True, False),
+            TaskBlueprint(1, 0, "T-B", 92, [{'w': 34, 'n': 'T-E'}], [{'w': 12, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 0, "T-C", 50, [{'w': 24, 'n': 'T-E'}], [{'w': 3, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(3, 0, "T-D", 78, [{'w': 32, 'n': 'T-E'}], [{'w': 13, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(4, 0, "T-E", 24, [{'w': 26, 'n': 'T-F'}, {'w': 5, 'n': 'T-G'}], [{'w': 34, 'n': 'T-B'}, {'w': 24, 'n': 'T-C'}, {'w': 32, 'n': 'T-D'}], 0, False, False),
+            TaskBlueprint(5, 0, "T-F", 33, [{'w': 75, 'n': 'T-H'}], [{'w': 26, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(6, 0, "T-G", 20, [{'w': 18, 'n': 'T-H'}], [{'w': 5, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(7, 0, "T-H", 89, [], [{'w': 75, 'n': 'T-F'}, {'w': 18, 'n': 'T-G'}], 0, False, True),
         ],
         # [
-        #     TaskBlueprint(0, 1, "T-A", 38, [{'weight': 85, 'name': 'T-B'}, {'weight': 85, 'name': 'T-C'}], [], 1, True, False),
-        #     TaskBlueprint(1, 1, "T-B", 24, [{'weight': 70, 'name': 'T-D'}], [{'weight': 85, 'name': 'T-A'}], 0, False, False),
-        #     TaskBlueprint(2, 1, "T-C", 100, [{'weight': 78, 'name': 'T-D'}], [{'weight': 85, 'name': 'T-A'}], 0, False, False),
-        #     TaskBlueprint(3, 1, "T-D", 75, [], [{'weight': 70, 'name': 'T-B'}, {'weight': 78, 'name': 'T-C'}], 0, False, True),
+        #     TaskBlueprint(0, 1, "T-A", 38, [{'w': 85, 'n': 'T-B'}, {'w': 85, 'n': 'T-C'}], [], 1, True, False),
+        #     TaskBlueprint(1, 1, "T-B", 24, [{'w': 70, 'n': 'T-D'}], [{'w': 85, 'n': 'T-A'}], 0, False, False),
+        #     TaskBlueprint(2, 1, "T-C", 100, [{'w': 78, 'n': 'T-D'}], [{'w': 85, 'n': 'T-A'}], 0, False, False),
+        #     TaskBlueprint(3, 1, "T-D", 75, [], [{'w': 70, 'n': 'T-B'}, {'w': 78, 'n': 'T-C'}], 0, False, True),
         # ]
     ],
     "best-fit":
     [
         [
-            TaskBlueprint(0, 0, "T-A", 69, [{'weight': 12, 'name': 'T-B'}, {'weight': 3, 'name': 'T-C'}, {'weight': 13, 'name': 'T-D'}], [], 1, True, False),
-            TaskBlueprint(1, 0, "T-B", 92, [{'weight': 34, 'name': 'T-E'}], [{'weight': 12, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 0, "T-C", 50, [{'weight': 24, 'name': 'T-E'}], [{'weight': 3, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(3, 0, "T-D", 78, [{'weight': 32, 'name': 'T-E'}], [{'weight': 13, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(4, 0, "T-E", 24, [{'weight': 26, 'name': 'T-F'}, {'weight': 5, 'name': 'T-G'}], [{'weight': 34, 'name': 'T-B'}, {'weight': 24, 'name': 'T-C'}, {'weight': 32, 'name': 'T-D'}], 0, False, False),
-            TaskBlueprint(5, 0, "T-F", 33, [{'weight': 75, 'name': 'T-H'}], [{'weight': 26, 'name': 'T-E'}], 0, False, False),
-            TaskBlueprint(6, 0, "T-G", 20, [{'weight': 18, 'name': 'T-H'}], [{'weight': 5, 'name': 'T-E'}], 0, False, False),
-            TaskBlueprint(7, 0, "T-H", 89, [], [{'weight': 75, 'name': 'T-F'}, {'weight': 18, 'name': 'T-G'}], 0, False, True),
+            TaskBlueprint(0, 0, "T-A", 69, [{'w': 12, 'n': 'T-B'}, {'w': 3, 'n': 'T-C'}, {'w': 13, 'n': 'T-D'}], [], 1, True, False),
+            TaskBlueprint(1, 0, "T-B", 92, [{'w': 34, 'n': 'T-E'}], [{'w': 12, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 0, "T-C", 50, [{'w': 24, 'n': 'T-E'}], [{'w': 3, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(3, 0, "T-D", 78, [{'w': 32, 'n': 'T-E'}], [{'w': 13, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(4, 0, "T-E", 24, [{'w': 26, 'n': 'T-F'}, {'w': 5, 'n': 'T-G'}], [{'w': 34, 'n': 'T-B'}, {'w': 24, 'n': 'T-C'}, {'w': 32, 'n': 'T-D'}], 0, False, False),
+            TaskBlueprint(5, 0, "T-F", 33, [{'w': 75, 'n': 'T-H'}], [{'w': 26, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(6, 0, "T-G", 20, [{'w': 18, 'n': 'T-H'}], [{'w': 5, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(7, 0, "T-H", 89, [], [{'w': 75, 'n': 'T-F'}, {'w': 18, 'n': 'T-G'}], 0, False, True),
         ],
         [
-            TaskBlueprint(0, 1, "T-A", 38, [{'weight': 85, 'name': 'T-B'}, ], [], 1, True, False),
-            TaskBlueprint(1, 1, "T-B", 24, [{'weight': 70, 'name': 'T-C'}], [{'weight': 85, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 1, "T-C", 100, [{'weight': 78, 'name': 'T-D'}], [{'weight': 70, 'name': 'T-B'}], 0, False, False),
-            TaskBlueprint(3, 1, "T-D", 75, [], [{'weight': 78, 'name': 'T-C'}], 0, False, True),
+            TaskBlueprint(0, 1, "T-A", 38, [{'w': 85, 'n': 'T-B'}, ], [], 1, True, False),
+            TaskBlueprint(1, 1, "T-B", 24, [{'w': 70, 'n': 'T-C'}], [{'w': 85, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 1, "T-C", 100, [{'w': 78, 'n': 'T-D'}], [{'w': 70, 'n': 'T-B'}], 0, False, False),
+            TaskBlueprint(3, 1, "T-D", 75, [], [{'w': 78, 'n': 'T-C'}], 0, False, True),
         ]
     ],
     "workflows":
     [
         [
-            TaskBlueprint(0, 0, "T-A", 67, [{'weight': 1, 'name': 'T-B'}, {'weight': 50, 'name': 'T-C'}, {'weight': 26, 'name': 'T-D'}], [], 1, True, False),
-            TaskBlueprint(1, 0, "T-B", 54, [{'weight': 51, 'name': 'T-E'}], [{'weight': 1, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 0, "T-C", 63, [{'weight': 56, 'name': 'T-E'}], [{'weight': 50, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(3, 0, "T-D", 26, [{'weight': 98, 'name': 'T-E'}], [{'weight': 26, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(4, 0, "T-E", 25, [{'weight': 73, 'name': 'T-F'}, {'weight': 33, 'name': 'T-G'}], [{'weight': 51, 'name': 'T-B'}, {'weight': 56, 'name': 'T-C'}, {'weight': 98, 'name': 'T-D'}], 0, False, False),
-            TaskBlueprint(5, 0, "T-F", 26, [{'weight': 16, 'name': 'T-H'}], [{'weight': 73, 'name': 'T-E'}], 0, False, False),
-            TaskBlueprint(6, 0, "T-G", 7, [{'weight': 41, 'name': 'T-H'}], [{'weight': 33, 'name': 'T-E'}], 0, False, False),
-            TaskBlueprint(7, 0, "T-H", 61, [], [{'weight': 16, 'name': 'T-F'}, {'weight': 41, 'name': 'T-G'}], 0, False, True)
+            TaskBlueprint(0, 0, "T-A", 67, [{'w': 1, 'n': 'T-B'}, {'w': 50, 'n': 'T-C'}, {'w': 26, 'n': 'T-D'}], [], 1, True, False),
+            TaskBlueprint(1, 0, "T-B", 54, [{'w': 51, 'n': 'T-E'}], [{'w': 1, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 0, "T-C", 63, [{'w': 56, 'n': 'T-E'}], [{'w': 50, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(3, 0, "T-D", 26, [{'w': 98, 'n': 'T-E'}], [{'w': 26, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(4, 0, "T-E", 25, [{'w': 73, 'n': 'T-F'}, {'w': 33, 'n': 'T-G'}], [{'w': 51, 'n': 'T-B'}, {'w': 56, 'n': 'T-C'}, {'w': 98, 'n': 'T-D'}], 0, False, False),
+            TaskBlueprint(5, 0, "T-F", 26, [{'w': 16, 'n': 'T-H'}], [{'w': 73, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(6, 0, "T-G", 7, [{'w': 41, 'n': 'T-H'}], [{'w': 33, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(7, 0, "T-H", 61, [], [{'w': 16, 'n': 'T-F'}, {'w': 41, 'n': 'T-G'}], 0, False, True)
         ],
         [
-            TaskBlueprint(0, 1, "T-A", 32, [{'weight': 69, 'name': 'T-B'}], [], 1, True, False),
-            TaskBlueprint(1, 1, "T-B", 20, [{'weight': 95, 'name': 'T-C'}], [{'weight': 69, 'name': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 1, "T-C", 65, [{'weight': 11, 'name': 'T-D'}], [{'weight': 95, 'name': 'T-B'}], 0, False, False),
-            TaskBlueprint(3, 1, "T-D", 7, [], [{'weight': 11, 'name': 'T-C'}], 0, False, True),
+            TaskBlueprint(0, 1, "T-A", 32, [{'w': 69, 'n': 'T-B'}], [], 1, True, False),
+            TaskBlueprint(1, 1, "T-B", 20, [{'w': 95, 'n': 'T-C'}], [{'w': 69, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 1, "T-C", 65, [{'w': 11, 'n': 'T-D'}], [{'w': 95, 'n': 'T-B'}], 0, False, False),
+            TaskBlueprint(3, 1, "T-D", 7, [], [{'w': 11, 'n': 'T-C'}], 0, False, True),
         ]
         # [
-        #     TaskBlueprint(0, 0, 'T-A', 20, [{"weight": 12, "name": 'T-B'}, {"weight": 15, "name": 'T-C'}, {"weight": 15, "name": 'T-C'}], [], TaskStatus.READY, True, False),
-        #     TaskBlueprint(1, 0, 'T-B', 50, [{"weight": 10, "name": 'T-D'}], [{"weight": 12, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
-        #     TaskBlueprint(2, 0, 'T-C', 90, [{"weight": 5, "name": 'T-E'}], [{"weight": 15, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
-        #     TaskBlueprint(3, 0, 'T-D', 60, [{"weight": 10, "name": 'T-E'}], [{"weight": 10, "name": 'T-B'}], TaskStatus.UNSCHEDULED, False, False),
-        #     TaskBlueprint(4, 0, 'T-E', 20, [], [{"weight": 10, "name": 'T-D'}, {"weight": 5, "name": 'T-C'}], TaskStatus.UNSCHEDULED, False, True),
+        #     TaskBlueprint(0, 0, 'T-A', 20, [{"w": 12, "n": 'T-B'}, {"w": 15, "n": 'T-C'}, {"w": 15, "n": 'T-C'}], [], TaskStatus.READY, True, False),
+        #     TaskBlueprint(1, 0, 'T-B', 50, [{"w": 10, "n": 'T-D'}], [{"w": 12, "n": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
+        #     TaskBlueprint(2, 0, 'T-C', 90, [{"w": 5, "n": 'T-E'}], [{"w": 15, "n": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
+        #     TaskBlueprint(3, 0, 'T-D', 60, [{"w": 10, "n": 'T-E'}], [{"w": 10, "n": 'T-B'}], TaskStatus.UNSCHEDULED, False, False),
+        #     TaskBlueprint(4, 0, 'T-E', 20, [], [{"w": 10, "n": 'T-D'}, {"w": 5, "n": 'T-C'}], TaskStatus.UNSCHEDULED, False, True),
         # ],
         # [
-        #     TaskBlueprint(0, 1, 'T-A', 3, [{"weight": 3, "name": 'T-B'}, {"weight": 4, "name": 'T-C'}], [], TaskStatus.READY, True, False),
-        #     TaskBlueprint(1, 1, 'T-B', 15, [{"weight": 6, "name": 'T-D'}], [{"weight": 3, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
-        #     TaskBlueprint(2, 1, 'T-C', 41, [{"weight": 2, "name": 'T-D'}], [{"weight": 4, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
-        #     TaskBlueprint(3, 1, 'T-D', 10, [], [{"weight": 6, "name": 'T-B'}, {"weight": 2, "name": 'T-C'}], TaskStatus.UNSCHEDULED, False, True),
+        #     TaskBlueprint(0, 1, 'T-A', 3, [{"w": 3, "n": 'T-B'}, {"w": 4, "n": 'T-C'}], [], TaskStatus.READY, True, False),
+        #     TaskBlueprint(1, 1, 'T-B', 15, [{"w": 6, "n": 'T-D'}], [{"w": 3, "n": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
+        #     TaskBlueprint(2, 1, 'T-C', 41, [{"w": 2, "n": 'T-D'}], [{"w": 4, "n": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
+        #     TaskBlueprint(3, 1, 'T-D', 10, [], [{"w": 6, "n": 'T-B'}, {"w": 2, "n": 'T-C'}], TaskStatus.UNSCHEDULED, False, True),
         # ],
         # [
-        #     TaskBlueprint(0, 2, 'T-A', 5, [{"weight": 31, "name": 'T-B'}], [], TaskStatus.READY, True, False),
-        #     TaskBlueprint(1, 2, 'T-B', 7, [{"weight": 25, "name": 'T-C'}], [{"weight": 31, "name": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
-        #     TaskBlueprint(2, 2, 'T-C', 3, [], [{"weight": 25, "name": 'T-B'}], TaskStatus.UNSCHEDULED, False, True),
+        #     TaskBlueprint(0, 2, 'T-A', 5, [{"w": 31, "n": 'T-B'}], [], TaskStatus.READY, True, False),
+        #     TaskBlueprint(1, 2, 'T-B', 7, [{"w": 25, "n": 'T-C'}], [{"w": 31, "n": 'T-A'}], TaskStatus.UNSCHEDULED, False, False),
+        #     TaskBlueprint(2, 2, 'T-C', 3, [], [{"w": 25, "n": 'T-B'}], TaskStatus.UNSCHEDULED, False, True),
         # ],
     ]
 }
@@ -268,19 +268,17 @@ NAMES_B = ["B1", "B2", "B3", "B4", "B5", "B6", "B7"]
 
 PARENTS_DAG_A = [
     [],
-    [{"name": "A1", "weight": 4}],
-    [{"name": "A1", "weight": 2}],
-    [{"name": "A1", "weight": 2}],
-    [{"name": "A2", "weight": 10}, {"name": "A3",
-                                    "weight": 5}, {"name": "A4", "weight": 3}],
+    [{"n": "A1", "w": 4}],
+    [{"n": "A1", "w": 2}],
+    [{"n": "A1", "w": 2}],
+    [{"n": "A2", "w": 10}, {"n": "A3", "w": 5}, {"n": "A4", "w": 3}],
 ]
 
 TASK_DAG_A = [
-    [{"name": "A2", "weight": 4}, {"name": "A3",
-                                   "weight": 2}, {"name": "A4", "weight": 2}],
-    [{"name": "A5", "weight": 10}],
-    [{"name": "A5", "weight": 5}],
-    [{"name": "A5", "weight": 3}],
+    [{"n": "A2", "w": 4}, {"n": "A3", "w": 2}, {"n": "A4", "w": 2}],
+    [{"n": "A5", "w": 10}],
+    [{"n": "A5", "w": 5}],
+    [{"n": "A5", "w": 3}],
     []
 ]
 
@@ -304,22 +302,21 @@ COSTS_B = [
 
 PARENTS_DAG_B = [
     [],
-    [{"name": "B1", "weight": 3}],
-    [{"name": "B1", "weight": 5}],
-    [{"name": "B1", "weight": 1}],
-    [{"name": "B2", "weight": 10}, {"name": "B4", "weight": 9}],
-    [{"name": "B3", "weight": 3}, {"name": "B4", "weight": 8}],
-    [{"name": "B5", "weight": 4}, {"name": "B6", "weight": 2}]
+    [{"n": "B1", "w": 3}],
+    [{"n": "B1", "w": 5}],
+    [{"n": "B1", "w": 1}],
+    [{"n": "B2", "w": 10}, {"n": "B4", "w": 9}],
+    [{"n": "B3", "w": 3}, {"n": "B4", "w": 8}],
+    [{"n": "B5", "w": 4}, {"n": "B6", "w": 2}]
 ]
 
 TASK_DAG_B = [
-    [{"name": "B2", "weight": 3}, {"name": "B3",
-                                   "weight": 5}, {"name": "B4", "weight": 1}],
-    [{"name": "B5", "weight": 10}],
-    [{"name": "B6", "weight": 3}],
-    [{"name": "B5", "weight": 9}, {"name": "B6", "weight": 8}],
-    [{"name": "B7", "weight": 4}],
-    [{"name": "B7", "weight": 2}],
+    [{"n": "B2", "w": 3}, {"n": "B3", "w": 5}, {"n": "B4", "w": 1}],
+    [{"n": "B5", "w": 10}],
+    [{"n": "B6", "w": 3}],
+    [{"n": "B5", "w": 9}, {"n": "B6", "w": 8}],
+    [{"n": "B7", "w": 4}],
+    [{"n": "B7", "w": 2}],
     []
 ]
 

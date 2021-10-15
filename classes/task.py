@@ -39,7 +39,7 @@ class TaskBlueprint:
     name: str
     runtime: float
     children_names: dict
-    parents_names: dict
+    parents_names: Union[None, dict]
     status: TaskStatus
     is_entry: bool
     is_exit: bool
@@ -82,15 +82,39 @@ class Task:
             raise Exception(f"Node[ {self.id} ] is not connected in the dag!")
 
     def get_blueprint(self):
-        return TaskBlueprint(self.id, self.wf_id, self.name, self.runtime, [{"weight": e.weight, "name": e.node.name} for e in self.children_edges], [{"weight": e.weight, "name": e.node.name} for e in self.parents_edges], self.status, self.is_entry, self.is_exit)
+        return TaskBlueprint(self.id, self.wf_id, self.name, self.runtime, [{"w": e.weight, "n": e.node.name} for e in self.children_edges], [{"w": e.weight, "n": e.node.name} for e in self.parents_edges], self.status, self.is_entry, self.is_exit)
 
-    def create_edges(self, tasks: List['Task']):
-        self.set_edges([Edge(e['weight'], Task.find_task_by_name(tasks, e['name'])) for e in self.children_names],
-                       [Edge(e['weight'], Task.find_task_by_name(tasks, e['name'])) for e in self.parents_names])
+    def create_edges(self, tasks: List['Task'], network_kbps: Union[None, float] = None):
+        if network_kbps is not None:
+            children: List[Task] = self.get_tasks_from_names(tasks, is_child_tasks=True)
+            parents: List[Task] = self.get_tasks_from_names(tasks, is_child_tasks=False)
+            # We need at least -> len(Edges) == len(children)
+            children_edges: List[Edge] = [Edge(weight=0, node=child) for child in children]
+            parents_edges: List[Edge] = [Edge(weight=0, node=parent) for parent in parents]
+
+            for file in self.files:
+                if file['link'] == 'output':
+                    for i, child in enumerate(children):
+                        if child.is_file_in_task(file):
+                            children_edges[i].weight += file['size']
+                elif file['link'] == 'input':
+                    for i, parent in enumerate(parents):
+                        if parent.is_file_in_task(file):
+                            parents_edges[i].weight += file['size']
+
+            for child_edge in children_edges:
+                child_edge.weight /= network_kbps
+            for parent_edge in parents_edges:
+                parent_edge.weight /= network_kbps
+            # We use this function to check if everything went smoothly in the parsing
+            self.set_edges(children_edges, parents_edges)
+        else:
+            self.set_edges([Edge(e['w'], Task.find_task_by_name(tasks, e['n'])) for e in self.children_names],
+                           [Edge(e['w'], Task.find_task_by_name(tasks, e['n'])) for e in self.parents_names])
 
     @staticmethod
     def blueprint_to_task(blp: TaskBlueprint):
-        t = Task(
+        return Task(
             id_=blp.id_,
             wf_id=blp.wf_id,
             name=blp.name,
@@ -100,7 +124,6 @@ class Task:
             files=None,
             children_names=blp.children_names,
             parents_names=blp.parents_names)
-        return t
 
     def set_wf_deadline(self, deadline):
         self.wf_deadline = deadline

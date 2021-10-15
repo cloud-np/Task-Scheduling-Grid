@@ -11,12 +11,12 @@ NUM_TASKS = [10, 50, 100, 200, 500, 1000]
 # NUM_TASKS = [300, 400]
 
 
-def create_wfs(wf_type: str, path: str = './data', num_tasks: int = 200):
+def create_wfs(wf_type: str, i: int, path: str = './data', num_tasks: int = 200):
 
     if wf_type not in WF_TYPES:
         raise Exception('Not a valid name for a recipe!')
 
-    file_name = f'{path}/{wf_type}/{wf_type}_{num_tasks}'
+    file_name = f'{path}/{wf_type}/{wf_type}_{num_tasks}_{i}'
 
     # If the file exists already just return.
     if isfile(f'{file_name}.json'):
@@ -52,11 +52,16 @@ def create_wfs(wf_type: str, path: str = './data', num_tasks: int = 200):
 
 
 def create_all_wfs():
-    for n_tasks in NUM_TASKS:
-        for w_type in WF_TYPES:
-            create_wfs(wf_type=w_type, num_tasks=n_tasks)
+    # for n_tasks in NUM_TASKS:
+    #     for w_type in WF_TYPES:
+    #         create_wfs(wf_type=w_type, num_tasks=n_tasks)
+    for i in [0, 1, 2]:
+        for n_tasks in [100]:
+            for w_type in WF_TYPES:
+                create_wfs(wf_type=w_type, i=i, num_tasks=n_tasks)
 
 
+create_all_wfs()
 # file_name = 'data/epigenomics-wf.json'
 # creating a Seismology workflow recipe based on the number
 # of pair of signals to estimate earthquake STFs

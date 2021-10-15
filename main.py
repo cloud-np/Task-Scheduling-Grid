@@ -1,10 +1,12 @@
 from algos.paper_2011_algos.paper_method import Paper2011
 from helpers.examples.example_data import HOLE_METHOD_VARIATIONS
 from helpers.visuals.visualize import Visualizer
-from helpers.examples.example_gen import Example
 from classes.workflow import Workflow
 from classes.machine import Machine
-from helpers.simulation.simulation import Simulation
+from helpers.examples.example_gen import ExampleGen
+from helpers.simulation.simulation import Simulation, save_sims_to_excel
+from classes.scheduler import FillMethod
+from helpers.pick_best_method import find_seed_for
 
 
 if __name__ == "__main__":
@@ -13,23 +15,45 @@ if __name__ == "__main__":
     #    {"name": "c1", "time_types": ["EST"], "fill_type": "NO-FILL"},
     #    {"name": "c2", "time_types": ["EST"], "fill_type": "NO-FILL"},
     #    {"name": "c3", "time_types": ["EST"], "fill_type": "NO-FILL"}]
-    run_methods = [
-        {"name": "holes FASTEST-FIT",
-         "time_types": ["EFT", "EFT"], "fill_type": "FASTEST-FIT"},
-        # {"name": "holes BEST-FIT",
-        #  "time_types": ["EFT", "EFT"], "fill_type": "BEST-FIT"},
-        # {"name": "holes FIRST-FIT",
-        #  "time_types": ["EFT", "EFT"], "fill_type": "FIRST-FIT"},
-        # {"name": "holes WORST-FIT",
-        #  "time_types": ["EFT", "EFT"], "fill_type": "WORST-FIT"},
-    ]
-
-    # run_methods = [HOLE_METHOD_VARIATIONS["EFT_variations"]]
+    # run_methods = [HOLE_METHOD_VARIATIONS["EFT_variations"], HOLE_METHOD_VARIATIONS["compositions"], HOLE_METHOD_VARIATIONS['holes-paper-2011']]
+    run_methods = [HOLE_METHOD_VARIATIONS["EFT_variations"]]
+    # run_methods = [HOLE_METHOD_VARIATIONS["compositions"], HOLE_METHOD_VARIATIONS['criticals_unsorted']]
+    # run_methods = [HOLE_METHOD_VARIATIONS["compositions"], HOLE_METHOD_VARIATIONS['criticals_unsorted']]
     # run_methods = [{"name": "c1", "time_types": ["EST"], "fill_type": "NO-FILL"}]
-    # run_methods = sum(run_methods, [])
+    run_methods = sum(run_methods, [])
     # run_methods = HOLE_METHOD_VARIATIONS["EFT_variations"]
     # run_methods = [{"name": "holes2011 FASTEST-EDF", "fill_type": "FASTEST-FIT", "priority_type": "EDF"}]
     # for wf_size in [50, 100, 200, 300, 400, 500, 1000]:
+    # for wf_size in [5, 10, 20, 30, 50]:
+    # schedulers = []
+    n = 8
+    ss = []
+# for n in [1, 2]:
+    for n_machines in [4, 8]:
+        for network in [12]:
+            # machines, workflows = ExampleGen.load_random_wfs([n_machines, network * 125], wf_size)
+            machines, workflows = ExampleGen.load_all_types([n_machines, network * 125], 100, n_times=n)
+            print(f"n-wfs: {n} machines: {n_machines}  network: {network}")
+            # Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=True, save_sim=True, show_machines=False).run()
+            ss = Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=False, save_sim=True, show_machines=False).run()
+            for s in ss:
+                print(s)
+    # ss = sum(ss, ())
+    # save_sims_to_excel(ss, n)
+    # for [FillMethod.BEST_FIT, FillMethod.FASTEST_FIT, FillMethod.]
+    # seed, wfs = find_seed_for(FillMethod.BEST_FIT, starting_seed=190)
+    # # print(seed)
+    # for t in wfs[1].tasks:
+    #     print(t)
+    #     for e in t.children_edges:
+    #         print(f"\t{e.weight}")
+
+    # for t in wfs[1].tasks:
+    #     print(t)
+    #     for e in t.children_edges:
+    #         print(f"\t{e.weight}")
+    # schedulers = sum(schedulers, [])
+    # save_sims_to_excel(schedulers, 7 * n)
     #     for network in [50, 500]:
     #         for n_cores in [4, 8, 16, 32]:
     #             # machines = Machine.load_n_static_machines(n_cores, network * 125)
@@ -37,22 +61,13 @@ if __name__ == "__main__":
     #             machines, workflows = Example.load_all_types([n_cores, network * 125], wf_size)
     #             Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=True, save_sim=True, show_machines=False).run()
     # avg_makespan from both for each bin packing method
-    import random
-    i = 0
-    done = False
-    # seed = 1
-    # random.seed(seed)
-    # done = Simulation.load_paper_example(seed)
-    while not done:
-        random.seed(i)
-        done = Simulation.load_paper_example(i)
-        i += 1
-    print(i - 1)
 
     # FIRST-FIT 89
-    # FASTEST-FIT 3
+    # FASTEST-FIT 172
     # BEST-FIT 1
     # WORST-FIT 0
+    # print(find_seed_for(FillMethod.FIRST_FIT, starting_seed=0))
+    # machines, workflows = Example.load_all_types([4, 35], 100)
     # Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=True, save_sim=True, show_machines=True).run()
 
     # machines, workflows = Example.load_medium_example()

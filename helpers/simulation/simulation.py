@@ -9,7 +9,9 @@ from classes.scheduler import Scheduler, get_fill_method, FillMethod
 from helpers.checker import schedule_checker
 from helpers.visuals.visualize import Visualizer
 from random import randint
-from helpers.examples.example_gen import Example
+from helpers.examples.example_gen import ExampleGen
+from algos.optimizer import optimize_schedule
+from helpers.utils import find_perc_diff
 import xlsxwriter
 import numpy as np
 import matplotlib.pyplot as plt
@@ -27,63 +29,100 @@ class Simulation:
         self.show_fig: bool = show_fig
         self.save_sim: bool = save_sim
         self.schedulers: List[Scheduler] = [Scheduler(method['name'],
-                                                      data=Example.re_create_example(workflows, machines),
+                                                      data=ExampleGen.re_create_example(workflows, machines),
                                                       time_types=method.get("time_types"),
                                                       fill_method=method["fill_type"], priority_type=method.get("priority_type")) for method in run_methods]
 
-    @staticmethod
-    def load_paper_example(count):
-        machines, workflows = Example.load_small_random()
-        run_methods = [
-            {"name": "holes FASTEST-FIT", "time_types": ["EFT", "EFT"], "fill_type": "FASTEST-FIT"},
-            {"name": "holes BEST-FIT", "time_types": ["EFT", "EFT"], "fill_type": "BEST-FIT"},
-            {"name": "holes FIRST-FIT", "time_types": ["EFT", "EFT"], "fill_type": "FIRST-FIT"},
-            {"name": "holes WORST-FIT", "time_types": ["EFT", "EFT"], "fill_type": "WORST-FIT"},
-        ]
-        schedulers: List[Scheduler] = [Scheduler(method['name'], data=Example.re_create_example(workflows, machines), time_types=method.get("time_types"), fill_method=method["fill_type"], priority_type=method.get("priority_type")) for method in run_methods]
-        for s in schedulers:
+    def run_paper_example(self, count):
+        for s in self.schedulers:
             Simulation.fake_schedule_fist_workflow(s.machines, s.workflows)
-            s.example()
-            avg_makespan = sum(wf.wf_len for wf in s.workflows) / s.n_wfs
-            print(f"{s.fill_method} {avg_makespan}")
-            for t in s.workflows[1].tasks:
-                print(t)
-        print(f" iter: {count}")
+            s.run_example()
+        return self.schedulers
 
-        min_s = min(schedulers, key=lambda s: s.avg_workflow_makespan)
-        for s in schedulers:
-            if s.fill_method == FillMethod.FIRST_FIT:
-                fs = s
-            if s.fill_method == FillMethod.FASTEST_FIT:
-                frs = s
-            if s.fill_method == FillMethod.BEST_FIT:
-                bs = s
-            if s.fill_method == FillMethod.WORST_FIT:
-                ws = s
+    def run(self):
+        for s in self.schedulers:
+            s.run()
+            # if self.save_sim:
+            #     s.save_output_to_file()
 
-        if min_s.fill_method == FillMethod.WORST_FIT:
-            all_avg = (fs.avg_workflow_makespan, bs.avg_workflow_makespan, frs.avg_workflow_makespan)
-            for m in min_s.machines:
-                ok = False
-                for t in m.tasks:
-                    if t.wf_id == 1:
-                        ok = True
-                if ok is False:
-                    return False
-            if min_s.avg_workflow_makespan not in all_avg:
-                print(min_s.fill_method)
-                Visualizer.visualize_machines(min_s.machines)
-                return True
-            else:
-                return False
-        else:
-            return False
-        # if min_s.fill_method == FillMethod.WORST_FIT:
-        Visualizer.visualize_machines(min_s.machines)
-        #     return True
-        # return False
-        # if self.visuals is True:
-        #     Visualizer.compare_data([s.get_slowest_machine().time_on_machine for s in self.schedulers], [s.method_used_info(concise=True) for s in self.schedulers], len(self.workflows), save_fig=self.save_fig, show_fig=self.show_fig)
+        # print("-------TOTAL MAKESPAN-------")
+        # their_min_s = min(self.get_their_schedulers(), key=lambda s: s.schedule_len)
+        # print(their_min_s)
+        our_min_s = min(self.get_our_schedulers(), key=lambda s: s.schedule_len)
+        # # our_min_s.view_machine_holes()
+        # ordered_our_min_s, is_better = optimize_schedule(self.workflows, self.machines, our_min_s)
+        # if self.save_sim:
+        #     our_min_s.save_output_to_file()
+            # their_min_s.save_output_to_file()
+        # print(our_min_s)
+        # print(f"DIFF: {their_min_s.schedule_len - our_min_s.schedule_len} \n\n")
+        # if is_better:
+        #     self.schedulers.append(our_min_s)
+        # print(min_s)
+        if self.save_sim:
+            # min_s = min(self.schedulers, key=lambda s: s.schedule_len)
+
+            our_min_s = min(self.get_our_schedulers(), key=lambda s: s.schedule_len)
+            return self.get_our_schedulers()
+            # their_min_s = min(self.get_their_schedulers(), key=lambda s: s.schedule_len)
+            # c1 = self.get_c1()
+            # return [our_min_s, ordered_our_min_s, their_min_s, c1]
+            # self.save_sim_stats(min_s)
+        if self.show_machines:
+            Visualizer.visualize_machines(our_min_s.machines)
+            # Visualizer.visualize_machines(their_min_s.machines)
+            # print(their_min_s)
+            # if min_s is our_min_s:
+            #     Visualizer.visualize_machines(our_min_s.machines)
+            #     Visualizer.visualize_machines(their_min_s.machines)
+            # print("-------AVG MAKESPAN-------")
+            # our_min_s = min(self.get_our_schedulers(), key=lambda s: s.avg_workflow_makespan)
+            # print(our_min_s)
+            # their_min_s = min(self.get_their_schedulers(), key=lambda s: s.avg_workflow_makespan)
+            # print(their_min_s)
+        if self.visuals is True:
+            # Schedule len
+            Visualizer.compare_data([s.get_slowest_machine().time_on_machine for s in self.schedulers], [s.method_used_info(concise=True) for s in self.schedulers], len(self.workflows), save_fig=self.save_fig, show_fig=self.show_fig)
+            # Holes filled
+            # Visualizer.compare_data([s.get_holes_filled() for s in self.schedulers], [s.method_used_info(concise=True) for s in self.schedulers], len(self.workflows), save_fig=self.save_fig, show_fig=self.show_fig)
+            # Avg wf makespan
+            # Visualizer.compare_data([s.avg_workflow_makespan for s in self.schedulers], [s.method_used_info(concise=True) for s in self.schedulers], len(self.workflows), save_fig=self.save_fig, show_fig=self.show_fig)
+        return self.schedulers
+
+    def get_our_schedulers(self):
+        return [s for s in self.schedulers if (s.name.startswith("crit") or s.name.startswith("holes "))]
+
+    def get_their_schedulers(self):
+        return [s for s in self.schedulers if (s.name.startswith("holes2011"))]
+
+    def get_c1(self):
+        return [s for s in self.schedulers if (s.name.startswith("c1"))][0]
+
+    def save_sim_stats(self, min_s):
+        out_f = f'sim/bw_{int(self.machines[0].network_kbps / 125)}_wfs_{len(self.workflows)}_machines_{len(self.machines)}_best.txt'
+        lines = []
+        our_min_s = min(self.get_our_schedulers(), key=lambda s: s.schedule_len)
+        their_min_s = min(self.get_their_schedulers(), key=lambda s: s.schedule_len)
+        c1 = self.get_c1()
+        for s in [our_min_s, their_min_s, c1]:
+            info = [f"{s.name}\t", f"{int(s.schedule_len)}\t", f"{s.machines_util_avg_perc}\t", f"{int(s.avg_workflow_makespan)}\t", f"{s.get_holes_filled()}\t", f"{int(s.get_holes_time_saved())}\t", f"{int(s.machines[0].network_kbps / 125)}\t", f"{len(s.workflows)}\t", f"{len(s.machines)}\n"]
+            lines.append(info)
+        # lines.append([f"{our_min_s.name} vs c1 perc diff: {find_perc_diff(our_min_s.schedule_len, c1.schedule_len)}\n"])
+        # lines.append([f"Best Schedule: {min_s.name}\n"])
+        lines = sum(lines, [])
+        with open(out_f, "+a") as f:
+            f.writelines(lines)
+
+    def save_sim_info(self, min_s):
+        # out_f = f'{len(self.workflows)}_.txt'
+        lines = []
+        for s in self.schedulers:
+            info = [f"{s.name}\t", f"{int(s.schedule_len)}\t", f"{s.machines_util_avg_perc}\t", f"{int(s.avg_workflow_makespan)}\t", f"{s.get_holes_filled()}\t", f"{int(s.get_holes_time_saved())}\t", f"{int(s.machines[0].network_kbps / 125)}\t", f"{len(s.workflows)}\t", f"{len(s.machines)}\n"]
+            lines.append(info)
+        lines = sum(lines, [])
+        # with open(out_f, "+a") as f:
+        #     f.writelines(lines)
+        return lines
 
     @staticmethod
     def fake_schedule_fist_workflow(machines, workflows):
@@ -129,72 +168,121 @@ class Simulation:
             machines[1].tasks.append(t)
             t.machine_id = 1
 
-        # make a wf_len for the workflow
-        # workflows.wf_len = t_7.end
 
-    def run(self):
-        # slowest_machines = []
-        for s in self.schedulers:
-            s.run()
-            # print(s.get_holes_filled())
-            if self.save_sim:
-                s.save_output_to_file()
-            # if s.fill_method == FillMethod.WORST_FIT:
-            #     ss = s
+def save_sims_to_excel(schedulers, num_wfs):
+    workbook = xlsxwriter.Workbook(f'sim-{num_wfs}_EST-EFT.xlsx')
+    wks = workbook.add_worksheet('Runned Simulation Info')
+    bold = workbook.add_format({'bold': True})
+    write_to_excel(schedulers, wks, bold, s_pos=[2, 0])
+    # for i, n in enumerate(ns):
+    #     schedules = run_sim(n, run_methods, visuals=True, save_fig=False, show_fig=False, save_sim=False)
+    #     print("Finished simulating for n = ", n)
 
-        min_s = min(self.schedulers, key=lambda s: s.workflows_avg_schedule_len)
-        min_s.info()
-
-        if self.show_machines:
-            Visualizer.visualize_machines(min_s.machines)
-        if self.visuals is True:
-            Visualizer.compare_data([s.get_slowest_machine().time_on_machine for s in self.schedulers], [s.method_used_info(concise=True) for s in self.schedulers], len(self.workflows), save_fig=self.save_fig, show_fig=self.show_fig)
-            # Visualizer.compare_data([s.get_whole_idle_time() for s in self.schedulers], [sm['method_used'] for sm in slowest_machines], len(self.workflows), save_fig=self.save_fig, show_fig=self.show_fig)
-
-# def run_save_n_sims_to_excel(ns, run_methods):
-#     workbook = xlsxwriter.Workbook('simulation_info.xlsx')
-#     wks = workbook.add_worksheet('Runned Simulation Info')
-#     bold = workbook.add_format({'bold': True})
-#     for i, n in enumerate(ns):
-#         schedules, fig = run_sim(
-#             n, run_methods, visuals=True, save_fig=False, show_fig=False, save_sim=False)
-#         print("Finished simulating for n = ", n)
-
-#         write_to_excel(schedules, fig, wks, bold, s_pos=[2 + i * 40, 0])
-#     workbook.close()
+    #     write_to_excel(schedules, wks, bold, s_pos=[2 + i * 40, 0])
+    workbook.close()
 
 
-def write_to_excel(schedules: List[Scheduler], fig, wks, bold, s_pos: List[int] = [2, 0]):
+def write_excel(schedules: List[Scheduler], wks, bold, s_pos: List[int] = [2, 0]):
 
-    infos = [s.get_scheduled_info() for s in schedules]
-    imgdata = io.BytesIO()
-    fig.savefig(imgdata, format='png')
-    wks.insert_image(s_pos[0], s_pos[1], '', {'image_data': imgdata})
+    # imgdata = io.BytesIO()
+    # fig.savefig(imgdata, format='png')
+    # wks.insert_image(s_pos[0], s_pos[1], '', {'image_data': imgdata})
 
     # The image we insert needs at least 20 rows.
-    x_offset = s_pos[0] + 20
+    x_offset = s_pos[0]
     y_offset = s_pos[1] + 1
 
     wks.set_column(0, 50, 20)
 
     # Headers
     wks.write(x_offset, y_offset, "Method Name", bold)
-    wks.write(x_offset, y_offset + 1, "Holes Filled", bold)
-    wks.write(x_offset, y_offset + 2, "Time Saved", bold)
-    wks.write(x_offset, y_offset + 3, "Length", bold)
+    wks.write(x_offset, y_offset + 1, "Total Makespan", bold)
+    wks.write(x_offset, y_offset + 2, "Avg Machine Util", bold)
+    wks.write(x_offset, y_offset + 3, "Avg Wf Makespan", bold)
+    wks.write(x_offset, y_offset + 4, "Holes Filled", bold)
+    wks.write(x_offset, y_offset + 5, "Hole Saved Time", bold)
+    wks.write(x_offset, y_offset + 6, "Bandwidth", bold)
+    wks.write(x_offset, y_offset + 7, "Workflows", bold)
+    wks.write(x_offset, y_offset + 8, "Machines", bold)
 
-    for i, info in enumerate(infos):
-        # name
+    for i, s in enumerate(schedules):
         x_offset += 1
-        name = info[0].split()
-        wks.write(x_offset, y_offset, f"{name[0]} {name[1]}")
+        # name
+        wks.write(x_offset, y_offset, f"{s.method_used_info()}")
+
+        # schedule len
+        wks.write(x_offset, y_offset + 1, int(s.schedule_len))
+
+        # avg machine util
+        wks.write(x_offset, y_offset + 2, s.machines_util_avg_perc)
+
+        # avg workflow makespan
+        wks.write(x_offset, y_offset + 3, int(s.avg_workflow_makespan))
 
         # holes filled
-        wks.write(x_offset, y_offset + 1, info[1].split("Holes Filled ")[1])
+        wks.write(x_offset, y_offset + 4, s.get_holes_filled())
 
-        # time saved
-        wks.write(x_offset, y_offset + 2, int(float(info[2])))
+        # time saved by holes
+        wks.write(x_offset, y_offset + 5, int(s.get_holes_time_saved()))
 
-        # schedule_len
-        wks.write(x_offset, y_offset + 3,
-                  int(float(info[4].split("TOTAL LEN: ")[1])))
+        # bandwidth
+        wks.write(x_offset, y_offset + 6, int(s.machines[0].network_kbps / 125))
+
+        # workflows
+        wks.write(x_offset, y_offset + 7, len(s.workflows))
+
+        # machines
+        wks.write(x_offset, y_offset + 8, len(s.machines))
+
+
+def write_to_excel(schedules: List[Scheduler], wks, bold, s_pos: List[int] = [2, 0]):
+
+    # imgdata = io.BytesIO()
+    # fig.savefig(imgdata, format='png')
+    # wks.insert_image(s_pos[0], s_pos[1], '', {'image_data': imgdata})
+
+    # The image we insert needs at least 20 rows.
+    x_offset = s_pos[0]
+    y_offset = s_pos[1] + 1
+
+    wks.set_column(0, 50, 20)
+
+    # Headers
+    wks.write(x_offset, y_offset, "Method Name", bold)
+    wks.write(x_offset, y_offset + 1, "Total Makespan", bold)
+    wks.write(x_offset, y_offset + 2, "Avg Machine Util", bold)
+    wks.write(x_offset, y_offset + 3, "Avg Wf Makespan", bold)
+    wks.write(x_offset, y_offset + 4, "Holes Filled", bold)
+    wks.write(x_offset, y_offset + 5, "Hole Saved Time", bold)
+    wks.write(x_offset, y_offset + 6, "Bandwidth", bold)
+    wks.write(x_offset, y_offset + 7, "Workflows", bold)
+    wks.write(x_offset, y_offset + 8, "Machines", bold)
+
+    for i, s in enumerate(schedules):
+        x_offset += 1
+        # name
+        wks.write(x_offset, y_offset, f"{s.method_used_info()}")
+
+        # schedule len
+        wks.write(x_offset, y_offset + 1, int(s.schedule_len))
+
+        # avg machine util
+        wks.write(x_offset, y_offset + 2, s.machines_util_avg_perc)
+
+        # avg workflow makespan
+        wks.write(x_offset, y_offset + 3, int(s.avg_workflow_makespan))
+
+        # holes filled
+        wks.write(x_offset, y_offset + 4, s.get_holes_filled())
+
+        # time saved by holes
+        wks.write(x_offset, y_offset + 5, int(s.get_holes_time_saved()))
+
+        # bandwidth
+        wks.write(x_offset, y_offset + 6, int(s.machines[0].network_kbps / 125))
+
+        # workflows
+        wks.write(x_offset, y_offset + 7, len(s.workflows))
+
+        # machines
+        wks.write(x_offset, y_offset + 8, len(s.machines))

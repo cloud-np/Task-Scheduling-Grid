@@ -12,7 +12,7 @@ def get_tasks_from_json_file(file_name, wf_id, network_kbps):
 
     # Visualize the graph to check it.
     # create_csv_file_to_visualize_graph(data['workflow']['jobs'])
-    tasks = list()
+    tasks = []
 
     # n_tasks = len(data['workflow']['jobs'])
     # 1) Parse first the machines you have to do the workflow. ( we create our machines )
@@ -38,38 +38,8 @@ def get_tasks_from_json_file(file_name, wf_id, network_kbps):
                 parents_names=job['parents']
             )
         )
-
-    # Calculate the the edges between the nodes and their weights in KBS.
-    # NOTE: not sure why but without the type notation this code below won't work..
-    # ( I mean accessing stuff from the Task class)
-    for task in tasks:
-        children: List[Task] = task.get_tasks_from_names(tasks, is_child_tasks=True)
-        parents: List[Task] = task.get_tasks_from_names(tasks, is_child_tasks=False)
-        # We need at least -> len(Edges) == len(children)
-        children_edges: List[Edge] = [Edge(weight=0, node=child) for child in children]
-        parents_edges: List[Edge] = [Edge(weight=0, node=parent) for parent in parents]
-
-        for file in task.files:
-            if file['link'] == 'output':
-                for i, child in enumerate(children):
-                    if child.is_file_in_task(file):
-                        children_edges[i].weight += file['size']
-            elif file['link'] == 'input':
-                for i, parent in enumerate(parents):
-                    if parent.is_file_in_task(file):
-                        parents_edges[i].weight += file['size']
-
-        if Machines.HAS_NETWORK:
-            for child_edge in children_edges:
-                # child_edge.weight = 0
-                child_edge.weight /= network_kbps
-            for parent_edge in parents_edges:
-                # parent_edge.weight = 0
-                parent_edge.weight /= network_kbps
-
-        # We use this function to check if everything went smoothly in the parsing
-        task.set_edges(children_edges, parents_edges)
-
+    for t in tasks:
+        t.create_edges(tasks, network_kbps)
     return tasks
 
 
