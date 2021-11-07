@@ -114,17 +114,20 @@ class Scheduler:
         lines.insert(0, f"{self.priority_type}, {self.fill_method}, {self.time_types}\n")
         for blp_tasks in blp_self.workflows:
             for bt in blp_tasks:
-                lines.append(f"TaskBlueprint({bt.id_}, {bt.wf_id}, \"{bt.name}\", {bt.runtime}, {str(bt.children_names)}, {str(bt.parents_names)}, {1 if bt.is_entry else 0}, {bt.is_entry}, {bt.is_exit}),\n")
+                lines.append(
+                    f'TaskBlueprint({bt.id_}, {bt.wf_id}, "{bt.name}", {bt.runtime}, {bt.children_names}, {bt.parents_names}, {1 if bt.is_entry else 0}, {bt.is_entry}, {bt.is_exit}),\n'
+                )
 
         with open(f"./{get_fill_method(self.fill_method)}.txt", "w") as f:
             f.writelines(lines)
 
     def get_whole_idle_time(self):
-        return sum([m.get_idle_time() for m in self.machines])
+        return sum(m.get_idle_time() for m in self.machines)
 
     def run_example(self):
         self.example_hole_scheduling()
         self.is_scheduling_done = True
+        self.schedule_len = self.get_schedule_len()
         schedule_checker(self)
 
     def run(self):
@@ -137,26 +140,25 @@ class Scheduler:
 
     def method_used_info(self, concise=False):
         fill_method = None
-        if self.name.startswith("holes"):
-            if concise:
-                if self.fill_method == FillMethod.FASTEST_FIT:
-                    fill_method = "FST"
-                elif self.fill_method == FillMethod.BEST_FIT:
-                    fill_method = "B"
-                elif self.fill_method == FillMethod.FIRST_FIT:
-                    fill_method = "FR"
-                elif self.fill_method == FillMethod.WORST_FIT:
-                    fill_method = "W"
-            else:
-                fill_method = get_fill_method(self.fill_method)
-
-            if self.name.startswith("holes2011"):
-                return f"{fill_method} {self.priority_type_str}\n"
-            else:
-                ttypes = [get_time_type(t) for t in self.time_types]
-                return f"{'ordered ' if self.name.startswith('ordered') else ''}{fill_method}-{ttypes[0]}-{ttypes[1]}\n"
-        else:
+        if not self.name.startswith("holes"):
             return self.name
+
+        if concise:
+            if self.fill_method == FillMethod.FASTEST_FIT:
+                fill_method = "FST"
+            elif self.fill_method == FillMethod.BEST_FIT:
+                fill_method = "B"
+            elif self.fill_method == FillMethod.FIRST_FIT:
+                fill_method = "FR"
+            elif self.fill_method == FillMethod.WORST_FIT:
+                fill_method = "W"
+        else:
+            fill_method = get_fill_method(self.fill_method)
+
+        if self.name.startswith("holes2011"):
+            return f"{fill_method} {self.priority_type_str}\n"
+        ttypes = [get_time_type(t) for t in self.time_types]
+        return f"{'ordered ' if self.name.startswith('ordered') else ''}{fill_method}-{ttypes[0]}-{ttypes[1]}\n"
 
     def get_scheduled_info(self):
         def add_nl(_str):

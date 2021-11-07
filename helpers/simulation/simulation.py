@@ -33,6 +33,11 @@ class Simulation:
                                                       time_types=method.get("time_types"),
                                                       fill_method=method["fill_type"], priority_type=method.get("priority_type")) for method in run_methods]
 
+    def run_c1(self, count):
+        for s in self.schedulers:
+            s.run()
+        return self.schedulers
+
     def run_paper_example(self, count):
         for s in self.schedulers:
             Simulation.fake_schedule_fist_workflow(s.machines, s.workflows)

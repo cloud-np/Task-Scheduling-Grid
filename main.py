@@ -6,7 +6,7 @@ from classes.machine import Machine
 from helpers.examples.example_gen import ExampleGen
 from helpers.simulation.simulation import Simulation, save_sims_to_excel
 from classes.scheduler import FillMethod
-from helpers.pick_best_method import find_seed_for
+from helpers.pick_best_method import find_seed_for, find_c1_example
 
 
 if __name__ == "__main__":
@@ -16,32 +16,32 @@ if __name__ == "__main__":
     #    {"name": "c2", "time_types": ["EST"], "fill_type": "NO-FILL"},
     #    {"name": "c3", "time_types": ["EST"], "fill_type": "NO-FILL"}]
     # run_methods = [HOLE_METHOD_VARIATIONS["EFT_variations"], HOLE_METHOD_VARIATIONS["compositions"], HOLE_METHOD_VARIATIONS['holes-paper-2011']]
-    run_methods = [HOLE_METHOD_VARIATIONS["EFT_variations"]]
+    # run_methods = [HOLE_METHOD_VARIATIONS["EFT_variations"]]
     # run_methods = [HOLE_METHOD_VARIATIONS["compositions"], HOLE_METHOD_VARIATIONS['criticals_unsorted']]
     # run_methods = [HOLE_METHOD_VARIATIONS["compositions"], HOLE_METHOD_VARIATIONS['criticals_unsorted']]
     # run_methods = [{"name": "c1", "time_types": ["EST"], "fill_type": "NO-FILL"}]
-    run_methods = sum(run_methods, [])
+    # run_methods = sum(run_methods, [])
     # run_methods = HOLE_METHOD_VARIATIONS["EFT_variations"]
     # run_methods = [{"name": "holes2011 FASTEST-EDF", "fill_type": "FASTEST-FIT", "priority_type": "EDF"}]
     # for wf_size in [50, 100, 200, 300, 400, 500, 1000]:
     # for wf_size in [5, 10, 20, 30, 50]:
     # schedulers = []
-    n = 8
-    ss = []
+    # n = 8
+    # ss = []
 # for n in [1, 2]:
-    for n_machines in [4, 8]:
-        for network in [12]:
-            # machines, workflows = ExampleGen.load_random_wfs([n_machines, network * 125], wf_size)
-            machines, workflows = ExampleGen.load_all_types([n_machines, network * 125], 100, n_times=n)
-            print(f"n-wfs: {n} machines: {n_machines}  network: {network}")
-            # Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=True, save_sim=True, show_machines=False).run()
-            ss = Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=False, save_sim=True, show_machines=False).run()
-            for s in ss:
-                print(s)
+    # for n_machines in [4, 8]:
+    #     for network in [12]:
+    #         # machines, workflows = ExampleGen.load_random_wfs([n_machines, network * 125], wf_size)
+    #         machines, workflows = ExampleGen.load_all_types([n_machines, network * 125], 100, n_times=n)
+    #         print(f"n-wfs: {n} machines: {n_machines}  network: {network}")
+    #         # Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=True, save_sim=True, show_machines=False).run()
+    #         ss = Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=False, save_sim=True, show_machines=False).run()
+    #         for s in ss:
+    #             print(s)
     # ss = sum(ss, ())
     # save_sims_to_excel(ss, n)
     # for [FillMethod.BEST_FIT, FillMethod.FASTEST_FIT, FillMethod.]
-    # seed, wfs = find_seed_for(FillMethod.BEST_FIT, starting_seed=190)
+    # seed, wfs = find_seed_for(FillMethod.BEST_FIT, starting_seed=0)
     # # print(seed)
     # for t in wfs[1].tasks:
     #     print(t)
@@ -66,7 +66,19 @@ if __name__ == "__main__":
     # FASTEST-FIT 172
     # BEST-FIT 1
     # WORST-FIT 0
-    # print(find_seed_for(FillMethod.FIRST_FIT, starting_seed=0))
+    _iter, schedulers = find_c1_example()
+    print(_iter)
+    # _iter, min_s, schedulers = find_seed_for(FillMethod.NO_FILL, starting_seed=0)
+    for t in schedulers[0].workflows[0].tasks:
+        print(t.runtime, end=" ")
+        print(t)
+    for s in schedulers:
+        # if min_s is s:
+        #     continue
+        print(s)
+        for t in s.workflows[1].tasks:
+            print(t.runtime, end=" ")
+            print(t)
     # machines, workflows = Example.load_all_types([4, 35], 100)
     # Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=True, save_sim=True, show_machines=True).run()
 
