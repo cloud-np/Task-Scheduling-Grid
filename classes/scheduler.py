@@ -448,20 +448,17 @@ class Scheduler:
                     if hole.is_fillable(end):
                         holes_times.append({"machine": machine, "hole": hole, "start": start, "end": end, "gap_left": hole.gap - (end - start)})
 
-        # If there are holes to fill prioritize them.
-        if len(holes_times) > 0:
-            if fill_method == FillMethod.FASTEST_FIT:
-                best_time = Scheduler.pick_machine_based_on_timetype(time_type, holes_times)
-            elif fill_method == FillMethod.BEST_FIT:
-                best_time = min(holes_times, key=lambda t: t["gap_left"])
-            elif fill_method == FillMethod.FIRST_FIT:
-                best_time = sorted(holes_times, key=lambda t: t['start'])[0]
-            elif fill_method == FillMethod.WORST_FIT:
-                best_time = max(holes_times, key=lambda t: t["gap_left"])
-            return best_time["start"], best_time["end"], best_time["machine"], best_time['hole']
-        # If no holes were found.
-        else:
+        if not holes_times:
             return *Scheduler.find_machine(task, machines, time_type), None
+        if fill_method == FillMethod.FASTEST_FIT:
+            best_time = Scheduler.pick_machine_based_on_timetype(time_type, holes_times)
+        elif fill_method == FillMethod.BEST_FIT:
+            best_time = min(holes_times, key=lambda t: t["gap_left"])
+        elif fill_method == FillMethod.FIRST_FIT:
+            best_time = sorted(holes_times, key=lambda t: t['start'])[0]
+        elif fill_method == FillMethod.WORST_FIT:
+            best_time = max(holes_times, key=lambda t: t["gap_left"])
+        return best_time["start"], best_time["end"], best_time["machine"], best_time['hole']
 
     # @staticmethod
     # def schedule_task_to_best_machine1(task, machines, time_type, fill_method=FillMethod.NO_FILL):
@@ -639,45 +636,43 @@ def get_time_type(ttype):
             return TimeType.EFT
         elif ttype == "EST":
             return TimeType.EST
-        elif ttype == "LST":
-            return TimeType.LST
         elif ttype == "LFT":
             return TimeType.LFT
-    else:
-        if ttype == TimeType.EFT:
-            return "EFT"
-        elif ttype == TimeType.EST:
-            return "EST"
-        elif ttype == TimeType.LST:
-            return "LST"
-        elif ttype == TimeType.LFT:
-            return "LFT"
+        elif ttype == "LST":
+            return TimeType.LST
+    elif ttype == TimeType.EFT:
+        return "EFT"
+    elif ttype == TimeType.EST:
+        return "EST"
+    elif ttype == TimeType.LST:
+        return "LST"
+    elif ttype == TimeType.LFT:
+        return "LFT"
     raise ValueError(f"Not supported Time Type: {ttype}")
 
 
 def get_fill_method(fmethod):
     if fmethod.__class__ == str:
-        if fmethod == "FASTEST-FIT":
-            return FillMethod.FASTEST_FIT
-        elif fmethod == "BEST-FIT":
+        if fmethod == "BEST-FIT":
             return FillMethod.BEST_FIT
+        elif fmethod == "FASTEST-FIT":
+            return FillMethod.FASTEST_FIT
         elif fmethod == "FIRST-FIT":
             return FillMethod.FIRST_FIT
-        elif fmethod == "WORST-FIT":
-            return FillMethod.WORST_FIT
         elif fmethod == "NO-FILL":
             return FillMethod.NO_FILL
-    else:
-        if fmethod == FillMethod.FASTEST_FIT:
-            return "FASTEST"
-        elif fmethod == FillMethod.BEST_FIT:
-            return "BEST"
-        elif fmethod == FillMethod.FIRST_FIT:
-            return "FIRST"
-        elif fmethod == FillMethod.WORST_FIT:
-            return "WORST"
-        elif fmethod == FillMethod.NO_FILL:
-            return "NO"
+        elif fmethod == "WORST-FIT":
+            return FillMethod.WORST_FIT
+    elif fmethod == FillMethod.FASTEST_FIT:
+        return "FASTEST"
+    elif fmethod == FillMethod.BEST_FIT:
+        return "BEST"
+    elif fmethod == FillMethod.FIRST_FIT:
+        return "FIRST"
+    elif fmethod == FillMethod.WORST_FIT:
+        return "WORST"
+    elif fmethod == FillMethod.NO_FILL:
+        return "NO"
 
     raise ValueError(f"Not supported Fill Type: {fmethod}")
 
