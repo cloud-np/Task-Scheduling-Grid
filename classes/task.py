@@ -212,20 +212,14 @@ class Task:
             return NotImplemented
 
     def __lt__(self, other):
-        if isinstance(other, Task):
-            return self.id < other.id
-        else:
-            return NotImplemented
+        return self.id < other.id if isinstance(other, Task) else NotImplemented
 
     def __gt__(self, other):
-        if isinstance(other, Task):
-            return self.id > other.id
-        else:
-            return NotImplemented
+        return self.id > other.id if isinstance(other, Task) else NotImplemented
 
     def avg_com_cost(self):
         size = 1 if len(self.children_edges) == 0 else len(self.children_edges)
-        return sum([child.weight for child in self.children_edges]) / size
+        return sum(child.weight for child in self.children_edges) / size
 
     def avg_cost(self):
         # len(self.costs) cannot be 0 or at least it shouldn't
@@ -276,10 +270,8 @@ class Task:
             self.is_entry = True
 
     def is_slowest_parent(self, child):
-        if child.slowest_parent['parent_task'] is None or \
-                child.slowest_parent['parent_task'].end < self.end:
-            return True
-        return False
+        return child.slowest_parent['parent_task'] is None or \
+                child.slowest_parent['parent_task'].end < self.end
 
     # This function runs once the task gets scheduled
     def update_children_and_self_status(self):
@@ -295,16 +287,12 @@ class Task:
                 child_edge.node.slowest_parent = {
                     'parent_task': self, 'communication_time': child_edge.weight}
 
-            # Update the child's counter for parents once that value
-            # goes to 0 the child can start the schedule machine itself
-            # be careful the same parents should run this function once!
             if child_edge.node.parents_till_ready <= 0:
                 raise Exception(f"\nThe child: {child_edge.node} is already ready! "
                                 f"Task that tried to update it: {self}\n")
-            else:
-                child_edge.node.parents_till_ready -= 1
-                if child_edge.node.parents_till_ready == 0:
-                    child_edge.node.status = TaskStatus.READY
+            child_edge.node.parents_till_ready -= 1
+            if child_edge.node.parents_till_ready == 0:
+                child_edge.node.status = TaskStatus.READY
 
     @staticmethod
     def create_random_task(id_, wf_id):
@@ -317,10 +305,7 @@ class Task:
         return tmp_str
 
     def is_file_in_task(self, search_file):
-        for file in self.files:
-            if file['name'] == search_file['name']:
-                return True
-        return False
+        return any(file['name'] == search_file['name'] for file in self.files)
 
     def add_parent(self, cost, task):
         # if self.name.startswith('Dummy'):

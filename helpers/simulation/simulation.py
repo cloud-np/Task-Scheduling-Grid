@@ -53,7 +53,7 @@ class Simulation:
         # ordered_our_min_s, is_better = optimize_schedule(self.workflows, self.machines, our_min_s)
         # if self.save_sim:
         #     our_min_s.save_output_to_file()
-            # their_min_s.save_output_to_file()
+        # their_min_s.save_output_to_file()
         # print(our_min_s)
         # print(f"DIFF: {their_min_s.schedule_len - our_min_s.schedule_len} \n\n")
         # if is_better:
@@ -205,7 +205,7 @@ def write_excel(schedules: List[Scheduler], wks, bold, s_pos: List[int] = [2, 0]
     wks.write(x_offset, y_offset + 7, "Workflows", bold)
     wks.write(x_offset, y_offset + 8, "Machines", bold)
 
-    for i, s in enumerate(schedules):
+    for s in schedules:
         x_offset += 1
         # name
         wks.write(x_offset, y_offset, f"{s.method_used_info()}")
@@ -258,7 +258,7 @@ def write_to_excel(schedules: List[Scheduler], wks, bold, s_pos: List[int] = [2,
     wks.write(x_offset, y_offset + 7, "Workflows", bold)
     wks.write(x_offset, y_offset + 8, "Machines", bold)
 
-    for i, s in enumerate(schedules):
+    for s in schedules:
         x_offset += 1
         # name
         wks.write(x_offset, y_offset, f"{s.method_used_info()}")

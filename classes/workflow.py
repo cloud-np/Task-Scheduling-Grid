@@ -213,7 +213,7 @@ class Workflow:
         costs = [COSTS_A, COSTS_B]
         children_dags = [TASK_DAG_A, TASK_DAG_B]
         parents_dags = [PARENTS_DAG_A, PARENTS_DAG_B]
-        tasks = [list(), list()]
+        tasks = [[], []]
         for wf_id in range(2):
             # We do +1 because we usally add an entry node with id = 0
             tasks[wf_id] = [Task(id_=i + 1,

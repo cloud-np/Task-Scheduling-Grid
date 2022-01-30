@@ -24,7 +24,7 @@ def optimize_schedule(workflows, machines, best_sch):
         i += 1
 
     # print(f'{best_sch.schedule_order}\n')
-    return best_sch, True if best_sch.name.startswith('ordered') else False
+    return best_sch, bool(best_sch.name.startswith('ordered'))
 
 
 def update_best_schedule(workflows, machines, best_sch, order):

@@ -44,8 +44,8 @@ def get_tasks_from_json_file(file_name, wf_id, network_kbps):
 
 
 def create_csv_file_to_visualize_graph(jobs):
-    nodes = list()
-    edges = list()
+    nodes = []
+    edges = []
     for job in jobs:
         name = job['name']
         job_id = get_id_from_name(name)
