@@ -15,7 +15,7 @@ class Visualizer:
         min_len_index = data_on_x.index(min(data_on_x))
         bar_colors[min_len_index] = 'r'
 
-        labels = [m for m in methods_used]
+        labels = list(methods_used)
 
         plt.style.use("seaborn-dark")
         x = np.arange(len(labels))
@@ -45,8 +45,8 @@ class Visualizer:
     @staticmethod
     def compare_hole_filling_methods(data):
 
-        methods_order = list()
-        infos: Dict[str, List[int]] = dict()
+        methods_order = []
+        infos: Dict[str, List[int]] = {}
         for i, m in enumerate(data):
             ttypes, method = m['method_used'].split()
             if i < 4:
@@ -56,9 +56,10 @@ class Visualizer:
             else:
                 infos[ttypes] = [round(m['machine'].time_on_machine)]
 
-        bars = list()
-        for key, info in infos.items():
-            bars.append(go.Bar(name=key, x=methods_order, y=info))  # type:ignore
+        bars = [
+            go.Bar(name=key, x=methods_order, y=info)
+            for key, info in infos.items()
+        ]
 
         fig = go.Figure(data=bars)  # type: ignore
 
@@ -124,7 +125,7 @@ class Visualizer:
     def color_node_points(G, node_trace):
         node_adjacencies = []
         node_text = []
-        for node, adjacencies in enumerate(G.adjacency()):
+        for adjacencies in G.adjacency():
             node_adjacencies.append(len(adjacencies[1]))
             node_text.append('# of connections: ' + str(len(adjacencies[1])))
 
