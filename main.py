@@ -1,25 +1,24 @@
-from algos.paper_2011_algos.paper_method import Paper2011
-from helpers.examples.example_data import HOLE_METHOD_VARIATIONS
-from helpers.visuals.visualize import Visualizer
-from classes.workflow import Workflow
-from classes.machine import Machine
-from helpers.examples.example_gen import ExampleGen
-from helpers.simulation.simulation import Simulation, save_sims_to_excel
-from classes.scheduler import FillMethod
+from algos.paper_2011_algos.paper_method import paper2011
+from helpers.examples.example_data import hole_method_variations
+from helpers.visuals.visualize import visualizer
+from classes.workflow import workflow
+from classes.machine import machine
+from helpers.examples.example_gen import examplegen
+from helpers.simulation.simulation import simulation, save_sims_to_excel
+from classes.scheduler import fillmethod
 from helpers.pick_best_method import find_seed_for
 
 
 if __name__ == "__main__":
 
-    # Variations. This should be its own file.
-    #    {"name": "c1", "time_types": ["EST"], "fill_type": "NO-FILL"},
-    #    {"name": "c2", "time_types": ["EST"], "fill_type": "NO-FILL"},
-    #    {"name": "c3", "time_types": ["EST"], "fill_type": "NO-FILL"}]
-    # run_methods = [HOLE_METHOD_VARIATIONS["EFT_variations"], HOLE_METHOD_VARIATIONS["compositions"], HOLE_METHOD_VARIATIONS['holes-paper-2011']]
-    run_methods = [HOLE_METHOD_VARIATIONS["EFT_variations"]]
-    # run_methods = [HOLE_METHOD_VARIATIONS["compositions"], HOLE_METHOD_VARIATIONS['criticals_unsorted']]
-    # run_methods = [HOLE_METHOD_VARIATIONS["compositions"], HOLE_METHOD_VARIATIONS['criticals_unsorted']]
-    # run_methods = [{"name": "c1", "time_types": ["EST"], "fill_type": "NO-FILL"}]
+    # variations. this should be its own file.
+    #    {"name": "c1", "time_types": ["est"], "fill_type": "no-fill"},
+    #    {"name": "c2", "time_types": ["est"], "fill_type": "no-fill"},
+    #    {"name": "c3", "time_types": ["est"], "fill_type": "no-fill"}]
+    # run_methods = [hole_method_variations["eft_variations"], hole_method_variations["compositions"], hole_method_variations['holes-paper-2011']]
+    run_methods = [hole_method_variations["eft_variations"]]
+
+    # run_methods = [{"name": "crit_u best-fit", "fill_type": "best-fit"}]
     run_methods = sum(run_methods, [])
     # run_methods = HOLE_METHOD_VARIATIONS["EFT_variations"]
     # run_methods = [{"name": "holes2011 FASTEST-EDF", "fill_type": "FASTEST-FIT", "priority_type": "EDF"}]
@@ -29,13 +28,13 @@ if __name__ == "__main__":
     n = 8
     ss = []
 # for n in [1, 2]:
-    for n_machines in [4, 8]:
-        for network in [12]:
-            # machines, workflows = ExampleGen.load_random_wfs([n_machines, network * 125], wf_size)
-            machines, workflows = ExampleGen.load_all_types([n_machines, network * 125], 100, n_times=n)
+    for n_machines in [8]:
+        for network in [500]:
+            machines, workflows = ExampleGen.load_random_wfs([n_machines, network * 125], 20)
+            # machines, workflows = ExampleGen.load_all_types([n_machines, network * 125], 100, n_times=n)
             print(f"n-wfs: {n} machines: {n_machines}  network: {network}")
             # Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=True, save_sim=True, show_machines=False).run()
-            ss = Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=False, save_sim=True, show_machines=False).run()
+            ss = Simulation(run_methods, machines, workflows, visuals=True, save_fig=False, show_fig=True, save_sim=True, show_machines=False).run()
             for s in ss:
                 print(s)
     # ss = sum(ss, ())

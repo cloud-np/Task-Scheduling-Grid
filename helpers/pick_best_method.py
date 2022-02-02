@@ -27,10 +27,10 @@ def find_seed_for(fill_method: FillMethod, starting_seed: int = 0):
             for m in min_s.machines:
                 if m.contains_wf_id(wf_id=1) is False:
                     done = False
-            if done is False:
+            if not done:
                 i += 1
         else:
             done = False
             i += 1
-        # Visualizer.visualize_machines(min_s.machines)
+            # Visualizer.visualize_machines(min_s.machines)
     return i, min_s.workflows

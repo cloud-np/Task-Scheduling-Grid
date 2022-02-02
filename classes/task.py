@@ -270,8 +270,7 @@ class Task:
             self.is_entry = True
 
     def is_slowest_parent(self, child):
-        return child.slowest_parent['parent_task'] is None or \
-                child.slowest_parent['parent_task'].end < self.end
+        return child.slowest_parent['parent_task'] is None or child.slowest_parent['parent_task'].end < self.end
 
     # This function runs once the task gets scheduled
     def update_children_and_self_status(self):
