@@ -1,12 +1,12 @@
 from classes.task import Task, TaskStatus, Edge
-from algos.calc_task_ranks import calculate_downward_ranks, calculate_upward_ranks
+from algos.calc_task_ranks import calculate_upward_ranks
 from colorama import Fore, Back
-from typing import Union, Any, List, Dict
+from typing import Union, List
 from helpers.data_parser import get_tasks_from_json_file
 from helpers.examples.example_data import NAMES_A, NAMES_B, COSTS_A, COSTS_B, \
     TASK_DAG_A, TASK_DAG_B, PARENTS_DAG_A, PARENTS_DAG_B
-from helpers.checker import schedule_checker
 from random import choice
+import networkx as nx
 
 # 'montage' not working properly
 # 'soykbr' wfcommons 0.7 not working properly
@@ -391,3 +391,13 @@ class Workflow:
 
         if sort_tasks is True:
             self.tasks.sort(key=lambda t: t.id)
+
+    def to_nxdigraph(self) -> nx.DiGraph:
+        g = nx.Graph()
+        for task in self.tasks:
+            for ce in task.children_edges:
+                g.add_edge(task, ce)
+            # g.add_node(task.id, start=task.start, end=task.end, machine_id=task.machine_id)
+            # g.add_node(task)
+        nx.draw(g)
+        # pylab.draw()

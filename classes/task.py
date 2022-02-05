@@ -1,6 +1,6 @@
 from colorama import Fore
 from random import randint
-from typing import List, Union
+from typing import List, Optional
 from dataclasses import dataclass
 
 DEBUG = True
@@ -38,8 +38,8 @@ class TaskBlueprint:
     wf_id: int
     name: str
     runtime: float
-    children_names: dict
-    parents_names: Union[None, dict]
+    children_names: Optional[dict]
+    parents_names: Optional[dict]
     status: TaskStatus
     is_entry: bool
     is_exit: bool
@@ -63,7 +63,7 @@ class Task:
         self.level = None
         self.down_rank = None
         self.priority = None
-        self.wf_deadline: Union[int, None] = None
+        self.wf_deadline: Optional[int] = None
         self.children_till_ready: int = 0
         self.parents_till_ready: int = 0
         self.is_critical: bool = False
@@ -84,7 +84,7 @@ class Task:
     def get_blueprint(self):
         return TaskBlueprint(self.id, self.wf_id, self.name, self.runtime, [{"w": e.weight, "n": e.node.name} for e in self.children_edges], [{"w": e.weight, "n": e.node.name} for e in self.parents_edges], self.status, self.is_entry, self.is_exit)
 
-    def create_edges(self, tasks: List['Task'], network_kbps: Union[None, float] = None):
+    def create_edges(self, tasks: List['Task'], network_kbps: Optional[float] = None):
         if network_kbps is not None:
             children: List[Task] = self.get_tasks_from_names(tasks, is_child_tasks=True)
             parents: List[Task] = self.get_tasks_from_names(tasks, is_child_tasks=False)
@@ -226,7 +226,7 @@ class Task:
         return sum(self.costs) / len(self.costs)
 
     @staticmethod
-    def find_task_by_name(tasks, name) -> Union['Task', None]:
+    def find_task_by_name(tasks, name) -> Optional['Task']:
         for task in tasks:
             if task.name == name:
                 return task

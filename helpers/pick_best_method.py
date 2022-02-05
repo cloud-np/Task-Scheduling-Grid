@@ -1,4 +1,4 @@
-from classes.scheduler import FillMethod, get_fill_method
+from classes.scheduler import FillMethod
 from helpers.examples.example_gen import ExampleGen
 from helpers.simulation.simulation import Simulation
 import random
