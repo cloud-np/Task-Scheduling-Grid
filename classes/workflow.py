@@ -1,7 +1,7 @@
 from classes.task import Task, TaskStatus, Edge
 from algos.calc_task_ranks import calculate_upward_ranks
 from colorama import Fore, Back
-from typing import Union, List
+from typing import Optional, List
 from helpers.data_parser import get_tasks_from_json_file
 from helpers.examples.example_data import NAMES_A, NAMES_B, COSTS_A, COSTS_B, \
     TASK_DAG_A, TASK_DAG_B, PARENTS_DAG_A, PARENTS_DAG_B
@@ -23,12 +23,12 @@ CACHED_WFS = dict()
 # in any CASE tho tasks and machines lists should NEVER change
 # at all. I should try to make them immutable later on.
 class Workflow:
-    def __init__(self, id_, wf_type, machines, add_dummies, file_path: str = None, name: str = None, tasks: Union[List[Task], None] = None):
+    def __init__(self, id_, wf_type, machines, add_dummies, file_path: str = None, name: str = None, tasks: Optional[List[Task]] = None):
         self.id: int = id_
         self.type = wf_type  # type of the workflow e.g: LIGO, Montage, etc
         self.name: str = name
         self.wf_len: float = 0
-        self.tasks: Union[List[Task], None] = tasks
+        self.tasks: Optional[List[Task]] = tasks
         self.scheduled: bool = False
         self.finishing_time: float = -1.0
         self.avg_comp_cost: float = -1.0

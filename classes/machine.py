@@ -3,7 +3,7 @@ from random import randint
 from classes.task import Task
 import heapq
 import classes.scheduler as scheduler
-from typing import Set, Union, List
+from typing import Set, List
 from dataclasses import dataclass
 
 
