@@ -15,7 +15,7 @@ class RuinRecreate:
 
     def __init__(self, og_workflow: Workflow, og_machines: List[Machine], ruin_method="random"):
         self.og_solution = Solution(og_workflow)
-        self.og_workflows: Workflow = og_workflow
+        self.og_workflow: Workflow = og_workflow
         self.og_machines: List[Machine] = og_machines
         self.ruin_method: str = ruin_method
 
@@ -25,11 +25,17 @@ class RuinRecreate:
         # self.__ruin()
 
     def run(self):
-        # self.__ruin()
+        self.__ruin()
         # self.__recreate()
         ...
 
+    def __copy_workflow_and_machines(self):
+        machines_copy = [Machine.blueprint_to_machine(m.get_blueprint()) for m in self.og_machines]
+        tasks = [Task.blueprint_to_task(t.get_blueprint()) for t in self.og_workflow.tasks]
+        workflow_copy = Workflow.blueprint_to_workflow(self.og_workflow.id, self.og_workflow.tasks, self.og_workflow.machines)
+
     def __ruin(self):
+        time_interval = (10, 30)
         ...
 
     def __recreate(self):
