@@ -1,29 +1,11 @@
 from helpers.examples.example_data import HOLE_METHOD_VARIATIONS
 # from helpers.visuals.visualize import Visualizer
 from helpers.examples.example_gen import ExampleGen
-<<<<<<< HEAD
-from helpers.simulation.simulation import Simulation, save_sims_to_excel
-from classes.scheduler import FillMethod
-from helpers.pick_best_method import find_seed_for, find_c1_example
-=======
 from helpers.simulation.simulation import Simulation
->>>>>>> testing
 
 
 if __name__ == "__main__":
 
-<<<<<<< HEAD
-    # Variations. This should be its own file.
-    #    {"name": "c1", "time_types": ["EST"], "fill_type": "NO-FILL"},
-    #    {"name": "c2", "time_types": ["EST"], "fill_type": "NO-FILL"},
-    #    {"name": "c3", "time_types": ["EST"], "fill_type": "NO-FILL"}]
-    # run_methods = [HOLE_METHOD_VARIATIONS["EFT_variations"], HOLE_METHOD_VARIATIONS["compositions"], HOLE_METHOD_VARIATIONS['holes-paper-2011']]
-    # run_methods = [HOLE_METHOD_VARIATIONS["EFT_variations"]]
-    # run_methods = [HOLE_METHOD_VARIATIONS["compositions"], HOLE_METHOD_VARIATIONS['criticals_unsorted']]
-    # run_methods = [HOLE_METHOD_VARIATIONS["compositions"], HOLE_METHOD_VARIATIONS['criticals_unsorted']]
-    # run_methods = [{"name": "c1", "time_types": ["EST"], "fill_type": "NO-FILL"}]
-    # run_methods = sum(run_methods, [])
-=======
     # variations. this should be its own file.
     #    {"name": "c1", "time_types": ["est"], "fill_type": "no-fill"},
     #    {"name": "c2", "time_types": ["est"], "fill_type": "no-fill"},
@@ -34,7 +16,6 @@ if __name__ == "__main__":
 
     # run_methods = [{"name": "crit_u best-fit", "fill_type": "best-fit"}]
     run_methods = sum(run_methods, [])
->>>>>>> testing
     # run_methods = HOLE_METHOD_VARIATIONS["EFT_variations"]
     # run_methods = [{"name": "holes2011 FASTEST-EDF", "fill_type": "FASTEST-FIT", "priority_type": "EDF"}]
     # for wf_size in [50, 100, 200, 300, 400, 500, 1000]:
@@ -43,17 +24,6 @@ if __name__ == "__main__":
     # n = 8
     # ss = []
 # for n in [1, 2]:
-<<<<<<< HEAD
-    # for n_machines in [4, 8]:
-    #     for network in [12]:
-    #         # machines, workflows = ExampleGen.load_random_wfs([n_machines, network * 125], wf_size)
-    #         machines, workflows = ExampleGen.load_all_types([n_machines, network * 125], 100, n_times=n)
-    #         print(f"n-wfs: {n} machines: {n_machines}  network: {network}")
-    #         # Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=True, save_sim=True, show_machines=False).run()
-    #         ss = Simulation(run_methods, machines, workflows, visuals=False, save_fig=False, show_fig=False, save_sim=True, show_machines=False).run()
-    #         for s in ss:
-    #             print(s)
-=======
     for n_machines in [8]:
         for network in [50]:
             machines, workflows = ExampleGen.load_random_wfs([n_machines, network * 125], 10)
@@ -63,7 +33,6 @@ if __name__ == "__main__":
             ss = Simulation(run_methods, machines, workflows, visuals=True, save_fig=False, show_fig=True, save_sim=False, show_machines=True).run()
             for s in ss:
                 print(s)
->>>>>>> testing
     # ss = sum(ss, ())
     # save_sims_to_excel(ss, n)
     # for [FillMethod.BEST_FIT, FillMethod.FASTEST_FIT, FillMethod.]

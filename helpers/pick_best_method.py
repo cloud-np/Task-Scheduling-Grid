@@ -48,8 +48,4 @@ def find_seed_for(fill_method: FillMethod, starting_seed: int = 0):
             done = False
             i += 1
             # Visualizer.visualize_machines(min_s.machines)
-<<<<<<< HEAD
-    return i, min_s, schedulers
-=======
     return i, min_s.workflows
->>>>>>> testing

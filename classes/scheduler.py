@@ -145,10 +145,6 @@ class Scheduler:
         fill_method = None
         if not self.name.startswith("holes"):
             return self.name
-<<<<<<< HEAD
-
-=======
->>>>>>> testing
         if concise:
             if self.fill_method == FillMethod.FASTEST_FIT:
                 fill_method = "FST"

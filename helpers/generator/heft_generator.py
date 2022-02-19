@@ -12,15 +12,15 @@ class HeftGenerator:
 
     def __init__(self, n_tasks, out_degree, a, ccr, b):
         self.n_tasks = n_tasks
-        mean_value = (math.sqrt(n_tasks) / a)
-        self.height = math.floor(np.random.uniform(low=1, high=mean_value, size=n_tasks)[0])
+        ep = (math.sqrt(n_tasks) / a)
+        self.height = math.floor(np.random.uniform(low=1, high=ep, size=n_tasks)[0])
         self.a = a
         self.out_degree = out_degree
         self.ccr = ccr
         self.b = b
         print(self.height)
         # print(self.height.mean())
-        print(mean_value)
+        print(ep)
 
 
 if __name__ == "__main__":
