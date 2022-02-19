@@ -1,4 +1,4 @@
-from classes.task import Task, TaskStatus, Edge
+import classes.task as ta
 from algos.calc_task_ranks import calculate_upward_ranks
 from colorama import Fore, Back
 from typing import Optional, List
@@ -23,12 +23,12 @@ CACHED_WFS = dict()
 # in any CASE tho tasks and machines lists should NEVER change
 # at all. I should try to make them immutable later on.
 class Workflow:
-    def __init__(self, id_, wf_type, machines, add_dummies, file_path: str = None, name: str = None, tasks: Optional[List[Task]] = None):
+    def __init__(self, id_, wf_type, machines, add_dummies, file_path: str = None, name: str = None, tasks: Optional[List[ta.Task]] = None):
         self.id: int = id_
         self.type = wf_type  # type of the workflow e.g: LIGO, Montage, etc
         self.name: str = name
         self.wf_len: float = 0
-        self.tasks: Optional[List[Task]] = tasks
+        self.tasks: Optional[List[ta.Task]] = tasks
         self.scheduled: bool = False
         self.finishing_time: float = -1.0
         self.avg_comp_cost: float = -1.0
@@ -75,7 +75,7 @@ class Workflow:
             # I don't want to use max() just to be a bit faster even
             # though by theory it would still be O(n)
             for t in self.tasks:
-                if t.status != TaskStatus.SCHEDULED:
+                if t.status != ta.TaskStatus.SCHEDULED:
                     raise Exception("Workflow can't be scheduled if all of his tasks haven't ended.")
                 elif t.end > self.wf_len:
                     self.wf_len = t.end
@@ -104,8 +104,8 @@ class Workflow:
     # FIXME
     # DO NOT CHANGE THE NAMING
     def __add_dummy_nodes(self):
-        self.tasks.insert(0, Task.make_dummy_node(0, self.id, "Dummy-In"))
-        self.tasks.append(Task.make_dummy_node(len(self.tasks), self.id, "Dummy-Out"))
+        self.tasks.insert(0, ta.Task.make_dummy_node(0, self.id, "Dummy-In"))
+        self.tasks.append(ta.Task.make_dummy_node(len(self.tasks), self.id, "Dummy-Out"))
 
         dummy_in = self.tasks[0]
         dummy_out = self.tasks[len(self.tasks) - 1]
@@ -119,7 +119,7 @@ class Workflow:
                 task.add_child(0, dummy_out)
                 task.is_exit = False
         dummy_in.is_entry = True
-        dummy_in.status = TaskStatus.READY
+        dummy_in.status = ta.TaskStatus.READY
         dummy_out.is_exit = True
 
     # TODO: If we end up using the same workflow for multiple workflows we should preload tasks and machines
@@ -131,10 +131,10 @@ class Workflow:
     '''
     @staticmethod
     def connect_wfs(workflows, machines):
-        dummy_in: Task = Task.make_dummy_node(id_=-1, wf_id=-1, name="Dummy-In-BIG")
+        dummy_in: ta.Task = ta.Task.make_dummy_node(id_=-1, wf_id=-1, name="Dummy-In-BIG")
         # To find the dummy_out.id we need to calc all the tasks in all workflows
-        dummy_out: Task = Task.make_dummy_node(id_=sum([len(wf.tasks) for wf in workflows]), wf_id=-1, name="Dummy-Out-BIG")
-        all_tasks: List[Task] = [dummy_in]
+        dummy_out: ta.Task = ta.Task.make_dummy_node(id_=sum([len(wf.tasks) for wf in workflows]), wf_id=-1, name="Dummy-Out-BIG")
+        all_tasks: List[ta.Task] = [dummy_in]
         dummy_in.costs: List[int] = [0 for _ in machines]
 
         for wf in workflows:
@@ -143,7 +143,7 @@ class Workflow:
                     dummy_in.add_child(0, task)
                     task.add_parent(0, dummy_in)
                     task.is_entry = False
-                    task.status = TaskStatus.UNSCHEDULED
+                    task.status = ta.TaskStatus.UNSCHEDULED
                 if task.is_exit:
                     dummy_out.add_parent(0, task)
                     task.add_child(0, dummy_out)
@@ -154,7 +154,7 @@ class Workflow:
 
         all_tasks.append(dummy_out)
         dummy_out.costs = [0 for _ in machines]
-        dummy_in.status = TaskStatus.READY
+        dummy_in.status = ta.TaskStatus.READY
         dummy_out.is_exit = True
         return all_tasks
 
@@ -179,7 +179,7 @@ class Workflow:
         for task in self.tasks:
             if task.is_entry:
                 return task
-        raise Exception("NO entry task found! func: [find_an_entry_task]")
+        raise Exception("NO entry task found!")
 
     def construct_critical_path(self):
         critical_path = []
@@ -193,10 +193,8 @@ class Workflow:
 
         # Start from an entry task and run until you find an exit task.
         # Then the critical path would be ready.
-        counter = 0
         while temp_task.is_exit is False:
             for child_edge in temp_task.children_edges:
-                counter += 1
                 diff: float = entry_priority - child_edge.node.priority
                 if abs(diff) < 0.90:
                     temp_task = child_edge.node
@@ -216,15 +214,15 @@ class Workflow:
         tasks = [[], []]
         for wf_id in range(2):
             # We do +1 because we usally add an entry node with id = 0
-            tasks[wf_id] = [Task(id_=i + 1,
-                                 wf_id=wf_id,
-                                 name=names[wf_id][i],
-                                 costs=costs[wf_id][i],
-                                 runtime=None,
-                                 files=None,
-                                 children_names=[c['name']
-                                                 for c in children_dags[wf_id][i]],
-                                 parents_names=[p['name'] for p in parents_dags[wf_id][i]]) for i in range(0, len(children_dags[wf_id]))]
+            tasks[wf_id] = [ta.Task(id_=i + 1,
+                            wf_id=wf_id,
+                            name=names[wf_id][i],
+                            costs=costs[wf_id][i],
+                            runtime=None,
+                            files=None,
+                            children_names=[c['name']
+                                            for c in children_dags[wf_id][i]],
+                            parents_names=[p['name'] for p in parents_dags[wf_id][i]]) for i in range(0, len(children_dags[wf_id]))]
 
             for task in tasks[wf_id]:
                 children: list = task.get_tasks_from_names(
@@ -232,8 +230,8 @@ class Workflow:
                 parents: list = task.get_tasks_from_names(
                     tasks[wf_id], is_child_tasks=False)
                 # We need at least -> len(Edges) == len(children)
-                children_edges = [Edge(weight=children_dags[wf_id][task.id - 1][i]["w"], node=child) for i, child in enumerate(children)]
-                parents_edges = [Edge(weight=parents_dags[wf_id][task.id - 1][i]["w"], node=parent) for i, parent in enumerate(parents)]
+                children_edges = [ta.Edge(weight=children_dags[wf_id][task.id - 1][i]["w"], node=child) for i, child in enumerate(children)]
+                parents_edges = [ta.Edge(weight=parents_dags[wf_id][task.id - 1][i]["w"], node=parent) for i, parent in enumerate(parents)]
                 # We use this function to check if everything went smoothly in the parsing
                 task.set_edges(children_edges, parents_edges)
 
@@ -299,13 +297,13 @@ class Workflow:
         return workflows
 
     def get_ready_tasks(self):
-        return [t for t in self.tasks if t.status == TaskStatus.READY]
+        return [t for t in self.tasks if t.status == ta.TaskStatus.READY]
 
     # NOTE: This can be written in one line.
     # Gets the starting tasks which are the entry tasks to begin with.
 
-    def starting_ready_tasks(self) -> List[Task]:
-        return [child.node for child in self.tasks[0].children_edges if child.node.status == TaskStatus.READY]
+    def starting_ready_tasks(self) -> List[ta.Task]:
+        return [child.node for child in self.tasks[0].children_edges if child.node.status == ta.TaskStatus.READY]
 
     def str_id(self):
         return f"WORKFLOW    ID = {self.id}"
@@ -314,18 +312,18 @@ class Workflow:
         return f"{Back.RED}WORKFLOW    ID = {self.id}{Back.RESET}"
 
     def calc_avg_comp_cost(self):
-        self.avg_comp_cost = sum(task.avg_cost() for task in self.tasks)
+        self.avg_comp_cost = sum(task.avg_cost() for task in self.tasks) / len(self.tasks)
         return self.avg_comp_cost
 
     def get_ready_unscheduled_tasks(self):
-        return [t for t in self.tasks if t.status in (TaskStatus.READY, TaskStatus.UNSCHEDULED)]
+        return [t for t in self.tasks if t.status in (ta.TaskStatus.READY, ta.TaskStatus.UNSCHEDULED)]
 
     def calc_avg_com_cost(self):
         # Get all the edges and remove the duplicates
         all_edges = [task.children_edges for task in self.tasks]
         all_edges = set(sum(all_edges, []))
 
-        self.avg_com_cost = sum(e.weight for e in all_edges)
+        self.avg_com_cost = sum(e.weight for e in all_edges) / len(self.tasks)
         return self.avg_com_cost
 
     # ccr = Communication to computation ratio.
@@ -334,8 +332,7 @@ class Workflow:
             self.calc_avg_comp_cost()
         if self.avg_com_cost == -1:
             self.calc_avg_com_cost()
-        ccr = self.avg_com_cost / self.avg_comp_cost
-        return ccr
+        return self.avg_com_cost / self.avg_comp_cost
 
     @staticmethod
     def level_order(tasks):
@@ -374,8 +371,8 @@ class Workflow:
 
         return filtered_levels
 
-    def get_task(self, index):
-        return self.tasks[index]
+    def get_task_by_id(self, id_):
+        return [t for t in self.tasks if t.id == id_][0]
 
     def recipe(self):
         return [{"id": task,

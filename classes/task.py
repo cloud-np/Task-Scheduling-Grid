@@ -227,10 +227,7 @@ class Task:
 
     @staticmethod
     def find_task_by_name(tasks, name) -> Optional['Task']:
-        for task in tasks:
-            if task.name == name:
-                return task
-        return None
+        return next((task for task in tasks if task.name == name), None)
 
     def str_col_times(self):
         return f"{Fore.MAGENTA}[{round(self.start, ROUND_DIGIT)} - {round(self.end, ROUND_DIGIT)}]{Fore.RESET}"

@@ -97,7 +97,7 @@ class Scheduler:
         slowest_machine = self.get_slowest_machine()
         _str += f'\n{slowest_machine.str_col_schedule_len()}\n'
         _str += f'\n{Fore.RED}AVG MAKESPAN:{Fore.RESET} {self.avg_workflow_makespan}\n'
-        _str += f"n-tasks: {Fore.MAGENTA}{sum([len(wf.tasks) for wf in self.workflows])}{Fore.RESET} machines: {Fore.MAGENTA}{len(self.machines)}{Fore.RESET} network: {Fore.MAGENTA}{self.machines[0].network_kbps / 125}{Fore.RESET}\n"
+        _str += f"n-tasks: {Fore.MAGENTA}{sum(len(wf.tasks) for wf in self.workflows)}{Fore.RESET} machines: {Fore.MAGENTA}{len(self.machines)}{Fore.RESET} network: {Fore.MAGENTA}{self.machines[0].network_kbps / 125}{Fore.RESET}\n"
         return _str
 
     def get_blueprint(self):
@@ -109,14 +109,16 @@ class Scheduler:
         lines = [f"({m.id}, {m.name}, {m.n_cpu}, {m.speed}, {m.network_kbps})\n" for m in self.machines]
         lines.insert(0, f"{self.priority_type}, {self.fill_method}, {self.time_types}\n")
         for blp_tasks in blp_self.workflows:
-            for bt in blp_tasks:
-                lines.append(f"TaskBlueprint({bt.id_}, {bt.wf_id}, \"{bt.name}\", {bt.runtime}, {str(bt.children_names)}, {str(bt.parents_names)}, {1 if bt.is_entry else 0}, {bt.is_entry}, {bt.is_exit}),\n")
+            lines.extend(
+                f'TaskBlueprint({bt.id_}, {bt.wf_id}, "{bt.name}", {bt.runtime}, {bt.children_names}, {bt.parents_names}, {1 if bt.is_entry else 0}, {bt.is_entry}, {bt.is_exit}),\n'
+                for bt in blp_tasks
+            )
 
         with open(f"./{get_fill_method(self.fill_method)}.txt", "w") as f:
             f.writelines(lines)
 
     def get_whole_idle_time(self):
-        return sum([m.get_idle_time() for m in self.machines])
+        return sum(m.get_idle_time() for m in self.machines)
 
     def run_example(self):
         self.example_hole_scheduling()
@@ -133,26 +135,24 @@ class Scheduler:
 
     def method_used_info(self, concise=False):
         fill_method = None
-        if self.name.startswith("holes"):
-            if concise:
-                if self.fill_method == FillMethod.FASTEST_FIT:
-                    fill_method = "FST"
-                elif self.fill_method == FillMethod.BEST_FIT:
-                    fill_method = "B"
-                elif self.fill_method == FillMethod.FIRST_FIT:
-                    fill_method = "FR"
-                elif self.fill_method == FillMethod.WORST_FIT:
-                    fill_method = "W"
-            else:
-                fill_method = get_fill_method(self.fill_method)
-
-            if self.name.startswith("holes2011"):
-                return f"{fill_method} {self.priority_type_str}\n"
-            else:
-                ttypes = [get_time_type(t) for t in self.time_types]
-                return f"{'ordered ' if self.name.startswith('ordered') else ''}{fill_method}-{ttypes[0]}-{ttypes[1]}\n"
-        else:
+        if not self.name.startswith("holes"):
             return self.name
+        if concise:
+            if self.fill_method == FillMethod.FASTEST_FIT:
+                fill_method = "FST"
+            elif self.fill_method == FillMethod.BEST_FIT:
+                fill_method = "B"
+            elif self.fill_method == FillMethod.FIRST_FIT:
+                fill_method = "FR"
+            elif self.fill_method == FillMethod.WORST_FIT:
+                fill_method = "W"
+        else:
+            fill_method = get_fill_method(self.fill_method)
+
+        if self.name.startswith("holes2011"):
+            return f"{fill_method} {self.priority_type_str}\n"
+        ttypes = [get_time_type(t) for t in self.time_types]
+        return f"{'ordered ' if self.name.startswith('ordered') else ''}{fill_method}-{ttypes[0]}-{ttypes[1]}\n"
 
     def get_scheduled_info(self):
         def add_nl(_str):
@@ -412,7 +412,7 @@ class Scheduler:
     @staticmethod
     def schedule_task_machine(task, machines, time_type, fill_method=FillMethod.NO_FILL):
         if task.status != TaskStatus.READY:
-            raise Exception("Task is not ready! ", task)
+            raise Exception(f"Task[{task.id}] wf[{task.wf_id}] has not ready state! It has status of: {task.status}")
         start, end, machine = Scheduler.find_machine(task, machines, time_type)
 
         Scheduler.schedule_task((start, end), task, machine=machine)
@@ -576,27 +576,42 @@ class Scheduler:
         # 2. Run HEFT in round-robin-fashion
         Scheduler.round_robin_heft(all_tasks, self.machines, len(self.workflows))
         self.set_wfs_scheduled()
-    # @staticmethod
-    # def pick_machine_for_critical_path(critical_path, machines):
-    #     machines_costs = []
-    #     for machine in machines:
-    #         machine_critical_cost = 0
-    #         for task in critical_path:
-    #             machine_critical_cost += task.costs[machine.id]
-    #         machines_costs.append((machine_critical_cost, machine.id))
 
-    #     # Machine selected for the critical path
-    #     return min(machines_costs, key=lambda tup: tup[0])[1]
+    @staticmethod
+    def pick_machine_for_critical_path(critical_path, machines):
+        machines_costs = []
+        for machine in machines:
+            machine_critical_cost = sum(task.costs[machine.id] for task in critical_path)
+            machines_costs.append((machine_critical_cost, machine.id))
+
+        # Machine selected for the critical path
+        return min(machines_costs, key=lambda tup: tup[0])[1]
 
 
 # Running this function means we already have
 # as a fact that all the parent tasks are done
 # before we get in here and check for the slowest parent
-def compute_execution_time(task, m_id, start_time):
+def compute_execution_time(task, m_id, potensial_start_time):
+    """Find the execution time of a task on a machine based on given start_time.
+
+    Parameters
+    ----------
+    task : Task
+        The task we want to find the execution time for.
+    m_id : int
+        Machine id.
+    potensial_start_time : float
+        This can be either the current time of a machine or the start time of a hole in a machine.
+
+    Returns
+    -------
+    Tuple[float, float]
+        The potential start time and end time of the task on the machine.
+    """
     # If between the child and the parent the machine doesn't change
     # then the communication cost is 0.
     if task.is_entry:
-        return [start_time, start_time + task.costs[m_id]]
+        return [potensial_start_time, potensial_start_time + task.costs[m_id]]
     elif task.slowest_parent['parent_task'].machine_id == m_id:
         communication_time = 0
     else:
@@ -606,7 +621,7 @@ def compute_execution_time(task, m_id, start_time):
     #  parent_end + communication_time + cost_of_task_in_this_machine
     # We pick the one that is bigger so we can ensure the child task starts
     # after the parent.
-    start = max(task.slowest_parent['parent_task'].end + communication_time, start_time)
+    start = max(task.slowest_parent['parent_task'].end + communication_time, potensial_start_time)
     end = start + task.costs[m_id]
     return [start, end]
 

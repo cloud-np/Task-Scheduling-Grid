@@ -11,7 +11,34 @@ NUM_TASKS = [10, 50, 100, 200, 500, 1000]
 # NUM_TASKS = [300, 400]
 
 
-def create_wfs(wf_type: str, path: str, num_tasks: int):
+def __creatw_wf_files(wf_type, num_tasks, file_name):
+    if wf_type == 'blast':
+        recipe = BlastRecipe.from_num_tasks(num_tasks=num_tasks)
+    elif wf_type == 'cycles':
+        recipe = CyclesRecipe.from_num_tasks(num_tasks=num_tasks)
+    elif wf_type == 'epigenomics':
+        recipe = EpigenomicsRecipe.from_num_tasks(num_tasks=num_tasks)
+    elif wf_type == 'genome':
+        recipe = GenomeRecipe.from_num_tasks(num_tasks=num_tasks)
+    elif wf_type == 'montage':
+        recipe = MontageRecipe.from_num_tasks(num_tasks=num_tasks)
+    elif wf_type == 'seismology':
+        recipe = SeismologyRecipe.from_num_tasks(num_tasks=num_tasks)
+    elif wf_type == 'soykbr':
+        recipe = SoykbRecipe.from_num_tasks(num_tasks=num_tasks)
+    elif wf_type == 'sra':
+        recipe = SrasearchRecipe.from_num_tasks(num_tasks=num_tasks)
+    else:
+        raise Exception('Not a valid name for a recipe!')
+    generator = WorkflowGenerator(recipe)
+    workflow = generator.build_workflow()
+    workflow.write_json(f'{file_name}.json')
+    workflow.write_dot(f'{file_name}.dot')
+    print(f"Created -> {file_name}.dot")
+    print(f"Created -> {file_name}.json")
+
+
+def create_wfs(wf_type: str, i: int, path: str, num_tasks: int):
     if wf_type not in WF_TYPES:
         raise Exception('Not a valid name for a recipe!')
 
@@ -22,30 +49,7 @@ def create_wfs(wf_type: str, path: str, num_tasks: int):
         return
 
     try:
-        if wf_type == 'cycles':
-            recipe = CyclesRecipe.from_num_tasks(num_tasks=num_tasks)
-        elif wf_type == 'epigenomics':
-            recipe = EpigenomicsRecipe.from_num_tasks(num_tasks=num_tasks)
-        elif wf_type == 'genome':
-            recipe = GenomeRecipe.from_num_tasks(num_tasks=num_tasks)
-        elif wf_type == 'montage':
-            recipe = MontageRecipe.from_num_tasks(num_tasks=num_tasks)
-        elif wf_type == 'seismology':
-            recipe = SeismologyRecipe.from_num_tasks(num_tasks=num_tasks)
-        elif wf_type == 'soykbr':
-            recipe = SoykbRecipe.from_num_tasks(num_tasks=num_tasks)
-        elif wf_type == 'blast':
-            recipe = BlastRecipe.from_num_tasks(num_tasks=num_tasks)
-        elif wf_type == 'sra':
-            recipe = SrasearchRecipe.from_num_tasks(num_tasks=num_tasks)
-        else:
-            raise Exception('Not a valid name for a recipe!')
-        generator = WorkflowGenerator(recipe)
-        workflow = generator.build_workflow()
-        workflow.write_json(f'{file_name}.json')
-        workflow.write_dot(f'{file_name}.dot')
-        print(f"Created -> {file_name}.dot")
-        print(f"Created -> {file_name}.json")
+        __creatw_wf_files(wf_type, num_tasks, file_name)
     except ValueError:
         print(f"Low tasks for {wf_type}. (n >= 133 for montage and n >= 14 for soykbr)")
 
@@ -54,13 +58,13 @@ def create_all_wfs():
     # for n_tasks in NUM_TASKS:
     #     for w_type in WF_TYPES:
     #         create_wfs(wf_type=w_type, num_tasks=n_tasks)
-    # for i in [0, 1, 2]:
-    #     for n_tasks in [10, 20, 50]:
-    #         for w_type in WF_TYPES:
-    #             create_wfs(wf_type=w_type, i=i, num_tasks=n_tasks)
-    for n_tasks in [300, 1000]:
-        for w_type in WF_TYPES:
-            create_wfs(wf_type=w_type, path='./data', num_tasks=n_tasks)
+    for i in [0, 1, 2]:
+        for n_tasks in [10, 20, 50]:
+            for w_type in WF_TYPES:
+                create_wfs(wf_type=w_type, i=i, num_tasks=n_tasks)
+    # for n_tasks in [300, 1000]:
+    #     for w_type in WF_TYPES:
+    #         create_wfs(wf_type=w_type, path='./data', num_tasks=n_tasks)
 
 
 if __name__ == '__main__':
