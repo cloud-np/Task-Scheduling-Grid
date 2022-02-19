@@ -44,6 +44,12 @@ class Simulation:
             s.run_example()
         return self.schedulers
 
+    def get_our_best_scheduler(self):
+        return min(self.get_our_schedulers(), key=lambda s: s.schedule_len)
+
+    def get_the_best_scheduler(self):
+        return min(self.schedulers, key=lambda s: s.schedule_len)
+
     def run(self):
         for s in self.schedulers:
             s.run()
@@ -53,8 +59,8 @@ class Simulation:
         # print("-------TOTAL MAKESPAN-------")
         # their_min_s = min(self.get_their_schedulers(), key=lambda s: s.schedule_len)
         # print(their_min_s)
-        our_min_s = min(self.get_our_schedulers(), key=lambda s: s.schedule_len)
         # # our_min_s.view_machine_holes()
+        # our_min_s = self.get_our_best_scheduler()
         # ordered_our_min_s, is_better = optimize_schedule(self.workflows, self.machines, our_min_s)
         # if self.save_sim:
         #     our_min_s.save_output_to_file()
@@ -64,17 +70,19 @@ class Simulation:
         # if is_better:
         #     self.schedulers.append(our_min_s)
         # print(min_s)
+        # our_min_s = self.get_our_best_scheduler()
+        # their_min_s = min(self.get_their_schedulers(), key=lambda s: s.schedule_len)
         if self.save_sim:
             # min_s = min(self.schedulers, key=lambda s: s.schedule_len)
 
-            our_min_s = min(self.get_our_schedulers(), key=lambda s: s.schedule_len)
             return self.get_our_schedulers()
-            # their_min_s = min(self.get_their_schedulers(), key=lambda s: s.schedule_len)
             # c1 = self.get_c1()
             # return [our_min_s, ordered_our_min_s, their_min_s, c1]
             # self.save_sim_stats(min_s)
         if self.show_machines:
-            Visualizer.visualize_machines(our_min_s.machines)
+            for s in self.schedulers:
+                Visualizer.visualize_machines(s.machines)
+            # Visualizer.visualize_machines(our_min_s.machines)
             # Visualizer.visualize_machines(their_min_s.machines)
             # print(their_min_s)
             # if min_s is our_min_s:

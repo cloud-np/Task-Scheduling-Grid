@@ -78,13 +78,8 @@ class Visualizer:
         for edge in G.edges():
             x0, y0 = G.nodes[edge[0]]['pos']
             x1, y1 = G.nodes[edge[1]]['pos']
-            edge_x.append(x0)
-            edge_x.append(x1)
-            edge_x.append(None)
-            edge_y.append(y0)
-            edge_y.append(y1)
-            edge_y.append(None)
-
+            edge_x.extend((x0, x1, None))
+            edge_y.extend((y0, y1, None))
         edge_trace = go.Scatter(
             x=edge_x, y=edge_y,
             line=dict(width=0.5, color='#888'),

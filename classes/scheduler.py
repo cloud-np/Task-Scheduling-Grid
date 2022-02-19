@@ -1,12 +1,10 @@
 from enum import Enum
-from typing import List, Any, Union
+from typing import List, Any, Optional
 import os
 from colorama import Fore, Back
 from classes.workflow import Workflow
 from dataclasses import dataclass
 from classes.task import TaskStatus, TaskBlueprint
-from matplotlib.pyplot import fill
-from helpers.examples.example_gen import ExampleGen
 from helpers.checker import schedule_checker
 from algos.calc_task_ranks import calculate_upward_ranks
 
@@ -43,20 +41,18 @@ class ScheduleBlueprint:
 
 
 class Scheduler:
-    def __init__(self, name: str, data, time_types: List[str], fill_method: str, schedule_order: Union[None, List[int]] = None, priority_type=None, output_path: str = "./simulation_output"):
+    def __init__(self, name: str, data, time_types: List[str], fill_method: str, schedule_order: Optional[List[int]] = None, priority_type=None, output_path: str = "./simulation_output"):
         workflows, machines = data
         self.name: str = name
-        self.n_wfs: int = len(workflows)
-        self.n_machines: int = len(machines)
-        self.workflows = workflows
+        self.workflows: List[Workflow] = workflows
         self.machines = machines
-        self.avg_workflow_makespan: Union[None, float] = None
+        self.avg_workflow_makespan: Optional[float] = None
         self.output_path: str = output_path
         self.critical_tasks = []
-        self.schedule_order: List[int] = schedule_order
+        self.schedule_wfs_order: List[int] = schedule_order
         # if not time_types[0].__class__ == str and time_types[1].__class__ == str and fill_method.__class__ == str and
         # E.g: sim_out/5.txt
-        self.output_file: str = f"{self.output_path}/bw_{int(self.machines[0].network_kbps / 125)}_wfs_{len(workflows)}_machines_{self.n_machines}.txt"
+        self.output_file: str = f"{self.output_path}/bw_{int(self.machines[0].network_kbps / 125)}_wfs_{len(workflows)}_machines_{len(self.machines)}.txt"
         self.time_types_str = time_types
 
         if time_types is not None:
@@ -101,7 +97,7 @@ class Scheduler:
         slowest_machine = self.get_slowest_machine()
         _str += f'\n{slowest_machine.str_col_schedule_len()}\n'
         _str += f'\n{Fore.RED}AVG MAKESPAN:{Fore.RESET} {self.avg_workflow_makespan}\n'
-        _str += f"n-tasks: {Fore.MAGENTA}{sum([len(wf.tasks) for wf in self.workflows])}{Fore.RESET} machines: {Fore.MAGENTA}{self.n_machines}{Fore.RESET} network: {Fore.MAGENTA}{self.machines[0].network_kbps / 125}{Fore.RESET}\n"
+        _str += f"n-tasks: {Fore.MAGENTA}{sum(len(wf.tasks) for wf in self.workflows)}{Fore.RESET} machines: {Fore.MAGENTA}{len(self.machines)}{Fore.RESET} network: {Fore.MAGENTA}{self.machines[0].network_kbps / 125}{Fore.RESET}\n"
         return _str
 
     def get_blueprint(self):
@@ -113,10 +109,17 @@ class Scheduler:
         lines = [f"({m.id}, {m.name}, {m.n_cpu}, {m.speed}, {m.network_kbps})\n" for m in self.machines]
         lines.insert(0, f"{self.priority_type}, {self.fill_method}, {self.time_types}\n")
         for blp_tasks in blp_self.workflows:
+<<<<<<< HEAD
             for bt in blp_tasks:
                 lines.append(
                     f'TaskBlueprint({bt.id_}, {bt.wf_id}, "{bt.name}", {bt.runtime}, {bt.children_names}, {bt.parents_names}, {1 if bt.is_entry else 0}, {bt.is_entry}, {bt.is_exit}),\n'
                 )
+=======
+            lines.extend(
+                f'TaskBlueprint({bt.id_}, {bt.wf_id}, "{bt.name}", {bt.runtime}, {bt.children_names}, {bt.parents_names}, {1 if bt.is_entry else 0}, {bt.is_entry}, {bt.is_exit}),\n'
+                for bt in blp_tasks
+            )
+>>>>>>> testing
 
         with open(f"./{get_fill_method(self.fill_method)}.txt", "w") as f:
             f.writelines(lines)
@@ -134,15 +137,18 @@ class Scheduler:
         self.schedule_method()
         self.is_scheduling_done = True
         self.schedule_len = self.get_schedule_len()
-        self.machines_util_avg_perc = sum(m.get_util_perc(self.schedule_len) for m in self.machines) / self.n_machines
-        self.avg_workflow_makespan = sum(wf.wf_len for wf in self.workflows) / self.n_wfs
+        self.machines_util_avg_perc = sum(m.get_util_perc(self.schedule_len) for m in self.machines) / len(self.machines)
+        self.avg_workflow_makespan = sum(wf.wf_len for wf in self.workflows) / len(self.workflows)
         # schedule_checker(self)
 
     def method_used_info(self, concise=False):
         fill_method = None
         if not self.name.startswith("holes"):
             return self.name
+<<<<<<< HEAD
 
+=======
+>>>>>>> testing
         if concise:
             if self.fill_method == FillMethod.FASTEST_FIT:
                 fill_method = "FST"
@@ -236,31 +242,31 @@ class Scheduler:
         on perpuse so it can fill them later with tasks with high computation
         cost and low communication cost.
         """
-        if self.schedule_order is None:
+        if self.schedule_wfs_order is None:
             self.find_critical_tasks()
             self.schedule_order_for_critical_tasks()
 
-        for i, wf_id in enumerate(self.schedule_order):
+        for wf_id in self.schedule_wfs_order:
             self.schedule_workflow(self.workflows[wf_id], TimeType.EFT)
 
     def schedule_order_for_critical_tasks(self):
-        self.schedule_order = [self.workflows[i].id for i in [t.wf_id for t in sorted(self.critical_tasks, key=lambda t: t.runtime, reverse=True)]]
+        self.schedule_wfs_order = [self.workflows[i].id for i in [t.wf_id for t in sorted(self.critical_tasks, key=lambda t: t.runtime, reverse=True)]]
         self.add_left_out_wfs_in_order()
 
     def ccr_schedule_order(self):
-        self.schedule_order = []
+        self.schedule_wfs_order = []
         sorted_wfs = sorted(self.workflows, key=lambda wf_: wf_.ccr, reverse=True)
         j = len(sorted_wfs) - 1
         for i in range(len(sorted_wfs) // 2):
-            self.schedule_order.append(sorted_wfs[i].id)
-            self.schedule_order.append(sorted_wfs[j].id)
+            self.schedule_wfs_order.append(sorted_wfs[i].id)
+            self.schedule_wfs_order.append(sorted_wfs[j].id)
             j -= 1
         self.add_left_out_wfs_in_order()
 
     def add_left_out_wfs_in_order(self):
         for wf in self.workflows:
-            if wf.id not in self.schedule_order:
-                self.schedule_order.append(wf.id)
+            if wf.id not in self.schedule_wfs_order:
+                self.schedule_wfs_order.append(wf.id)
 
     def holes_scheduling(self):
         """This method is used to schedule with method holes.
@@ -269,10 +275,10 @@ class Scheduler:
         on perpuse so it can fill them later with tasks with high computation
         cost and low communication cost.
         """
-        if self.schedule_order is None:
+        if self.schedule_wfs_order is None:
             self.ccr_schedule_order()
 
-        for i, wf_id in enumerate(self.schedule_order):
+        for i, wf_id in enumerate(self.schedule_wfs_order):
             self.schedule_workflow(self.workflows[wf_id], self.time_types[i % 2])
 
     def view_machine_holes(self):
@@ -284,7 +290,7 @@ class Scheduler:
 
     def example_hole_scheduling(self):
         self.schedule_workflow(self.workflows[1], self.time_types[0])
-        self.avg_workflow_makespan = sum(wf.wf_len for wf in self.workflows) / self.n_wfs
+        self.avg_workflow_makespan = sum(wf.wf_len for wf in self.workflows) / len(self.workflows)
 
     def schedule_workflow(self, wf, time_type):
         unscheduled = sorted(wf.get_ready_unscheduled_tasks(), key=lambda t: t.up_rank, reverse=True)
@@ -418,7 +424,7 @@ class Scheduler:
     @staticmethod
     def schedule_task_machine(task, machines, time_type, fill_method=FillMethod.NO_FILL):
         if task.status != TaskStatus.READY:
-            raise Exception("Task is not ready! ", task)
+            raise Exception(f"Task[{task.id}] wf[{task.wf_id}] has not ready state! It has status of: {task.status}")
         start, end, machine = Scheduler.find_machine(task, machines, time_type)
 
         Scheduler.schedule_task((start, end), task, machine=machine)
@@ -539,7 +545,6 @@ class Scheduler:
         tasks.sort(key=lambda task: task.up_rank, reverse=True)
         # Phase 2
         Scheduler.schedule_tasks_heft(tasks, machines)
-        return {'tasks': tasks, 'machines': machines}
 
     @staticmethod
     def round_robin_heft(tasks, machines, n_wfs):
@@ -548,15 +553,11 @@ class Scheduler:
 
         Scheduler.schedule_tasks_round_robin_heft(tasks, machines, n_wfs)
 
-        return {'tasks': tasks, 'machines': machines}
-
     @staticmethod
     def cpop(wf):
         critical_path, [entry_node, _] = wf.create_critical_path()
-        critical_machine_id = Scheduler.pick_machine_for_critical_path(
-            critical_path, wf.machines)
+        critical_machine_id = Scheduler.pick_machine_for_critical_path(critical_path, wf.machines)
         Scheduler.schedule_tasks_cpop(wf.machines, [entry_node], (critical_path, critical_machine_id))
-        return {'tasks': wf.tasks, 'machines': wf.machines}
 
     def multiple_workflows_c1(self):
         all_tasks = Workflow.connect_wfs(self.workflows, self.machines)
@@ -578,7 +579,7 @@ class Scheduler:
         # Maybe we should run heft based of how many levels we have.
         for level, tasks in levels.items():
             if len(tasks) > 0:
-                return Scheduler.heft(tasks, self.machines)
+                Scheduler.heft(tasks, self.machines)
         self.set_wfs_scheduled()
 
     def multiple_workflows_c3(self):
@@ -587,27 +588,42 @@ class Scheduler:
         # 2. Run HEFT in round-robin-fashion
         Scheduler.round_robin_heft(all_tasks, self.machines, len(self.workflows))
         self.set_wfs_scheduled()
-    # @staticmethod
-    # def pick_machine_for_critical_path(critical_path, machines):
-    #     machines_costs = []
-    #     for machine in machines:
-    #         machine_critical_cost = 0
-    #         for task in critical_path:
-    #             machine_critical_cost += task.costs[machine.id]
-    #         machines_costs.append((machine_critical_cost, machine.id))
 
-    #     # Machine selected for the critical path
-    #     return min(machines_costs, key=lambda tup: tup[0])[1]
+    @staticmethod
+    def pick_machine_for_critical_path(critical_path, machines):
+        machines_costs = []
+        for machine in machines:
+            machine_critical_cost = sum(task.costs[machine.id] for task in critical_path)
+            machines_costs.append((machine_critical_cost, machine.id))
+
+        # Machine selected for the critical path
+        return min(machines_costs, key=lambda tup: tup[0])[1]
 
 
 # Running this function means we already have
 # as a fact that all the parent tasks are done
 # before we get in here and check for the slowest parent
-def compute_execution_time(task, m_id, start_time):
+def compute_execution_time(task, m_id, potensial_start_time):
+    """Find the execution time of a task on a machine based on given start_time.
+
+    Parameters
+    ----------
+    task : Task
+        The task we want to find the execution time for.
+    m_id : int
+        Machine id.
+    potensial_start_time : float
+        This can be either the current time of a machine or the start time of a hole in a machine.
+
+    Returns
+    -------
+    Tuple[float, float]
+        The potential start time and end time of the task on the machine.
+    """
     # If between the child and the parent the machine doesn't change
     # then the communication cost is 0.
     if task.is_entry:
-        return [start_time, start_time + task.costs[m_id]]
+        return [potensial_start_time, potensial_start_time + task.costs[m_id]]
     elif task.slowest_parent['parent_task'].machine_id == m_id:
         communication_time = 0
     else:
@@ -617,7 +633,7 @@ def compute_execution_time(task, m_id, start_time):
     #  parent_end + communication_time + cost_of_task_in_this_machine
     # We pick the one that is bigger so we can ensure the child task starts
     # after the parent.
-    start = max(task.slowest_parent['parent_task'].end + communication_time, start_time)
+    start = max(task.slowest_parent['parent_task'].end + communication_time, potensial_start_time)
     end = start + task.costs[m_id]
     return [start, end]
 

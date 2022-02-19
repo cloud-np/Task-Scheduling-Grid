@@ -2,8 +2,7 @@ from colorama import Fore
 from random import randint
 from classes.task import Task
 import heapq
-import classes.scheduler as scheduler
-from typing import Set, Union, List
+from typing import Set, List
 from dataclasses import dataclass
 
 
@@ -292,20 +291,6 @@ class Machine:
                 1, 4, 4, 1,  # 64
                 ]
         return [Machine(id_=i, name=f"M-{i}", n_cpu=cpus[i], speed=CORE_SPEED - 100, network_kbps=network) for i in range(n)]
-
-    @staticmethod
-    def load_4_machines():
-        machines = [
-            Machine(id_=0, name="M-0", n_cpu=2, speed=CORE_SPEED - 200),
-            Machine(id_=1, name="M-1", n_cpu=1, speed=CORE_SPEED - 100),
-            Machine(id_=2, name="M-2", n_cpu=4, speed=CORE_SPEED - 300),
-            Machine(id_=3, name="M-3", n_cpu=2, speed=CORE_SPEED - 400)
-            # Machine(id_=0, name="M-0", n_cpu=2),
-            # Machine(id_=1, name="M-1", n_cpu=1),
-            # Machine(id_=2, name="M-2", n_cpu=4),
-            # Machine(id_=3, name="M-3", n_cpu=2)
-        ]
-        return machines
 
     # We add here a random const (1500) just so we can subtract
     # without getting a negative value. Since this const is adding

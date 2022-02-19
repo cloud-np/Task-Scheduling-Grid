@@ -15,7 +15,7 @@ def optimize_schedule(workflows, machines, best_sch):
             i += 1
             continue
         order[j], order[i + 1] = order[i + 1], order[j]
-        best_sch, is_better = update_best_schedule(workflows, machines, best_sch, order)
+        best_sch, is_better = try_update_best_schedule(workflows, machines, best_sch, order)
         if is_better:
             pairs.append((j, i + 1))
             if j + 2 < len(workflows):
@@ -23,11 +23,10 @@ def optimize_schedule(workflows, machines, best_sch):
                 i = 0
         i += 1
 
-    # print(f'{best_sch.schedule_order}\n')
     return best_sch, bool(best_sch.name.startswith('ordered'))
 
 
-def update_best_schedule(workflows, machines, best_sch, order):
+def try_update_best_schedule(workflows, machines, best_sch, order):
     new_workflows, new_machines = ExampleGen.re_create_example(workflows, machines)
     sch_name = f'ordered {best_sch.name}' if not best_sch.name.startswith('ordered') else best_sch.name
     ordered_sch = Scheduler(sch_name, data=[new_workflows, new_machines], schedule_order=order, time_types=best_sch.time_types_str, fill_method=best_sch.fill_method_str, priority_type=best_sch.priority_type_str)

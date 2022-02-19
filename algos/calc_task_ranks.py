@@ -3,27 +3,17 @@ def avg(arr):
 
 
 def calculate_upward_ranks(tasks):
-    def recursive_upward_ranks(curr_task):
+    def calc_upward(curr_task):
         # Base condition once your set
         # is empty just return the computation cost
         if curr_task.is_exit:
-            # TODO: we use runtime or calc the avg here?
-            avg_cost = avg(curr_task.costs)
-            curr_task.up_rank = avg_cost
-            return avg_cost
+            curr_task.up_rank = avg(curr_task.costs)
+            return curr_task.up_rank
 
-        all_ranks_of_curr_task = []
-        for child_edge in curr_task.children_edges:
-            # Calc rank_u
-            rank = child_edge.weight + recursive_upward_ranks(child_edge.node)
-            all_ranks_of_curr_task.append(rank)
-        task_costs = avg(curr_task.costs)
-        max_rank = task_costs + max(all_ranks_of_curr_task)
+        curr_task.up_rank = avg(curr_task.costs) + max(e.weight + calc_upward(e.node) for e in curr_task.children_edges)
+        return curr_task.up_rank
 
-        curr_task.up_rank = max_rank
-        return max_rank
-
-    recursive_upward_ranks(tasks[0])
+    calc_upward(tasks[0])
     return tasks
 
 
@@ -32,7 +22,6 @@ def calculate_downward_ranks(tasks):
         # Base condition once your set
         # is empty just return the computation cost
         if curr_task.is_entry:
-            # TODO: we use runtime or calc the avg here?
             avg_cost = avg(curr_task.costs)
             curr_task.down_rank = avg_cost
             return avg_cost

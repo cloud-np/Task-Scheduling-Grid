@@ -23,8 +23,8 @@ class ExampleGen:
         return machines, workflows
 
     @staticmethod
-    def load_n(n_machines, n_wfs):
-        machines = Machine.load_n_static_machines(n_machines)
+    def load_n(m_info, n_wfs):
+        machines = Machine.load_n_static_machines(m_info[0], m_info[1])
         workflows = Workflow.load_random_workflows(machines, n=n_wfs)
         return machines, workflows
 
@@ -115,7 +115,7 @@ class ExampleGen:
                 for blp_t in blp_tasks:
                     if blp_t.wf_id == wf_id:
                         blp_t.status = TaskStatus.READY if len(blp_t.parents_names) == 0 else TaskStatus.UNSCHEDULED
-                        Task.blueprint_to_task(blp_t)
+                        tasks.append(Task.blueprint_to_task(blp_t))
             new_workflows.append(Workflow.blueprint_to_workflow(wf_id, tasks, new_machines))
         return new_workflows, new_machines
 

@@ -25,8 +25,7 @@ def multiple_workflows_c4(workflows, machines):
             for cp_task in bcp['info']['critical_path']:
                 rank_diff = bcp_entry.up_rank - cp_task.up_rank
                 if rank_diff >= scp_entry.up_rank:
-                    linkables.append(
-                        (scp_entry, cp_task, rank_diff - scp_entry.up_rank))
+                    linkables.append((scp_entry, cp_task, rank_diff - scp_entry.up_rank))
     # for link in linkables:
     #     # DEBUG
     #     print(f"[{'A' if link[0].wf_id == 0 else 'B'}]-{link[0].str_col_id()} ---> "
