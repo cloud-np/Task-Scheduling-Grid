@@ -3,11 +3,9 @@ from copy import copy
 from classes.scheduler import Scheduler, get_time_type, get_fill_method, get_priority_type
 
 
-# find_wf(wf_id, workflows)
 def optimize_schedule(workflows, machines, best_sch):
     # 1. Get the order that the workflows got scheduled.
     order = copy(best_sch.schedule_order)
-    # print(best_sch.schedule_order)
     j = i = 0
     pairs = []
     while i < len(workflows) - 1:
