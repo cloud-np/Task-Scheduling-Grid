@@ -57,7 +57,6 @@ class Machine:
         self.network_kbps = network_kbps
         self.name: str = name
         self.n_cpu: int = n_cpu
-        # self.memory = memory
         # self.cpti = cpti  # cost per time interval
         self.speed = speed
         self.holes: Set[Hole] = set()
