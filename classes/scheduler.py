@@ -50,6 +50,7 @@ class Scheduler:
         self.output_path: str = output_path
         self.critical_tasks = []
         self.schedule_wfs_order: List[int] = schedule_order
+
         # E.g: sim_out/5.txt
         self.output_file: str = f"{self.output_path}/bw_{int(self.machines[0].network_kbps / 125)}_wfs_{len(workflows)}_machines_{len(self.machines)}.txt"
         self.time_types_str = time_types
