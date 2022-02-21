@@ -69,10 +69,7 @@ class Machine:
         return MachineBlueprint(self.id, self.name, self.n_cpu, self.speed, self.network_kbps)
 
     def contains_wf_id(self, wf_id):
-        for t in self.tasks:
-            if t.wf_id == wf_id:
-                return True
-        return False
+        return any(t.wf_id == wf_id for t in self.tasks)
 
     @staticmethod
     def blueprint_to_machine(blp: MachineBlueprint):
@@ -217,17 +214,12 @@ class Machine:
 
     @staticmethod
     def generate_rand_machines(n_machines):
-        machines = list()
-        for i in range(n_machines):
-            machines.append(
-                Machine(
+        return [Machine(
                     id_=i,
                     name=f'M-{i}',
                     n_cpu=randint(1, 4),
                     speed=CORE_SPEED - randint(100, 400),
-                )
-            )
-        return machines
+                ) for i in range(n_machines)]
 
     @staticmethod
     def load_n_static_machines(n: int, network):
