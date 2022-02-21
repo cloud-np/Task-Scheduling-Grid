@@ -11,7 +11,6 @@ from helpers.visuals.visualize import Visualizer
 from random import randint
 from helpers.examples.example_gen import ExampleGen
 from algos.optimizer import optimize_schedule
-from helpers.utils import find_perc_diff
 import xlsxwriter
 import numpy as np
 import matplotlib.pyplot as plt

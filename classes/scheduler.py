@@ -50,7 +50,6 @@ class Scheduler:
         self.output_path: str = output_path
         self.critical_tasks = []
         self.schedule_wfs_order: List[int] = schedule_order
-        # if not time_types[0].__class__ == str and time_types[1].__class__ == str and fill_method.__class__ == str and
         # E.g: sim_out/5.txt
         self.output_file: str = f"{self.output_path}/bw_{int(self.machines[0].network_kbps / 125)}_wfs_{len(workflows)}_machines_{len(self.machines)}.txt"
         self.time_types_str = time_types
@@ -91,8 +90,6 @@ class Scheduler:
 
     def __str__(self):
         _str = f"\t{Back.MAGENTA}{Fore.LIGHTYELLOW_EX}{self.method_used_info()}{Fore.RESET}{Back.RESET}"
-        # if self.name.startswith("holes"):
-        #     print(f"Time saved = {Fore.GREEN}{sum([m.holes_saved_time for m in self.machines])}{Fore.RESET}")
 
         slowest_machine = self.get_slowest_machine()
         _str += f'\n{slowest_machine.str_col_schedule_len()}\n'
@@ -132,7 +129,6 @@ class Scheduler:
         self.schedule_len = self.get_schedule_len()
         self.machines_util_avg_perc = sum(m.get_util_perc(self.schedule_len) for m in self.machines) / len(self.machines)
         self.avg_workflow_makespan = sum(wf.wf_len for wf in self.workflows) / len(self.workflows)
-        # schedule_checker(self)
 
     def method_used_info(self, concise=False):
         fill_method = None
@@ -273,7 +269,6 @@ class Scheduler:
     def view_machine_holes(self):
         for m in self.machines:
             print(f"M[{m.id}]")
-            # print(m)
             for hole in m.holes:
                 print(f"\t{hole}")
 
@@ -454,53 +449,6 @@ class Scheduler:
         elif fill_method == FillMethod.WORST_FIT:
             best_time = max(holes_times, key=lambda t: t["gap_left"])
         return best_time["start"], best_time["end"], best_time["machine"], best_time['hole']
-
-    # @staticmethod
-    # def schedule_task_to_best_machine1(task, machines, time_type, fill_method=FillMethod.NO_FILL):
-    #     if task.status != TaskStatus.READY:
-    #         raise Exception("Task is not ready! ", task)
-    #     start, end, machine, hole = Scheduler.find_machine(task, machines, time_type, fill_method)
-
-    #     Scheduler.schedule_task((start, end), task, machine=machine, hole=hole)
-
-    # @staticmethod
-    # def find_best_machine1(task, machines, time_type, fill_method=FillMethod.NO_FILL):
-    #     holes_times = []
-    #     task_times_on_machines = []
-    #     best_time = None
-    #     for machine in machines:
-    #         # Try to find the existing holes (in the current machine) to fill.
-    #         if fill_method != FillMethod.NO_FILL:
-    #             for hole in machine.holes:
-    #                 start, end = compute_execution_time(task, machine.id, hole.start)
-    #                 if hole.is_fillable(end):
-    #                     holes_times.append({"machine": machine, "hole": hole, "start": start, "end": end, "gap_left": hole.gap - (end - start)})
-
-    #         # If no valid holes were found try to look into the current machine
-    #         # and find the execution time of the specific task in the machine.
-    #         if len(holes_times) == 0:
-    #             start, end = compute_execution_time(task, machine.id, machine.time_on_machine)
-    #             task_times_on_machines.append({"machine": machine, "start": start, "end": end})
-
-    #     # If there are holes to fill prioritize them.
-    #     if len(holes_times) > 0:
-    #         if fill_method == FillMethod.FASTEST_FIT:
-    #             best_time = Scheduler.pick_machine_based_on_timetype(time_type, holes_times)
-    #         elif fill_method == FillMethod.BEST_FIT:
-    #             best_time = min(holes_times, key=lambda t: t["gap_left"])
-    #         elif fill_method == FillMethod.FIRST_FIT:
-    #             best_time = sorted(holes_times, key=lambda t: t['start'])[0]
-    #         elif fill_method == FillMethod.WORST_FIT:
-    #             best_time = max(holes_times, key=lambda t: t["gap_left"])
-    #     # If no holes were found.
-    #     else:
-    #         # best_time = Scheduler.pick_machine_based_on_timetype(time_type, task_times_on_machines)
-    #         best_time = Scheduler.pick_machine_based_on_making_holes(task, task_times_on_machines)
-    #         # best_time = Scheduler.pick_machine_based_on_timetype(time_type, task_times_on_machines)
-
-    #     if best_time is None:
-    #         raise ValueError(f"No machine or hole was assigned to: {task}")
-    #     return best_time["start"], best_time["end"], best_time["machine"], best_time.get('hole')
 
     @staticmethod
     def pick_machine_based_on_making_holes(task, times):
