@@ -109,17 +109,10 @@ class Scheduler:
         lines = [f"({m.id}, {m.name}, {m.n_cpu}, {m.speed}, {m.network_kbps})\n" for m in self.machines]
         lines.insert(0, f"{self.priority_type}, {self.fill_method}, {self.time_types}\n")
         for blp_tasks in blp_self.workflows:
-<<<<<<< HEAD
-            for bt in blp_tasks:
-                lines.append(
-                    f'TaskBlueprint({bt.id_}, {bt.wf_id}, "{bt.name}", {bt.runtime}, {bt.children_names}, {bt.parents_names}, {1 if bt.is_entry else 0}, {bt.is_entry}, {bt.is_exit}),\n'
-                )
-=======
             lines.extend(
                 f'TaskBlueprint({bt.id_}, {bt.wf_id}, "{bt.name}", {bt.runtime}, {bt.children_names}, {bt.parents_names}, {1 if bt.is_entry else 0}, {bt.is_entry}, {bt.is_exit}),\n'
                 for bt in blp_tasks
             )
->>>>>>> testing
 
         with open(f"./{get_fill_method(self.fill_method)}.txt", "w") as f:
             f.writelines(lines)
