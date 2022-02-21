@@ -127,23 +127,6 @@ class Machine:
     def create_random_machine(id_):
         return Machine(id_=id_, name=f"M-{id_}", n_cpu=randint(1, 4), speed=CORE_SPEED)
 
-    # If this returns false it means that the task is trying to finish or start after the gap e.g:
-    # task_times = (12, 25)  gap = (10, 22)
-    # def try_feeling_hole(self, task, cost, hole):
-    #     # Check when if the parent end interfere with the child start
-    #     # pred: predicted
-    #     [pred_start, pred_end] = compute_execution_time(task, self)
-    #     # TODO: Remove the first check since this gets generated from the machine itself
-    #     #       there should be no way a task can try to start earlier.
-    #     if (hole["times"][0] <= pred_start) and ((pred_start + cost) <= pred_end):
-    #         schedule_task({'start': pred_start, 'end': pred_start + cost},
-    #                       task, self)
-    #         self.holes.remove(hole)
-    #         return True
-    #     else:
-    #         raise Exception(f"{task.str_times()} {hole} {self}")
-    #         return False
-
     def str_col_id(self):
         return f'{Fore.YELLOW}Machine{Fore.RESET} [{Fore.GREEN}{self.id}{Fore.RESET}]'
 
@@ -178,16 +161,6 @@ class Machine:
     def str_schedule_len(self):
         return f'TOTAL LEN: {self.time_on_machine}'
 
-    # def print_info(self):
-    #     for task in self.tasks:
-    #         print(f"{task.str_id()} {task.str_times()} ")
-
-    # def convert_tasks_to_str(self):
-    #     tmp_str = f'{self.tasks[0]}'
-    #     for i in range(1, len(self.tasks)):
-    #         tmp_str += '-' + str(self.tasks[i].id)
-    #     return tmp_str
-
     def clear(self):
         self.tasks = set()
         self.time_on_machine = 0
@@ -213,17 +186,15 @@ class Machine:
 
     @staticmethod
     def generate_rand_machines(n_machines):
-        return [Machine(
-                    id_=i,
-                    name=f'M-{i}',
-                    n_cpu=randint(1, 4),
-                    speed=CORE_SPEED - randint(100, 400),
-                ) for i in range(n_machines)]
+        return [Machine(id_=i,
+                        name=f'M-{i}',
+                        n_cpu=randint(1, 4),
+                        speed=CORE_SPEED - randint(100, 400),
+                        ) for i in range(n_machines)]
 
     @staticmethod
     def load_n_static_machines(n: int, network):
         cpus = [2, 1, 4, 2,  # 4
-        # cpus = [4, 4, 4, 4,  # 4
                 1, 4, 2, 3,  # 8
                 2, 1, 4, 2,
                 3, 4, 2, 3,  # 16
