@@ -125,9 +125,6 @@ class Task:
             children_names=blp.children_names,
             parents_names=blp.parents_names)
 
-    def set_wf_deadline(self, deadline):
-        self.wf_deadline = deadline
-
     @staticmethod
     def make_dummy_node(id_, wf_id, name):
         return Task(id_=id_,

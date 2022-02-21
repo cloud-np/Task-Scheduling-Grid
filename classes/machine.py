@@ -161,10 +161,6 @@ class Machine:
     def str_schedule_len(self):
         return f'TOTAL LEN: {self.time_on_machine}'
 
-    def clear(self):
-        self.tasks = set()
-        self.time_on_machine = 0
-
     def update_schedule(self, task):
         self.time_on_machine = task.end if self.time_on_machine <= task.end else self.time_on_machine
 

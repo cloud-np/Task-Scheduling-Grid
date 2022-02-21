@@ -32,12 +32,12 @@ class Simulation:
                                                       time_types=method.get("time_types"),
                                                       fill_method=method["fill_type"], priority_type=method.get("priority_type")) for method in run_methods]
 
-    def run_c1(self, count):
+    def run_c1(self):
         for s in self.schedulers:
             s.run()
         return self.schedulers
 
-    def run_paper_example(self, count):
+    def run_paper_example(self):
         for s in self.schedulers:
             Simulation.fake_schedule_fist_workflow(s.machines, s.workflows)
             s.run_example()
@@ -56,42 +56,12 @@ class Simulation:
             #     s.save_output_to_file()
 
         # print("-------TOTAL MAKESPAN-------")
-        # their_min_s = min(self.get_their_schedulers(), key=lambda s: s.schedule_len)
-        # print(their_min_s)
-        # # our_min_s.view_machine_holes()
-        # our_min_s = self.get_our_best_scheduler()
-        # ordered_our_min_s, is_better = optimize_schedule(self.workflows, self.machines, our_min_s)
-        # if self.save_sim:
-        #     our_min_s.save_output_to_file()
-        # their_min_s.save_output_to_file()
-        # print(our_min_s)
-        # print(f"DIFF: {their_min_s.schedule_len - our_min_s.schedule_len} \n\n")
-        # if is_better:
-        #     self.schedulers.append(our_min_s)
-        # print(min_s)
-        # our_min_s = self.get_our_best_scheduler()
-        # their_min_s = min(self.get_their_schedulers(), key=lambda s: s.schedule_len)
+        min_s = min(self.schedulers, key=lambda s: s.schedule_len)
         if self.save_sim:
-            # min_s = min(self.schedulers, key=lambda s: s.schedule_len)
+            self.save_sim_stats(min_s)
 
-            return self.get_our_schedulers()
-            # c1 = self.get_c1()
-            # return [our_min_s, ordered_our_min_s, their_min_s, c1]
-            # self.save_sim_stats(min_s)
         if self.show_machines:
-            for s in self.schedulers:
-                Visualizer.visualize_machines(s.machines)
-            # Visualizer.visualize_machines(our_min_s.machines)
-            # Visualizer.visualize_machines(their_min_s.machines)
-            # print(their_min_s)
-            # if min_s is our_min_s:
-            #     Visualizer.visualize_machines(our_min_s.machines)
-            #     Visualizer.visualize_machines(their_min_s.machines)
-            # print("-------AVG MAKESPAN-------")
-            # our_min_s = min(self.get_our_schedulers(), key=lambda s: s.avg_workflow_makespan)
-            # print(our_min_s)
-            # their_min_s = min(self.get_their_schedulers(), key=lambda s: s.avg_workflow_makespan)
-            # print(their_min_s)
+            Visualizer.visualize_machines(min_s.machines)
         if self.visuals is True:
             # Schedule len
             Visualizer.compare_data([s.get_slowest_machine().time_on_machine for s in self.schedulers], [s.method_used_info(concise=True) for s in self.schedulers], len(self.workflows), save_fig=self.save_fig, show_fig=self.show_fig)
@@ -126,7 +96,6 @@ class Simulation:
             f.writelines(lines)
 
     def save_sim_info(self, min_s):
-        # out_f = f'{len(self.workflows)}_.txt'
         lines = []
         for s in self.schedulers:
             info = [f"{s.name}\t", f"{int(s.schedule_len)}\t", f"{s.machines_util_avg_perc}\t", f"{int(s.avg_workflow_makespan)}\t", f"{s.get_holes_filled()}\t", f"{int(s.get_holes_time_saved())}\t", f"{int(s.machines[0].network_kbps / 125)}\t", f"{len(s.workflows)}\t", f"{len(s.machines)}\n"]
@@ -194,8 +163,10 @@ def save_sims_to_excel(schedulers, num_wfs):
     workbook.close()
 
 
-def write_excel(schedules: List[Scheduler], wks, bold, s_pos: List[int] = [2, 0]):
+def write_excel(schedules: List[Scheduler], wks, bold, s_pos: List[int] = None):
 
+    if s_pos is None:
+        s_pos = [2, 0]
     # imgdata = io.BytesIO()
     # fig.savefig(imgdata, format='png')
     # wks.insert_image(s_pos[0], s_pos[1], '', {'image_data': imgdata})
@@ -247,8 +218,10 @@ def write_excel(schedules: List[Scheduler], wks, bold, s_pos: List[int] = [2, 0]
         wks.write(x_offset, y_offset + 8, len(s.machines))
 
 
-def write_to_excel(schedules: List[Scheduler], wks, bold, s_pos: List[int] = [2, 0]):
+def write_to_excel(schedules: List[Scheduler], wks, bold, s_pos: List[int] = None):
 
+    if s_pos is None:
+        s_pos = [2, 0]
     # imgdata = io.BytesIO()
     # fig.savefig(imgdata, format='png')
     # wks.insert_image(s_pos[0], s_pos[1], '', {'image_data': imgdata})

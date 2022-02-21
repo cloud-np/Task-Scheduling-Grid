@@ -59,15 +59,13 @@ class Workflow:
 
         # Calc ccr which means also the avg_comp and avg_com costs
         self.ccr = self.calc_ccr()
-        # print(self)
-        # print(f"avg_comm: {self.avg_com_cost} avg_comp: {self.avg_comp_cost} ccr: {self.ccr}")
 
         # From the avg comp cost of the tasks add them all together * some number and get the deadline
         self.deadline = self.avg_comp_cost * 10
 
         # Assign to all the tasks the wf_deadline
         for t in self.tasks:
-            t.set_wf_deadline(self.deadline)
+            t.wf_deadline = self.deadline
 
     def set_scheduled(self, is_scheduled: bool):
         if is_scheduled:
@@ -122,18 +120,11 @@ class Workflow:
         dummy_in.status = ta.TaskStatus.READY
         dummy_out.is_exit = True
 
-    # TODO: If we end up using the same workflow for multiple workflows we should preload tasks and machines
-    #       and just deepcopy these. Even that should be faster. This is not something that will effect us a lot but ok
-    '''
-        Generates multiple workflows randomly based on number of tasks and the workflows you need.
-        It doesn't actually create them although I could do that but I found it kinda pointless atm.
-        So it picks from some random pre-made ones.
-    '''
     @staticmethod
     def connect_wfs(workflows, machines):
         dummy_in: ta.Task = ta.Task.make_dummy_node(id_=-1, wf_id=-1, name="Dummy-In-BIG")
         # To find the dummy_out.id we need to calc all the tasks in all workflows
-        dummy_out: ta.Task = ta.Task.make_dummy_node(id_=sum([len(wf.tasks) for wf in workflows]), wf_id=-1, name="Dummy-Out-BIG")
+        dummy_out: ta.Task = ta.Task.make_dummy_node(id_=sum(len(wf.tasks) for wf in workflows), wf_id=-1, name="Dummy-Out-BIG")
         all_tasks: List[ta.Task] = [dummy_in]
         dummy_in.costs: List[int] = [0 for _ in machines]
 
@@ -299,9 +290,6 @@ class Workflow:
     def get_ready_tasks(self):
         return [t for t in self.tasks if t.status == ta.TaskStatus.READY]
 
-    # NOTE: This can be written in one line.
-    # Gets the starting tasks which are the entry tasks to begin with.
-
     def starting_ready_tasks(self) -> List[ta.Task]:
         return [child.node for child in self.tasks[0].children_edges if child.node.status == ta.TaskStatus.READY]
 
@@ -361,7 +349,7 @@ class Workflow:
         # Remove the "wrongly" placed tasks from higher levels.
 
         visited = set()
-        filtered_levels = {level: list() for level in levels.keys()}
+        filtered_levels = {level: [] for level in levels.keys()}
         for task in tasks:
             if task not in visited:
                 # print(task.level)
@@ -379,15 +367,6 @@ class Workflow:
                  "start": task.start,
                  "end": task.end,
                  "machine_id": task.machine_id} for task in self.tasks]
-
-    # This method is needed to "clean" the workflow to prepare it most likely for next
-    # workflow recipe to take in place. This is a must in our method to use in genetic algos.
-    def reset_workflow(self, sort_tasks: bool = False):
-        for task in self.tasks:
-            task.reset()
-
-        if sort_tasks is True:
-            self.tasks.sort(key=lambda t: t.id)
 
     def to_nxdigraph(self) -> nx.DiGraph:
         g = nx.Graph()

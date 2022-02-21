@@ -11,7 +11,7 @@ def find_c1_example():
     while not done:
         random.seed(i)
         machines, workflows = ExampleGen.load_fixed_small_random()
-        schedulers = Simulation(run_methods, machines, workflows).run_c1(i)
+        schedulers = Simulation(run_methods, machines, workflows).run_c1()
         if 393 < schedulers[0].schedule_len < 400:
             done = True
         i += 1
@@ -30,8 +30,7 @@ def find_seed_for(fill_method: FillMethod, starting_seed: int = 0):
     while not done:
         random.seed(i)
         machines, workflows = ExampleGen.load_fixed_small_random()
-        # schedulers = Simulation(run_methods, machines, workflows).run_paper_example(i)
-        schedulers = Simulation(run_methods, machines, workflows).run_paper_example(i)
+        schedulers = Simulation(run_methods, machines, workflows).run_paper_example()
 
         min_s = min(schedulers, key=lambda s: s.avg_workflow_makespan)
         all_avgs = [s.schedule_len for s in schedulers if s.fill_method != fill_method]
