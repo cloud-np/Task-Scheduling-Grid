@@ -50,7 +50,7 @@ class Scheduler:
         self.output_path: str = output_path
         self.critical_tasks = []
         self.schedule_wfs_order: List[int] = schedule_order
-        # if not time_types[0].__class__ == str and time_types[1].__class__ == str and fill_method.__class__ == str and
+
         # E.g: sim_out/5.txt
         self.output_file: str = f"{self.output_path}/bw_{int(self.machines[0].network_kbps / 125)}_wfs_{len(workflows)}_machines_{len(self.machines)}.txt"
         self.time_types_str = time_types
@@ -91,8 +91,6 @@ class Scheduler:
 
     def __str__(self):
         _str = f"\t{Back.MAGENTA}{Fore.LIGHTYELLOW_EX}{self.method_used_info()}{Fore.RESET}{Back.RESET}"
-        # if self.name.startswith("holes"):
-        #     print(f"Time saved = {Fore.GREEN}{sum([m.holes_saved_time for m in self.machines])}{Fore.RESET}")
 
         slowest_machine = self.get_slowest_machine()
         _str += f'\n{slowest_machine.str_col_schedule_len()}\n'
@@ -131,7 +129,6 @@ class Scheduler:
         self.schedule_len = self.get_schedule_len()
         self.machines_util_avg_perc = sum(m.get_util_perc(self.schedule_len) for m in self.machines) / len(self.machines)
         self.avg_workflow_makespan = sum(wf.wf_len for wf in self.workflows) / len(self.workflows)
-        # schedule_checker(self)
 
     def method_used_info(self, concise=False):
         fill_method = None
@@ -272,7 +269,6 @@ class Scheduler:
     def view_machine_holes(self):
         for m in self.machines:
             print(f"M[{m.id}]")
-            # print(m)
             for hole in m.holes:
                 print(f"\t{hole}")
 
