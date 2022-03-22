@@ -1,6 +1,7 @@
 import classes.task as ta
 from algos.calc_task_ranks import calculate_upward_ranks
 from colorama import Fore, Back
+from helpers.checker import workflow_checker
 from typing import Optional, List
 from helpers.data_parser import get_tasks_from_json_file
 from helpers.examples.example_data import NAMES_A, NAMES_B, COSTS_A, COSTS_B, \
@@ -78,6 +79,7 @@ class Workflow:
                 elif t.end > self.wf_len:
                     self.wf_len = t.end
             self.scheduled = True
+            # workflow_checker(self)
         else:
             self.scheduled = False
 

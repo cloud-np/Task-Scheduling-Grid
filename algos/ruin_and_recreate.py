@@ -3,6 +3,7 @@ from classes.task import Task, TaskStatus
 from typing import List, Iterable
 import random
 from helpers.examples.example_gen import ExampleGen
+from helpers.utils import find_perc_diff
 from classes.scheduler import Scheduler, TimeType
 from classes.machine import Machine
 from algos.optimizer import try_update_best_schedule
@@ -10,10 +11,16 @@ from algos.optimizer import try_update_best_schedule
 
 class RuinRecreate:
 
+    RR_COUNTODOWN = 3000
+
     def __init__(self, workflow: Workflow, machines: List[Machine], ruin_method="random"):
         self.og_workflow: Workflow = workflow
         self.og_machines: List[Machine] = machines
         self.ruin_method: str = ruin_method
+        self.rr_countdown: int = RuinRecreate.RR_COUNTODOWN
+
+        self.comp_srt: List[Workflow] = sorted(self.og_workflow.tasks, key=lambda t: t.avg_cost())
+        self.comm_srt: List[Workflow] = sorted(self.og_workflow.tasks, key=lambda t: sum(e.weight for e in t.children_edges))
 
         # NOTE: To get the time_space dynamically we need to have the workflow length.
         self.time_space = (20, 300)
@@ -26,29 +33,33 @@ class RuinRecreate:
     def run(self):
         # Get the order of the tasks.
         # scheduled_tasks: Iterable[Task] = sorted(self.og_workflow.tasks, key=lambda t: t.start)
-        scheduled_workflow = workflow = self.og_workflow
+        best_scheduled_workflow = self.og_workflow
         # Since we give just one workflow to copy there is only one in the list
-        is_better = False
-        i = 0
-        while not is_better:
+        end_loop = False
+
+        while not end_loop:
             # Refresh the data
-            workflows, machines = ExampleGen.re_create_example([workflow], self.og_machines, reset_task_status=True)
-            workflow = workflows[0]
+            workflows, machines = ExampleGen.re_create_example([best_scheduled_workflow], self.og_machines, reset_task_status=True)
+            unscheduled_workflow = workflows[0]
 
             # Ruin part
-            ruined_tasks_ids = self.__ruin(scheduled_workflow)
+            ruined_tasks_ids = self.__ruin(best_scheduled_workflow)
 
             # Recreate part
-            self.__recreate(workflow, machines, ruined_tasks_ids)
+            self.__recreate(unscheduled_workflow, machines, ruined_tasks_ids)
+            best_scheduled_workflow, end_loop = self.greedy_keep(unscheduled_workflow, best_scheduled_workflow)
 
-            if workflow.wf_len < scheduled_workflow.wf_len:
-                # if i >= 4:
-                is_better = True
-                scheduled_workflow = workflow
-                i += 1
-            # print(workflow.wf_len)
+        return best_scheduled_workflow, machines
 
-        return workflow, machines
+    def greedy_keep(self, workflow, best_scheduled_workflow):
+        self.rr_countdown -= 1
+
+        if self.rr_countdown <= 0 and best_scheduled_workflow.wf_len < self.og_workflow.wf_len:
+            return best_scheduled_workflow, True
+        if workflow.wf_len < best_scheduled_workflow.wf_len:
+            self.rr_countdown = RuinRecreate.RR_COUNTODOWN
+            return workflow, False
+        return best_scheduled_workflow, False
 
     def __ruin(self, workflow: Workflow):
         if self.ruin_method == "random":
