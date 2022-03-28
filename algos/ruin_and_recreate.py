@@ -6,7 +6,6 @@ from helpers.examples.example_gen import ExampleGen
 from helpers.utils import find_perc_diff
 from classes.scheduler import Scheduler, TimeType
 from classes.machine import Machine
-from algos.optimizer import try_update_best_schedule
 
 
 class RuinRecreate:
@@ -24,6 +23,14 @@ class RuinRecreate:
 
         # NOTE: To get the time_space dynamically we need to have the workflow length.
         self.time_space = (20, 300)
+        self.ten_perc = len(workflow.tasks) * 10 / 100
+        self.ruin_lb = 0
+        self.ruin_ub = self.ten_perc
+
+        if self.ruin_method == "comp":
+            self.sorted_tasks = sorted(workflow.tasks, key=lambda t: t.avg_cost())
+        elif self.ruin_method == "comm":
+            self.sorted_tasks = sorted(workflow.tasks, key=lambda t: t.avg_comm_cost())
 
         # Find the part you want to ruin
 
@@ -59,11 +66,19 @@ class RuinRecreate:
         if workflow.wf_len < best_scheduled_workflow.wf_len:
             self.rr_countdown = RuinRecreate.RR_COUNTODOWN
             return workflow, False
+        if self.ruin_method == "comp" or self.ruin_method == "comm":
+            if self.ruin_ub >= len(workflow.tasks):
+                return best_scheduled_workflow, True
         return best_scheduled_workflow, False
 
     def __ruin(self, workflow: Workflow):
         if self.ruin_method == "random":
             return [(t.id, t.machine_id) for t in workflow.tasks if random.randint(0, 10) < 5]
+        if self.ruin_method == "comp" or self.ruin_method == "comm":
+            data = [(t.id, t.machine_id) for t in self.sorted_tasks[self.ruin_lb:self.ruin_ub]]
+            self.ruin_lb = self.ruin_ub
+            self.ruin_ub += self.ten_perc
+            return data
         # elif self.ruin_method == "time-based":
         #     # NOTE this is not working yet
         #     # return [(t.id, t.machine_id) for t in workflow.tasks if self.time_space[0] < t.start < self.time_space[1]]
