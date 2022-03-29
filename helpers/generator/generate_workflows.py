@@ -1,6 +1,9 @@
 from wfcommons import WorkflowGenerator
 from os.path import isfile
+import numpy as np
+import math
 from wfcommons.wfchef.recipes import BlastRecipe, SrasearchRecipe, SeismologyRecipe, MontageRecipe, EpigenomicsRecipe, CyclesRecipe, GenomeRecipe, SoykbRecipe
+
 # To create a folder as well
 # import os
 # from time import gmtime, strftime
@@ -11,7 +14,64 @@ NUM_TASKS = [10, 50, 100, 200, 500, 1000]
 # NUM_TASKS = [300, 400]
 
 
-def __creatw_wf_files(wf_type, num_tasks, file_name):
+class HeftGenerator:
+
+    # SET V  {20, 40, 60, 80, 100}
+    # SET CCR  {0.1, 0.5, 1, 5, 10}
+    # SET  {0.5, 1.0, 2.0}
+    # SET out degree  {1, 2, 3, 4, 5}
+    # SET  {1, 0.25, 0.5, 0.75, 1}
+    def __init__(self, n_tasks, out_degree, a, ccr, b):
+        self.n_tasks = n_tasks
+        ep = (math.sqrt(n_tasks) / a)
+        self.height = math.floor(np.random.uniform(
+            low=1, high=ep, size=n_tasks)[0])
+        self.a = a
+        self.out_degree = out_degree
+        self.ccr = ccr
+        self.b = b
+        print(self.height)
+        # print(self.height.mean())
+        print(ep)
+
+    @staticmethod
+    def gen_dags():
+        from os import system
+        from itertools import product
+
+        minalpha = 20
+        maxalpha = 50
+        n = [10, 20, 30, 40, 50, 60, 70, 80, 90,
+             100, 150, 200, 250, 300, 350, 400]
+        fat = [0.1, 0.4, 0.8]
+        density = [0.2, 0.8]
+        regularity = [0.2, 0.8]
+        jump = [1, 2, 4]
+
+        keys = ['n', 'fat', 'density', 'regularity', 'jump']
+        values = [n, fat, density, regularity, jump]
+
+        for v in product(*values):
+            param = dict(zip(keys, v))
+            filename = './data/generated_dags/{}_{}_{}_{}_{}.dot'.format(param['n'],
+                                                                         param['fat'],
+                                                                         param['density'],
+                                                                         param['regularity'],
+                                                                         param['jump'])
+            param = dict(zip(keys, v))
+            system("~/daggen-master/daggen -n {} --fat {} --density {} --regular {} --jump {} --minalpha {} --maxalpha {} --dot -o {} >/dev/null 2>&1".format(
+                param['n'],
+                param['fat'],
+                param['density'],
+                param['regularity'],
+                param['jump'],
+                minalpha,
+                maxalpha,
+                filename
+            ))
+
+
+def __create_wf_files(wf_type, num_tasks, file_name):
     if wf_type == 'blast':
         recipe = BlastRecipe.from_num_tasks(num_tasks=num_tasks)
     elif wf_type == 'cycles':
@@ -49,7 +109,7 @@ def create_wfs(wf_type: str, i: int, path: str, num_tasks: int):
         return
 
     try:
-        __creatw_wf_files(wf_type, num_tasks, file_name)
+        __create_wf_files(wf_type, num_tasks, file_name)
     except ValueError:
         print(f"Low tasks for {wf_type}. (n >= 133 for montage and n >= 14 for soykbr)")
 

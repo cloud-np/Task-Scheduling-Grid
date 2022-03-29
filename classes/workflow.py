@@ -11,7 +11,8 @@ import networkx as nx
 
 # 'montage' not working properly
 # 'soykbr' wfcommons 0.7 not working properly
-WF_TYPES = ['cycles', 'epigenomics', 'genome', 'seismology', 'soykbr', 'blast', 'sra']
+WF_TYPES = ['cycles', 'epigenomics', 'genome',
+            'seismology', 'soykbr', 'blast', 'sra']
 NUM_TASKS = [50, 100, 200, 300, 400, 500, 1000]
 CACHED_WFS = dict()
 
@@ -24,7 +25,7 @@ CACHED_WFS = dict()
 # in any CASE tho tasks and machines lists should NEVER change
 # at all. I should try to make them immutable later on.
 class Workflow:
-    def __init__(self, id_, wf_type, machines, add_dummies, file_path: str = None, name: str = None, tasks: Optional[List[ta.Task]] = None):
+    def __init__(self, id_, wf_type, machines, add_dummies, file_path: str = "", name: str = None, tasks: Optional[List[ta.Task]] = None):
         self.id: int = id_
         self.type = wf_type  # type of the workflow e.g: LIGO, Montage, etc
         self.name: str = name
@@ -38,17 +39,21 @@ class Workflow:
         self.avg_com_cost: float = -1.0
         self.ccr: float = -1.0
 
-        if tasks is None:
-            # 1. Parse the workflow tasks
-            self.tasks = get_tasks_from_json_file(file_path, id_, self.machines[0].network_kbps)
+        if file_path.endswith(".dot"):
+            Workflow.read_dag(filename=file_path)
+        else:
+            if tasks is None:
+                # 1. Parse the workflow tasks
+                self.tasks = get_tasks_from_json_file(
+                    file_path, id_, self.machines[0].network_kbps)
 
-            # 2. add dummy nodes
-            if add_dummies:
-                self.__add_dummy_nodes()
+                # 2. add dummy nodes
+                if add_dummies:
+                    self.__add_dummy_nodes()
 
-        # 3. Calculate the runtime cost for every machine
-        for m in machines:
-            m.assign_tasks_with_costs(tasks=self.tasks)
+            # 3. Calculate the runtime cost for every machine
+            for m in machines:
+                m.assign_tasks_with_costs(tasks=self.tasks)
 
         # 4. Generate critical path, up_rank and down_rank
         self.cp_info = {"critical_path": set(), "entry": None, "exit": None}
@@ -75,7 +80,8 @@ class Workflow:
             # though by theory it would still be O(n)
             for t in self.tasks:
                 if t.status != ta.TaskStatus.SCHEDULED:
-                    raise Exception("Workflow can't be scheduled if all of his tasks haven't ended.")
+                    raise Exception(
+                        "Workflow can't be scheduled if all of his tasks haven't ended.")
                 elif t.end > self.wf_len:
                     self.wf_len = t.end
             self.scheduled = True
@@ -105,7 +111,8 @@ class Workflow:
     # DO NOT CHANGE THE NAMING
     def __add_dummy_nodes(self):
         self.tasks.insert(0, ta.Task.make_dummy_node(0, self.id, "Dummy-In"))
-        self.tasks.append(ta.Task.make_dummy_node(len(self.tasks), self.id, "Dummy-Out"))
+        self.tasks.append(ta.Task.make_dummy_node(
+            len(self.tasks), self.id, "Dummy-Out"))
 
         dummy_in = self.tasks[0]
         dummy_out = self.tasks[len(self.tasks) - 1]
@@ -124,9 +131,11 @@ class Workflow:
 
     @staticmethod
     def connect_wfs(workflows, machines):
-        dummy_in: ta.Task = ta.Task.make_dummy_node(id_=-1, wf_id=-1, name="Dummy-In-BIG")
+        dummy_in: ta.Task = ta.Task.make_dummy_node(
+            id_=-1, wf_id=-1, name="Dummy-In-BIG")
         # To find the dummy_out.id we need to calc all the tasks in all workflows
-        dummy_out: ta.Task = ta.Task.make_dummy_node(id_=sum(len(wf.tasks) for wf in workflows), wf_id=-1, name="Dummy-Out-BIG")
+        dummy_out: ta.Task = ta.Task.make_dummy_node(
+            id_=sum(len(wf.tasks) for wf in workflows), wf_id=-1, name="Dummy-Out-BIG")
         all_tasks: List[ta.Task] = [dummy_in]
         dummy_in.costs: List[int] = [0 for _ in machines]
 
@@ -223,8 +232,10 @@ class Workflow:
                 parents: list = task.get_tasks_from_names(
                     tasks[wf_id], is_child_tasks=False)
                 # We need at least -> len(Edges) == len(children)
-                children_edges = [ta.Edge(weight=children_dags[wf_id][task.id - 1][i]["w"], node=child) for i, child in enumerate(children)]
-                parents_edges = [ta.Edge(weight=parents_dags[wf_id][task.id - 1][i]["w"], node=parent) for i, parent in enumerate(parents)]
+                children_edges = [ta.Edge(
+                    weight=children_dags[wf_id][task.id - 1][i]["w"], node=child) for i, child in enumerate(children)]
+                parents_edges = [ta.Edge(weight=parents_dags[wf_id][task.id - 1]
+                                         [i]["w"], node=parent) for i, parent in enumerate(parents)]
                 # We use this function to check if everything went smoothly in the parsing
                 task.set_edges(children_edges, parents_edges)
 
@@ -302,7 +313,8 @@ class Workflow:
         return f"{Back.RED}WORKFLOW    ID = {self.id}{Back.RESET}"
 
     def calc_avg_comp_cost(self):
-        self.avg_comp_cost = sum(task.avg_cost() for task in self.tasks) / len(self.tasks)
+        self.avg_comp_cost = sum(task.avg_cost()
+                                 for task in self.tasks) / len(self.tasks)
         return self.avg_comp_cost
 
     def get_ready_unscheduled_tasks(self):
@@ -370,12 +382,62 @@ class Workflow:
                  "end": task.end,
                  "machine_id": task.machine_id} for task in self.tasks]
 
-    def to_nxdigraph(self) -> nx.DiGraph:
-        g = nx.Graph()
-        for task in self.tasks:
-            for ce in task.children_edges:
-                g.add_edge(task, ce)
-            # g.add_node(task.id, start=task.start, end=task.end, machine_id=task.machine_id)
-            # g.add_node(task)
-        nx.draw(g)
-        # pylab.draw()
+    def read_dag(filename, p=3, b=0.5, ccr=0.5):
+        import pydot
+        import numpy as np
+        from random import randint, gauss
+
+        graph = pydot.graph_from_dot_file(filename)[0]
+        n_nodes = len(graph.get_nodes())
+
+        # get adjacency matrix for DAG
+        adj_matrix = np.full((n_nodes, n_nodes), -1)
+        n_edges = 0
+        for e in graph.get_edge_list():
+            adj_matrix[int(e.get_source()) - 1][int(e.get_destination()) - 1] = 0
+            n_edges += 1
+
+        # if DAG has multiple entry/exit nodes, create dummy nodes in its place
+        ends = np.nonzero(np.all(adj_matrix == -1, axis=1))[0]    # exit nodes
+        starts = np.nonzero(np.all(adj_matrix == -1, axis=0))[0]  # entry nodes
+        start_node = pydot.Node("0", alpha="\"0\"", size="\"0\"")
+        end_node = pydot.Node(str(n_nodes + 1), alpha="\"0\"", size="\"0\"")
+        graph.add_node(start_node)
+        graph.add_node(end_node)
+
+        for start in starts:
+            s_edge = pydot.Edge("0", str(start + 1), size="\"0\"")
+            graph.add_edge(s_edge)
+
+        for end in ends:
+            e_edge = pydot.Edge(str(end + 1), str(n_nodes + 1), size="\"0\"")
+            graph.add_edge(e_edge)
+
+        n_nodes = len(graph.get_nodes())
+
+        # construct computation matrix
+        comp_matrix = np.empty((n_nodes, p))
+        comp_total = 0
+        for n in graph.get_node_list():
+            size_str = n.obj_dict['attributes']['alpha']
+            size = float(size_str.split('\"')[1])
+            if size == 0:
+                comp_matrix[int(n.get_name())][:] = 0
+            else:
+                comp_temp = np.random.randint(size * (1 - b / 2), high=size * (1 + b / 2), size=p)
+                comp_temp[comp_temp == 0] = 1
+                comp_matrix[int(n.get_name())][:] = comp_temp
+                comp_total += np.average(comp_temp)
+
+        # get modified adjency matrix
+        adj_matrix = np.full((n_nodes, n_nodes), -1)
+        mu = ccr * comp_total / n_edges
+        for e in graph.get_edge_list():
+            source, dest = int(e.get_source()), int(e.get_destination())
+            if source == 0 or dest == n_nodes - 1:
+                adj_matrix[source][dest] = 0
+            else:
+                adj_matrix[int(e.get_source())][int(
+                    e.get_destination())] = abs(gauss(mu, mu / 4))
+
+        return [n_nodes, p, comp_matrix, adj_matrix]

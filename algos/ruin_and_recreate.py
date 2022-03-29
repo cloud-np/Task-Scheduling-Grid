@@ -23,7 +23,7 @@ class RuinRecreate:
 
         # NOTE: To get the time_space dynamically we need to have the workflow length.
         self.time_space = (20, 300)
-        self.ten_perc = len(workflow.tasks) * 10 / 100
+        self.ten_perc = int(len(workflow.tasks) * 10 / 100)
         self.ruin_lb = 0
         self.ruin_ub = self.ten_perc
 
@@ -75,6 +75,7 @@ class RuinRecreate:
         if self.ruin_method == "random":
             return [(t.id, t.machine_id) for t in workflow.tasks if random.randint(0, 10) < 5]
         if self.ruin_method == "comp" or self.ruin_method == "comm":
+            print(self.ruin_lb, self.ruin_ub)
             data = [(t.id, t.machine_id) for t in self.sorted_tasks[self.ruin_lb:self.ruin_ub]]
             self.ruin_lb = self.ruin_ub
             self.ruin_ub += self.ten_perc
