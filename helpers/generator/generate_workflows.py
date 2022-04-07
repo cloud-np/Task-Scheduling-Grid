@@ -36,7 +36,8 @@ class HeftGenerator:
 
     @staticmethod
     def gen_dags():
-        from os import system
+        import os
+        import subprocess
         from itertools import product
 
         minalpha = 20
@@ -53,13 +54,14 @@ class HeftGenerator:
 
         for v in product(*values):
             param = dict(zip(keys, v))
-            filename = './data/generated_dags/{}_{}_{}_{}_{}.dot'.format(param['n'],
-                                                                         param['fat'],
+            filename = "./data/generated_dags/{}_{}_{}_{}_{}.dot".format(param['n'], param['fat'],
                                                                          param['density'],
                                                                          param['regularity'],
                                                                          param['jump'])
+            if os.path.isfile(filename):
+                continue
             param = dict(zip(keys, v))
-            system("~/daggen-master/daggen -n {} --fat {} --density {} --regular {} --jump {} --minalpha {} --maxalpha {} --dot -o {} >/dev/null 2>&1".format(
+            os.system("~/daggen-master/daggen -n {} --fat {} --density {} --regular {} --jump {} --minalpha {} --maxalpha {} --dot -o {}".format(
                 param['n'],
                 param['fat'],
                 param['density'],

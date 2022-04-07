@@ -7,37 +7,36 @@ from helpers.utils import get_id_from_name
 
 
 def get_tasks_from_json_file(file_name, wf_id, network_kbps):
+    tasks = []
     with open(file_name) as f:
+        # Visualize the graph to check it.
+        # create_csv_file_to_visualize_graph(data['workflow']['jobs'])
         data = json.load(f)
 
-    # Visualize the graph to check it.
-    # create_csv_file_to_visualize_graph(data['workflow']['jobs'])
-    tasks = []
+        # n_tasks = len(data['workflow']['jobs'])
+        # 1) Parse first the machines you have to do the workflow. ( we create our machines )
+        # 2) Parse the data for the tasks in the: data['workflow']['jobs'] ---> job['files']
+        #       For the above dictionary you should sum the file sizes together
+        #       to get the overall communication cost.
+        for job in data['workflow']['jobs']:
+            # Name & id
+            # job['name'] <- This can and should be used as an id right away
+            job_id = get_id_from_name(job['name'])
+            ####################################
 
-    # n_tasks = len(data['workflow']['jobs'])
-    # 1) Parse first the machines you have to do the workflow. ( we create our machines )
-    # 2) Parse the data for the tasks in the: data['workflow']['jobs'] ---> job['files']
-    #       For the above dictionary you should sum the file sizes together
-    #       to get the overall communication cost.
-    for job in data['workflow']['jobs']:
-        # Name & id
-        # job['name'] <- This can and should be used as an id right away
-        job_id = get_id_from_name(job['name'])
-        ####################################
-
-        # 3) Create the Task class based on the data you parsed.
-        tasks.append(
-            Task(
-                id_=job_id,
-                wf_id=wf_id,
-                name=job['name'],
-                costs=[],
-                runtime=job['runtime'],
-                files=job['files'],
-                children_names=job['children'],
-                parents_names=job['parents']
+            # 3) Create the Task class based on the data you parsed.
+            tasks.append(
+                Task(
+                    id_=job_id,
+                    wf_id=wf_id,
+                    name=job['name'],
+                    costs=[],
+                    runtime=job['runtime'],
+                    files=job['files'],
+                    children_names=job['children'],
+                    parents_names=job['parents']
+                )
             )
-        )
     for t in tasks:
         t.create_edges(tasks, network_kbps)
     return tasks

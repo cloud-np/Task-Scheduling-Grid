@@ -39,21 +39,20 @@ class Workflow:
         self.avg_com_cost: float = -1.0
         self.ccr: float = -1.0
 
-        if file_path.endswith(".dot"):
-            Workflow.read_dag(filename=file_path)
-        else:
-            if tasks is None:
-                # 1. Parse the workflow tasks
-                self.tasks = get_tasks_from_json_file(
-                    file_path, id_, self.machines[0].network_kbps)
+        if tasks is None:
+            # 1. Parse the workflow tasks
+            if file_path.endswith(".dot"):
+                self.tasks = self.read_dag()
+            else:
+                self.tasks = get_tasks_from_json_file(file_path, id_, self.machines[0].network_kbps)
 
-                # 2. add dummy nodes
-                if add_dummies:
-                    self.__add_dummy_nodes()
+            # 2. add dummy nodes
+            if add_dummies:
+                self.__add_dummy_nodes()
 
-            # 3. Calculate the runtime cost for every machine
-            for m in machines:
-                m.assign_tasks_with_costs(tasks=self.tasks)
+        # 3. Calculate the runtime cost for every machine
+        for m in machines:
+            m.assign_tasks_with_costs(tasks=self.tasks)
 
         # 4. Generate critical path, up_rank and down_rank
         self.cp_info = {"critical_path": set(), "entry": None, "exit": None}
@@ -274,6 +273,22 @@ class Workflow:
         return workflows
 
     @staticmethod
+    def load_heft_wfs(machines, n, n_tasks):
+        import os
+        workflows = []
+        for entry in os.scandir('./data/generated_dags/'):
+            if len(workflows) >= n:
+                break
+            if entry.is_dir() or entry.is_file():
+                # print(entry.name, entry.name.split('-')[0])
+                if '.dot' in entry.name and int(entry.name.split('_')[0]) == n_tasks:
+                    workflows.append(Workflow(id_=len(workflows), wf_type="random",
+                                     file_path=f"./data/generated_dags/{entry.name}", machines=machines, add_dummies=True))
+
+        for wf in workflows:
+            print(wf)
+
+    @staticmethod
     def load_random_workflows(machines, n, path: str = './data'):
         num_tasks = [
             100, 100, 200, 200, 500, 50,
@@ -382,62 +397,38 @@ class Workflow:
                  "end": task.end,
                  "machine_id": task.machine_id} for task in self.tasks]
 
-    def read_dag(filename, p=3, b=0.5, ccr=0.5):
+    def read_dag(self, ccr=0.5):
         import pydot
         import numpy as np
         from random import randint, gauss
 
-        graph = pydot.graph_from_dot_file(filename)[0]
-        n_nodes = len(graph.get_nodes())
+        graph = pydot.graph_from_dot_file(self.file_path)[0]
 
-        # get adjacency matrix for DAG
-        adj_matrix = np.full((n_nodes, n_nodes), -1)
-        n_edges = 0
-        for e in graph.get_edge_list():
-            adj_matrix[int(e.get_source()) - 1][int(e.get_destination()) - 1] = 0
-            n_edges += 1
-
-        # if DAG has multiple entry/exit nodes, create dummy nodes in its place
-        ends = np.nonzero(np.all(adj_matrix == -1, axis=1))[0]    # exit nodes
-        starts = np.nonzero(np.all(adj_matrix == -1, axis=0))[0]  # entry nodes
-        start_node = pydot.Node("0", alpha="\"0\"", size="\"0\"")
-        end_node = pydot.Node(str(n_nodes + 1), alpha="\"0\"", size="\"0\"")
-        graph.add_node(start_node)
-        graph.add_node(end_node)
-
-        for start in starts:
-            s_edge = pydot.Edge("0", str(start + 1), size="\"0\"")
-            graph.add_edge(s_edge)
-
-        for end in ends:
-            e_edge = pydot.Edge(str(end + 1), str(n_nodes + 1), size="\"0\"")
-            graph.add_edge(e_edge)
-
-        n_nodes = len(graph.get_nodes())
-
-        # construct computation matrix
-        comp_matrix = np.empty((n_nodes, p))
-        comp_total = 0
+        tasks = []
+        task_counter = 1
         for n in graph.get_node_list():
-            size_str = n.obj_dict['attributes']['alpha']
-            size = float(size_str.split('\"')[1])
-            if size == 0:
-                comp_matrix[int(n.get_name())][:] = 0
-            else:
-                comp_temp = np.random.randint(size * (1 - b / 2), high=size * (1 + b / 2), size=p)
-                comp_temp[comp_temp == 0] = 1
-                comp_matrix[int(n.get_name())][:] = comp_temp
-                comp_total += np.average(comp_temp)
+            runtime = float(n.obj_dict['attributes']['alpha'].split('\"')[1])
+            tasks.append(ta.Task(id_=task_counter,
+                                 wf_id=self.id,
+                                 costs=[],
+                                 runtime=runtime,
+                                 name=f"{self.file_path}-{self.id}-{task_counter}"))
+            task_counter += 1
 
-        # get modified adjency matrix
-        adj_matrix = np.full((n_nodes, n_nodes), -1)
-        mu = ccr * comp_total / n_edges
+        comp_total = sum(sum(m.generate_cost_for_task(t.runtime)
+                         for m in self.machines) for t in tasks)
+        mu = ccr * comp_total / len(graph.get_edge_list())
         for e in graph.get_edge_list():
-            source, dest = int(e.get_source()), int(e.get_destination())
-            if source == 0 or dest == n_nodes - 1:
-                adj_matrix[source][dest] = 0
-            else:
-                adj_matrix[int(e.get_source())][int(
-                    e.get_destination())] = abs(gauss(mu, mu / 4))
+            s_task, d_task = tasks[int(e.get_source()) - 1], tasks[int(e.get_destination()) - 1]
+            edge_w = abs(gauss(mu, mu / 4))
+            s_task.add_child(edge_w, d_task)
+            d_task.add_parent(edge_w, s_task)
 
-        return [n_nodes, p, comp_matrix, adj_matrix]
+        # Find entry and exit nodes
+        for t in tasks:
+            if len(t.children_edges) == 0:
+                t.is_exit = True
+            if len(t.parents_edges) == 0:
+                t.is_entry = True
+
+        return tasks

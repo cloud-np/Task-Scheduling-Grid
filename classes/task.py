@@ -46,7 +46,7 @@ class TaskBlueprint:
 
 
 class Task:
-    def __init__(self, id_, wf_id, name, costs, runtime, files, children_names, parents_names, status=TaskStatus.UNSCHEDULED) -> None:
+    def __init__(self, id_, wf_id, name, costs, runtime, children_names=None, parents_names=None, files=None, status=TaskStatus.UNSCHEDULED) -> None:
         self.costs = costs
         self.id = id_
         self.name = name
@@ -77,9 +77,6 @@ class Task:
 
         self.is_exit: bool = False
         self.is_entry: bool = False
-
-        if (self.is_entry, self.is_exit) == (True, True):
-            raise Exception(f"Node[ {self.id} ] is not connected in the dag!")
 
     def get_blueprint(self):
         return TaskBlueprint(self.id, self.wf_id, self.name, self.runtime, [{"w": e.weight, "n": e.node.name} for e in self.children_edges], [{"w": e.weight, "n": e.node.name} for e in self.parents_edges], self.status, self.is_entry, self.is_exit)
@@ -254,13 +251,13 @@ class Task:
     def set_edges(self, children_edges, parents_edges):
         # TODO Check if everything went fine in parsing.
         self.children_edges = children_edges
-        self.children_till_ready = len(children_edges)
-        if len(children_edges) == 0:
+        self.children_till_ready = len(self.children_edges)
+        if len(self.children_edges) == 0:
             self.is_exit = True
 
         self.parents_edges = parents_edges
-        self.parents_till_ready = len(parents_edges)
-        if len(parents_edges) == 0:
+        self.parents_till_ready = len(self.parents_edges)
+        if len(self.parents_edges) == 0:
             self.is_entry = True
 
     def is_slowest_parent(self, child):

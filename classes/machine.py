@@ -215,16 +215,13 @@ class Machine:
     # We can't use the ceil or floor function here because the numbers
     # are quite small and we will be missing that information.
     # ORR we can simply remove the speed and ignore
-    def __generate_cost_for_task(self, runtime):
+    def generate_cost_for_task(self, runtime):
+        # Because dummies runtimes is 0 this will return just 0
         return runtime / self.n_cpu
 
     def assign_tasks_with_costs(self, tasks):
         for task in tasks:
-            if task.name.startswith("Dummy"):
-                task.costs.append(0)
-            else:
-                cost = self.__generate_cost_for_task(task.runtime)
-                task.costs.append(cost)
+            task.costs.append(self.generate_cost_for_task(task.runtime))
 
     # Atm it just returns the cost back. Maybe we may add something depending the problem.
     def calc_com_cost(self, cost):

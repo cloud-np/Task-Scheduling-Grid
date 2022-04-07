@@ -4,19 +4,21 @@ from typing import List, Iterable
 import random
 from helpers.examples.example_gen import ExampleGen
 from helpers.utils import find_perc_diff
-from classes.scheduler import Scheduler, TimeType
+from classes.scheduler import Scheduler, TimeType, FillMethod
 from classes.machine import Machine
 
 
 class RuinRecreate:
 
-    RR_COUNTODOWN = 3000
+    RR_COUNTODOWN = 100
+    END_COUNTDOWN = 10_000
 
     def __init__(self, workflow: Workflow, machines: List[Machine], ruin_method="random"):
         self.og_workflow: Workflow = workflow
         self.og_machines: List[Machine] = machines
         self.ruin_method: str = ruin_method
         self.rr_countdown: int = RuinRecreate.RR_COUNTODOWN
+        self.end_countdown: int = RuinRecreate.END_COUNTDOWN
 
         self.comp_srt: List[Workflow] = sorted(self.og_workflow.tasks, key=lambda t: t.avg_cost())
         self.comm_srt: List[Workflow] = sorted(self.og_workflow.tasks, key=lambda t: sum(e.weight for e in t.children_edges))
@@ -58,24 +60,28 @@ class RuinRecreate:
 
         return best_scheduled_workflow, machines
 
-    def greedy_keep(self, workflow, best_scheduled_workflow):
+    def greedy_keep(self, wf, best_wf):
         self.rr_countdown -= 1
+        self.end_countdown -= 1
 
-        if self.rr_countdown <= 0 and best_scheduled_workflow.wf_len < self.og_workflow.wf_len:
-            return best_scheduled_workflow, True
-        if workflow.wf_len < best_scheduled_workflow.wf_len:
+        if self.rr_countdown <= 0 and best_wf.wf_len < self.og_workflow.wf_len:
+            return best_wf, True
+        elif self.end_countdown <= 0:
+            return best_wf, True
+        if wf.wf_len < best_wf.wf_len:
             self.rr_countdown = RuinRecreate.RR_COUNTODOWN
-            return workflow, False
+            self.end_countdown = RuinRecreate.END_COUNTDOWN
+            return wf, False
         if self.ruin_method == "comp" or self.ruin_method == "comm":
-            if self.ruin_ub >= len(workflow.tasks):
-                return best_scheduled_workflow, True
-        return best_scheduled_workflow, False
+            if self.ruin_ub >= len(wf.tasks):
+                return best_wf, True
+        return best_wf, False
 
     def __ruin(self, workflow: Workflow):
         if self.ruin_method == "random":
-            return [(t.id, t.machine_id) for t in workflow.tasks if random.randint(0, 10) < 5]
+            return [(t.id, t.machine_id) for t in workflow.tasks if random.randint(0, 10) < 2]
         if self.ruin_method == "comp" or self.ruin_method == "comm":
-            print(self.ruin_lb, self.ruin_ub)
+            # print(self.ruin_lb, self.ruin_ub)
             data = [(t.id, t.machine_id) for t in self.sorted_tasks[self.ruin_lb:self.ruin_ub]]
             self.ruin_lb = self.ruin_ub
             self.ruin_ub += self.ten_perc
@@ -87,10 +93,32 @@ class RuinRecreate:
         else:
             raise Exception("Unknown ruin method")
 
-    def __recreate(self, workflow: Workflow, machines: List[Machine], ruined_tasks_ids):
+    def __recreate(self, workflow: Workflow, machines: List[Machine], ruined_mt_ids):
+        # # for task in sorted(workflow.tasks, key=lambda t: t.up_rank, reverse=True):
+        # for task in workflow.tasks:
+        #     # print(task.id, task.status)
+        #     if m_id := [mt_ids[1] for mt_ids in ruined_mt_ids if mt_ids[0] == task.id]:
+        #         Scheduler.schedule_task_machine(task, [m for m in machines if m.id != m_id[0]], TimeType.EFT)
+        #     if task.status != TaskStatus.UNSCHEDULED:
+        #         Scheduler.schedule_task_machine(task, machines, TimeType.EFT)
+
         for task in workflow.tasks:
-            if m_id := [r_info[1] for r_info in ruined_tasks_ids if r_info[0] == task.id]:
+            if m_id := [r_info[1] for r_info in ruined_mt_ids if r_info[0] == task.id]:
                 Scheduler.schedule_task_machine(task, [m for m in machines if m.id != m_id[0]], TimeType.EFT)
             if task.status != TaskStatus.SCHEDULED:
                 Scheduler.schedule_task_machine(task, machines, TimeType.EFT)
         workflow.set_scheduled(True)
+        # unscheduled = workflow
+        # i = 0
+        # while len(workflow.tasks) > 0:
+        #     if i >= len(unscheduled):
+        #         i = 0
+        #     un_task = unscheduled[i]
+
+        #     if un_task.status == TaskStatus.READY:
+        #         Scheduler.schedule_task_machine_or_hole(un_task, self.machines, TimeType.EFT, FillMethod.FASTEST_FIT)
+        #         unscheduled.pop(i)
+        #         i = 0
+        #     else:
+        #         i += 1
+        # workflow.set_scheduled(True)
