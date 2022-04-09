@@ -1,9 +1,9 @@
 # Dockerfile, Image, Container
 FROM python:3.10
 
-ADD algos/ .
-ADD classes/ .
-ADD helpers/ .
+ADD algos/ algos/.
+ADD classes/ classes/.
+ADD helpers/ helpers/.
 ADD run_algos.ipynb .
 ADD main.py .
 
@@ -15,8 +15,12 @@ RUN apt-get update && \
         gcc         \
         libwww-perl && \
     apt-get autoremove -y && \
-    apt-get clean
+    apt-get clean \
+    apt-get zsh \
+    apt-get vim
 
+# Default powerline10k theme, no plugins installed
+RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/v1.1.2/zsh-in-docker.sh)"
 # Upgrade pip
 RUN pip install --upgrade pip
 
