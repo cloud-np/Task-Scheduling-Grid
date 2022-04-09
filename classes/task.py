@@ -81,6 +81,9 @@ class Task:
     def get_blueprint(self):
         return TaskBlueprint(self.id, self.wf_id, self.name, self.runtime, [{"w": e.weight, "n": e.node.name} for e in self.children_edges], [{"w": e.weight, "n": e.node.name} for e in self.parents_edges], self.status, self.is_entry, self.is_exit)
 
+    def has_child(self, child_task):
+        return any(e.node is child_task for e in self.children_edges)
+
     def create_edges(self, tasks: List['Task'], network_kbps: Optional[float] = None):
         if network_kbps is not None:
             children: List[Task] = self.get_tasks_from_names(tasks, is_child_tasks=True)

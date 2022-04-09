@@ -21,3 +21,4 @@ simulation_output/
 sim*.txt
 sim*.xlsx
 *.dot
+*.xlsx

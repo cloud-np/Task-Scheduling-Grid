@@ -24,6 +24,8 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
 # Upgrade pip
 RUN pip install --upgrade pip
 
+ENV SHELL /usr/bin/zsh
+
 ADD requirements.txt .
 RUN pip install -r requirements.txt
 

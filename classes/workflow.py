@@ -418,8 +418,12 @@ class Workflow:
         comp_total = sum(sum(m.generate_cost_for_task(t.runtime)
                          for m in self.machines) for t in tasks)
         mu = ccr * comp_total / len(graph.get_edge_list())
+
         for e in graph.get_edge_list():
             s_task, d_task = tasks[int(e.get_source()) - 1], tasks[int(e.get_destination()) - 1]
+            if s_task.has_child(d_task):
+                # print(s_task, d_task)
+                continue
             edge_w = abs(gauss(mu, mu / 4))
             s_task.add_child(edge_w, d_task)
             d_task.add_parent(edge_w, s_task)

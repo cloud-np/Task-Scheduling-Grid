@@ -6,6 +6,8 @@ def calculate_upward_ranks(tasks):
     def calc_upward(curr_task):
         # Base condition once your set
         # is empty just return the computation cost
+        if curr_task.up_rank is not None:
+            return curr_task.up_rank
         if curr_task.is_exit:
             curr_task.up_rank = avg(curr_task.costs)
             return curr_task.up_rank
@@ -21,6 +23,8 @@ def calculate_downward_ranks(tasks):
     def calc_downward(curr_task):
         # Base condition once your set
         # is empty just return the computation cost
+        if curr_task.down_rank is not None:
+            return curr_task.down_rank
         if curr_task.is_entry:
             curr_task.down_rank = avg(curr_task.costs)
             return curr_task.down_rank
