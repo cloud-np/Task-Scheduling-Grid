@@ -13,7 +13,6 @@ __pycache__/
 *.zip
 test.py
 helpers/githubHeft
-*.txt
 venv/
 linux_env/
 sim_files/
@@ -21,4 +20,4 @@ simulation_output/
 sim*.txt
 sim*.xlsx
 *.dot
-*.xlsx
+heft_rr_sim.xlsx
