@@ -28,12 +28,14 @@ class RuinRecreate:
             self.sorted_tasks = sorted(workflow.tasks, key=lambda t: t.avg_cost())
         elif self.ruin_method == "comm":
             self.sorted_tasks = sorted(workflow.tasks, key=lambda t: t.avg_com_cost())
+        elif self.ruin_method == "time":
+            start = random.randint(0, int(workflow.wf_len))
+            self.time_window: int = (start, start + int(workflow.wf_len * 10 / 100))
         elif self.ruin_method == "level":
             self.ruin_level: int = 0
             _, self.max_level = Workflow.level_order(workflow.tasks)
-        elif self.ruin_method == "time":
-            # NOTE: To get the time_space dynamically we need to have the workflow length.
-            self.time_space: tuple[int] = (20, 300)
+        # elif self.ruin_method == "uprank":
+        #     self.sorted_tasks = sorted(workflow.tasks, key=lambda t: t.up_rank)
 
         # Find the part you want to ruin
 
@@ -89,6 +91,11 @@ class RuinRecreate:
             ruin_ids = [(t.id, t.machine_id) for t in self.sorted_tasks[self.ruin_lb:self.ruin_ub]]
             self.ruin_lb = self.ruin_ub
             self.ruin_ub += self.ten_perc
+            return ruin_ids
+        if self.ruin_method == "time":
+            ruin_ids = [(t.id, t.machine_id) for t in filter(lambda x: self.time_window[0] <= x.start <= self.time_window[1], workflow.tasks)]
+            start = random.randint(0, int(workflow.wf_len))
+            self.time_window: int = (start, start + int(workflow.wf_len * 10 / 100))
             return ruin_ids
         if self.ruin_method == "level":
             return [(t.id, t.machine_id) for t in workflow.tasks if t.level == self.ruin_level]
