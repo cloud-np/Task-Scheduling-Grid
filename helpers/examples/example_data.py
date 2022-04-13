@@ -126,70 +126,70 @@ SMALL_EXAMPLE = {
     "first-fit":
     [
         [
-            TaskBlueprint(0, 0, "T-A", 1, [{'w': 15, 'n': 'T-B'}, {'w': 13, 'n': 'T-C'}, {'w': 1, 'n': 'T-D'}], [], 1, True, False),
-            TaskBlueprint(1, 0, "T-B", 74, [{'w': 38, 'n': 'T-E'}], [{'w': 15, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 0, "T-C", 34, [{'w': 27, 'n': 'T-E'}], [{'w': 13, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(3, 0, "T-D", 2, [{'w': 56, 'n': 'T-E'}], [{'w': 1, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(4, 0, "T-E", 73, [{'w': 16, 'n': 'T-F'}, {'w': 97, 'n': 'T-G'}], [{'w': 38, 'n': 'T-B'}, {'w': 27, 'n': 'T-C'}, {'w': 56, 'n': 'T-D'}], 0, False, False),
-            TaskBlueprint(5, 0, "T-F", 23, [{'w': 34, 'n': 'T-H'}], [{'w': 16, 'n': 'T-E'}], 0, False, False),
-            TaskBlueprint(6, 0, "T-G", 79, [{'w': 53, 'n': 'T-H'}], [{'w': 97, 'n': 'T-E'}], 0, False, False),
-            TaskBlueprint(7, 0, "T-H", 100, [], [{'w': 34, 'n': 'T-F'}, {'w': 53, 'n': 'T-G'}], 0, False, True),
+            TaskBlueprint(0, 0, "T-A", 1, None, [{'w': 15, 'n': 'T-B'}, {'w': 13, 'n': 'T-C'}, {'w': 1, 'n': 'T-D'}], [], 1, True, False),
+            TaskBlueprint(1, 0, "T-B", 74, None, [{'w': 38, 'n': 'T-E'}], [{'w': 15, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 0, "T-C", 34, None, [{'w': 27, 'n': 'T-E'}], [{'w': 13, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(3, 0, "T-D", 2, None, [{'w': 56, 'n': 'T-E'}], [{'w': 1, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(4, 0, "T-E", 73, None, [{'w': 16, 'n': 'T-F'}, {'w': 97, 'n': 'T-G'}], [{'w': 38, 'n': 'T-B'}, {'w': 27, 'n': 'T-C'}, {'w': 56, 'n': 'T-D'}], 0, False, False),
+            TaskBlueprint(5, 0, "T-F", 23, None, [{'w': 34, 'n': 'T-H'}], [{'w': 16, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(6, 0, "T-G", 79, None, [{'w': 53, 'n': 'T-H'}], [{'w': 97, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(7, 0, "T-H", 100, None, [], [{'w': 34, 'n': 'T-F'}, {'w': 53, 'n': 'T-G'}], 0, False, True),
         ],
         [
-            TaskBlueprint(0, 1, "T-A", 14, [{'w': 46, 'n': 'T-B'}], [], 1, True, False),
-            TaskBlueprint(1, 1, "T-B", 65, [{'w': 48, 'n': 'T-C'}], [{'w': 46, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 1, "T-C", 79, [{'w': 77, 'n': 'T-D'}], [{'w': 48, 'n': 'T-B'}], 0, False, False),
-            TaskBlueprint(3, 1, "T-D", 30, [], [{'w': 77, 'n': 'T-C'}], 0, False, True),
+            TaskBlueprint(0, 1, "T-A", 14, None, [{'w': 46, 'n': 'T-B'}], [], 1, True, False),
+            TaskBlueprint(1, 1, "T-B", 65, None, [{'w': 48, 'n': 'T-C'}], [{'w': 46, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 1, "T-C", 79, None, [{'w': 77, 'n': 'T-D'}], [{'w': 48, 'n': 'T-B'}], 0, False, False),
+            TaskBlueprint(3, 1, "T-D", 30, None, [], [{'w': 77, 'n': 'T-C'}], 0, False, True),
         ]
     ],
     "fastest-fit":
     [
         [
-            TaskBlueprint(0, 0, "T-A", 76, [{'w': 86, 'n': 'T-B'}, {'w': 9, 'n': 'T-C'}, {'w': 70, 'n': 'T-D'}], [], 1, True, False),
-            TaskBlueprint(1, 0, "T-B", 79, [{'w': 55, 'n': 'T-E'}], [{'w': 86, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 0, "T-C", 50, [{'w': 50, 'n': 'T-E'}], [{'w': 9, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(3, 0, "T-D", 61, [{'w': 77, 'n': 'T-E'}], [{'w': 70, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(4, 0, "T-E", 76, [{'w': 26, 'n': 'T-F'}, {'w': 21, 'n': 'T-G'}], [{'w': 55, 'n': 'T-B'}, {'w': 50, 'n': 'T-C'}, {'w': 77, 'n': 'T-D'}], 0, False, False),
-            TaskBlueprint(5, 0, "T-F", 38, [{'w': 67, 'n': 'T-H'}], [{'w': 26, 'n': 'T-E'}], 0, False, False),
-            TaskBlueprint(6, 0, "T-G", 94, [{'w': 92, 'n': 'T-H'}], [{'w': 21, 'n': 'T-E'}], 0, False, False),
-            TaskBlueprint(7, 0, "T-H", 28, [], [{'w': 67, 'n': 'T-F'}, {'w': 92, 'n': 'T-G'}], 0, False, True)
+            TaskBlueprint(0, 0, "T-A", 76, None, [{'w': 86, 'n': 'T-B'}, {'w': 9, 'n': 'T-C'}, {'w': 70, 'n': 'T-D'}], [], 1, True, False),
+            TaskBlueprint(1, 0, "T-B", 79, None, [{'w': 55, 'n': 'T-E'}], [{'w': 86, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 0, "T-C", 50, None, [{'w': 50, 'n': 'T-E'}], [{'w': 9, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(3, 0, "T-D", 61, None, [{'w': 77, 'n': 'T-E'}], [{'w': 70, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(4, 0, "T-E", 76, None, [{'w': 26, 'n': 'T-F'}, {'w': 21, 'n': 'T-G'}], [{'w': 55, 'n': 'T-B'}, {'w': 50, 'n': 'T-C'}, {'w': 77, 'n': 'T-D'}], 0, False, False),
+            TaskBlueprint(5, 0, "T-F", 38, None, [{'w': 67, 'n': 'T-H'}], [{'w': 26, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(6, 0, "T-G", 94, None, [{'w': 92, 'n': 'T-H'}], [{'w': 21, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(7, 0, "T-H", 28, None, [], [{'w': 67, 'n': 'T-F'}, {'w': 92, 'n': 'T-G'}], 0, False, True)
         ],
         [
-            TaskBlueprint(0, 1, "T-A", 100, [{'w': 60, 'n': 'T-B'}], [], 1, True, False),
-            TaskBlueprint(1, 1, "T-B", 39, [{'w': 87, 'n': 'T-C'}], [{'w': 60, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 1, "T-C", 88, [{'w': 39, 'n': 'T-D'}], [{'w': 87, 'n': 'T-B'}], 0, False, False),
-            TaskBlueprint(3, 1, "T-D", 50, [], [{'w': 39, 'n': 'T-C'}], 0, False, True),
+            TaskBlueprint(0, 1, "T-A", 100, None, [{'w': 60, 'n': 'T-B'}], [], 1, True, False),
+            TaskBlueprint(1, 1, "T-B", 39, None, [{'w': 87, 'n': 'T-C'}], [{'w': 60, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 1, "T-C", 88, None, [{'w': 39, 'n': 'T-D'}], [{'w': 87, 'n': 'T-B'}], 0, False, False),
+            TaskBlueprint(3, 1, "T-D", 50, None, [], [{'w': 39, 'n': 'T-C'}], 0, False, True),
         ]
     ],
     "worst-fit":
     [
         [
-            TaskBlueprint(0, 0, "T-A", 28, [{'w': 13, 'n': 'T-B'}, {'w': 21, 'n': 'T-C'}, {'w': 29, 'n': 'T-D'}], [], 1, True, False),
-            TaskBlueprint(1, 0, "T-B", 73, [{'w': 23, 'n': 'T-E'}], [{'w': 13, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 0, "T-C", 84, [{'w': 97, 'n': 'T-E'}], [{'w': 21, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(3, 0, "T-D", 69, [{'w': 80, 'n': 'T-E'}], [{'w': 29, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(4, 0, "T-E", 94, [{'w': 72, 'n': 'T-F'}, {'w': 22, 'n': 'T-G'}], [{'w': 23, 'n': 'T-B'}, {'w': 97, 'n': 'T-C'}, {'w': 80, 'n': 'T-D'}], 0, False, False),
-            TaskBlueprint(5, 0, "T-F", 7, [{'w': 62, 'n': 'T-H'}], [{'w': 72, 'n': 'T-E'}], 0, False, False),
-            TaskBlueprint(6, 0, "T-G", 80, [{'w': 17, 'n': 'T-H'}], [{'w': 22, 'n': 'T-E'}], 0, False, False),
-            TaskBlueprint(7, 0, "T-H", 91, [], [{'w': 62, 'n': 'T-F'}, {'w': 17, 'n': 'T-G'}], 0, False, True),
+            TaskBlueprint(0, 0, "T-A", 28, None, [{'w': 13, 'n': 'T-B'}, {'w': 21, 'n': 'T-C'}, {'w': 29, 'n': 'T-D'}], [], 1, True, False),
+            TaskBlueprint(1, 0, "T-B", 73, None, [{'w': 23, 'n': 'T-E'}], [{'w': 13, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 0, "T-C", 84, None, [{'w': 97, 'n': 'T-E'}], [{'w': 21, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(3, 0, "T-D", 69, None, [{'w': 80, 'n': 'T-E'}], [{'w': 29, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(4, 0, "T-E", 94, None, [{'w': 72, 'n': 'T-F'}, {'w': 22, 'n': 'T-G'}], [{'w': 23, 'n': 'T-B'}, {'w': 97, 'n': 'T-C'}, {'w': 80, 'n': 'T-D'}], 0, False, False),
+            TaskBlueprint(5, 0, "T-F", 7, None, [{'w': 62, 'n': 'T-H'}], [{'w': 72, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(6, 0, "T-G", 80, None, [{'w': 17, 'n': 'T-H'}], [{'w': 22, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(7, 0, "T-H", 91, None, [], [{'w': 62, 'n': 'T-F'}, {'w': 17, 'n': 'T-G'}], 0, False, True),
         ],
         [
-            TaskBlueprint(0, 1, "T-A", 20, [{'w': 77, 'n': 'T-B'}], [], 1, True, False),
-            TaskBlueprint(1, 1, "T-B", 27, [{'w': 99, 'n': 'T-C'}], [{'w': 77, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 1, "T-C", 16, [{'w': 74, 'n': 'T-D'}], [{'w': 99, 'n': 'T-B'}], 0, False, False),
-            TaskBlueprint(3, 1, "T-D", 46, [], [{'w': 74, 'n': 'T-C'}], 0, False, True),
+            TaskBlueprint(0, 1, "T-A", 20, None, [{'w': 77, 'n': 'T-B'}], [], 1, True, False),
+            TaskBlueprint(1, 1, "T-B", 27, None, [{'w': 99, 'n': 'T-C'}], [{'w': 77, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 1, "T-C", 16, None, [{'w': 74, 'n': 'T-D'}], [{'w': 99, 'n': 'T-B'}], 0, False, False),
+            TaskBlueprint(3, 1, "T-D", 46, None, [], [{'w': 74, 'n': 'T-C'}], 0, False, True),
         ]
     ],
     "example": [
         [
-            TaskBlueprint(0, 0, "T-A", 69, [{'w': 12, 'n': 'T-B'}, {'w': 3, 'n': 'T-C'}, {'w': 13, 'n': 'T-D'}], [], 1, True, False),
-            TaskBlueprint(1, 0, "T-B", 92, [{'w': 34, 'n': 'T-E'}], [{'w': 12, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 0, "T-C", 50, [{'w': 24, 'n': 'T-E'}], [{'w': 3, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(3, 0, "T-D", 78, [{'w': 32, 'n': 'T-E'}], [{'w': 13, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(4, 0, "T-E", 24, [{'w': 26, 'n': 'T-F'}, {'w': 5, 'n': 'T-G'}], [{'w': 34, 'n': 'T-B'}, {'w': 24, 'n': 'T-C'}, {'w': 32, 'n': 'T-D'}], 0, False, False),
-            TaskBlueprint(5, 0, "T-F", 33, [{'w': 75, 'n': 'T-H'}], [{'w': 26, 'n': 'T-E'}], 0, False, False),
-            TaskBlueprint(6, 0, "T-G", 20, [{'w': 18, 'n': 'T-H'}], [{'w': 5, 'n': 'T-E'}], 0, False, False),
-            TaskBlueprint(7, 0, "T-H", 89, [], [{'w': 75, 'n': 'T-F'}, {'w': 18, 'n': 'T-G'}], 0, False, True),
+            TaskBlueprint(0, 0, "T-A", 69, None, [{'w': 12, 'n': 'T-B'}, {'w': 3, 'n': 'T-C'}, {'w': 13, 'n': 'T-D'}], [], 1, True, False),
+            TaskBlueprint(1, 0, "T-B", 92, None, [{'w': 34, 'n': 'T-E'}], [{'w': 12, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 0, "T-C", 50, None, [{'w': 24, 'n': 'T-E'}], [{'w': 3, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(3, 0, "T-D", 78, None, [{'w': 32, 'n': 'T-E'}], [{'w': 13, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(4, 0, "T-E", 24, None, [{'w': 26, 'n': 'T-F'}, {'w': 5, 'n': 'T-G'}], [{'w': 34, 'n': 'T-B'}, {'w': 24, 'n': 'T-C'}, {'w': 32, 'n': 'T-D'}], 0, False, False),
+            TaskBlueprint(5, 0, "T-F", 33, None, [{'w': 75, 'n': 'T-H'}], [{'w': 26, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(6, 0, "T-G", 20, None, [{'w': 18, 'n': 'T-H'}], [{'w': 5, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(7, 0, "T-H", 89, None, [], [{'w': 75, 'n': 'T-F'}, {'w': 18, 'n': 'T-G'}], 0, False, True),
         ],
         # [
         #     TaskBlueprint(0, 1, "T-A", 38, [{'w': 85, 'n': 'T-B'}, {'w': 85, 'n': 'T-C'}], [], 1, True, False),
@@ -201,39 +201,39 @@ SMALL_EXAMPLE = {
     "best-fit":
     [
         [
-            TaskBlueprint(0, 0, "T-A", 69, [{'w': 12, 'n': 'T-B'}, {'w': 3, 'n': 'T-C'}, {'w': 13, 'n': 'T-D'}], [], 1, True, False),
-            TaskBlueprint(1, 0, "T-B", 92, [{'w': 34, 'n': 'T-E'}], [{'w': 12, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 0, "T-C", 50, [{'w': 24, 'n': 'T-E'}], [{'w': 3, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(3, 0, "T-D", 78, [{'w': 32, 'n': 'T-E'}], [{'w': 13, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(4, 0, "T-E", 24, [{'w': 26, 'n': 'T-F'}, {'w': 5, 'n': 'T-G'}], [{'w': 34, 'n': 'T-B'}, {'w': 24, 'n': 'T-C'}, {'w': 32, 'n': 'T-D'}], 0, False, False),
-            TaskBlueprint(5, 0, "T-F", 33, [{'w': 75, 'n': 'T-H'}], [{'w': 26, 'n': 'T-E'}], 0, False, False),
-            TaskBlueprint(6, 0, "T-G", 20, [{'w': 18, 'n': 'T-H'}], [{'w': 5, 'n': 'T-E'}], 0, False, False),
-            TaskBlueprint(7, 0, "T-H", 89, [], [{'w': 75, 'n': 'T-F'}, {'w': 18, 'n': 'T-G'}], 0, False, True),
+            TaskBlueprint(0, 0, "T-A", 69, None, [{'w': 12, 'n': 'T-B'}, {'w': 3, 'n': 'T-C'}, {'w': 13, 'n': 'T-D'}], [], 1, True, False),
+            TaskBlueprint(1, 0, "T-B", 92, None, [{'w': 34, 'n': 'T-E'}], [{'w': 12, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 0, "T-C", 50, None, [{'w': 24, 'n': 'T-E'}], [{'w': 3, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(3, 0, "T-D", 78, None, [{'w': 32, 'n': 'T-E'}], [{'w': 13, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(4, 0, "T-E", 24, None, [{'w': 26, 'n': 'T-F'}, {'w': 5, 'n': 'T-G'}], [{'w': 34, 'n': 'T-B'}, {'w': 24, 'n': 'T-C'}, {'w': 32, 'n': 'T-D'}], 0, False, False),
+            TaskBlueprint(5, 0, "T-F", 33, None, [{'w': 75, 'n': 'T-H'}], [{'w': 26, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(6, 0, "T-G", 20, None, [{'w': 18, 'n': 'T-H'}], [{'w': 5, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(7, 0, "T-H", 89, None, [], [{'w': 75, 'n': 'T-F'}, {'w': 18, 'n': 'T-G'}], 0, False, True),
         ],
         [
-            TaskBlueprint(0, 1, "T-A", 38, [{'w': 85, 'n': 'T-B'}, ], [], 1, True, False),
-            TaskBlueprint(1, 1, "T-B", 24, [{'w': 70, 'n': 'T-C'}], [{'w': 85, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 1, "T-C", 100, [{'w': 78, 'n': 'T-D'}], [{'w': 70, 'n': 'T-B'}], 0, False, False),
-            TaskBlueprint(3, 1, "T-D", 75, [], [{'w': 78, 'n': 'T-C'}], 0, False, True),
+            TaskBlueprint(0, 1, "T-A", 38, None, [{'w': 85, 'n': 'T-B'}, ], [], 1, True, False),
+            TaskBlueprint(1, 1, "T-B", 24, None, [{'w': 70, 'n': 'T-C'}], [{'w': 85, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 1, "T-C", 100, None, [{'w': 78, 'n': 'T-D'}], [{'w': 70, 'n': 'T-B'}], 0, False, False),
+            TaskBlueprint(3, 1, "T-D", 75, None, [], [{'w': 78, 'n': 'T-C'}], 0, False, True),
         ]
     ],
     "workflows":
     [
         [
-            TaskBlueprint(0, 0, "T-A", 67, [{'w': 1, 'n': 'T-B'}, {'w': 50, 'n': 'T-C'}, {'w': 26, 'n': 'T-D'}], [], 1, True, False),
-            TaskBlueprint(1, 0, "T-B", 54, [{'w': 51, 'n': 'T-E'}], [{'w': 1, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 0, "T-C", 63, [{'w': 56, 'n': 'T-E'}], [{'w': 50, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(3, 0, "T-D", 26, [{'w': 98, 'n': 'T-E'}], [{'w': 26, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(4, 0, "T-E", 25, [{'w': 73, 'n': 'T-F'}, {'w': 33, 'n': 'T-G'}], [{'w': 51, 'n': 'T-B'}, {'w': 56, 'n': 'T-C'}, {'w': 98, 'n': 'T-D'}], 0, False, False),
-            TaskBlueprint(5, 0, "T-F", 26, [{'w': 16, 'n': 'T-H'}], [{'w': 73, 'n': 'T-E'}], 0, False, False),
-            TaskBlueprint(6, 0, "T-G", 7, [{'w': 41, 'n': 'T-H'}], [{'w': 33, 'n': 'T-E'}], 0, False, False),
-            TaskBlueprint(7, 0, "T-H", 61, [], [{'w': 16, 'n': 'T-F'}, {'w': 41, 'n': 'T-G'}], 0, False, True)
+            TaskBlueprint(0, 0, "T-A", 67, None, [{'w': 1, 'n': 'T-B'}, {'w': 50, 'n': 'T-C'}, {'w': 26, 'n': 'T-D'}], [], 1, True, False),
+            TaskBlueprint(1, 0, "T-B", 54, None, [{'w': 51, 'n': 'T-E'}], [{'w': 1, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 0, "T-C", 63, None, [{'w': 56, 'n': 'T-E'}], [{'w': 50, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(3, 0, "T-D", 26, None, [{'w': 98, 'n': 'T-E'}], [{'w': 26, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(4, 0, "T-E", 25, None, [{'w': 73, 'n': 'T-F'}, {'w': 33, 'n': 'T-G'}], [{'w': 51, 'n': 'T-B'}, {'w': 56, 'n': 'T-C'}, {'w': 98, 'n': 'T-D'}], 0, False, False),
+            TaskBlueprint(5, 0, "T-F", 26, None, [{'w': 16, 'n': 'T-H'}], [{'w': 73, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(6, 0, "T-G", 7, None, [{'w': 41, 'n': 'T-H'}], [{'w': 33, 'n': 'T-E'}], 0, False, False),
+            TaskBlueprint(7, 0, "T-H", 61, None, [], [{'w': 16, 'n': 'T-F'}, {'w': 41, 'n': 'T-G'}], 0, False, True)
         ],
         [
-            TaskBlueprint(0, 1, "T-A", 32, [{'w': 69, 'n': 'T-B'}], [], 1, True, False),
-            TaskBlueprint(1, 1, "T-B", 20, [{'w': 95, 'n': 'T-C'}], [{'w': 69, 'n': 'T-A'}], 0, False, False),
-            TaskBlueprint(2, 1, "T-C", 65, [{'w': 11, 'n': 'T-D'}], [{'w': 95, 'n': 'T-B'}], 0, False, False),
-            TaskBlueprint(3, 1, "T-D", 7, [], [{'w': 11, 'n': 'T-C'}], 0, False, True),
+            TaskBlueprint(0, 1, "T-A", 32, None, [{'w': 69, 'n': 'T-B'}], [], 1, True, False),
+            TaskBlueprint(1, 1, "T-B", 20, None, [{'w': 95, 'n': 'T-C'}], [{'w': 69, 'n': 'T-A'}], 0, False, False),
+            TaskBlueprint(2, 1, "T-C", 65, None, [{'w': 11, 'n': 'T-D'}], [{'w': 95, 'n': 'T-B'}], 0, False, False),
+            TaskBlueprint(3, 1, "T-D", 7, None, [], [{'w': 11, 'n': 'T-C'}], 0, False, True),
         ]
         # [
         #     TaskBlueprint(0, 0, 'T-A', 20, [{"w": 12, "n": 'T-B'}, {"w": 15, "n": 'T-C'}, {"w": 15, "n": 'T-C'}], [], TaskStatus.READY, True, False),

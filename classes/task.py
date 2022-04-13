@@ -38,6 +38,7 @@ class TaskBlueprint:
     wf_id: int
     name: str
     runtime: float
+    level: int
     children_names: Optional[dict]
     parents_names: Optional[dict]
     status: TaskStatus
@@ -46,7 +47,7 @@ class TaskBlueprint:
 
 
 class Task:
-    def __init__(self, id_, wf_id, name, costs, runtime, children_names=None, parents_names=None, files=None, status=TaskStatus.UNSCHEDULED) -> None:
+    def __init__(self, id_, wf_id, name, costs, runtime, children_names=None, parents_names=None, files=None, status=TaskStatus.UNSCHEDULED, level=None) -> None:
         self.costs = costs
         self.id = id_
         self.name = name
@@ -60,7 +61,7 @@ class Task:
         self.end = None
         self.machine_id: int = -1
         self.up_rank = None
-        self.level = None
+        self.level = level
         self.down_rank = None
         self.priority = None
         self.wf_deadline: Optional[int] = None
@@ -79,7 +80,7 @@ class Task:
         self.is_entry: bool = False
 
     def get_blueprint(self):
-        return TaskBlueprint(self.id, self.wf_id, self.name, self.runtime, [{"w": e.weight, "n": e.node.name} for e in self.children_edges], [{"w": e.weight, "n": e.node.name} for e in self.parents_edges], self.status, self.is_entry, self.is_exit)
+        return TaskBlueprint(self.id, self.wf_id, self.name, self.runtime, self.level, [{"w": e.weight, "n": e.node.name} for e in self.children_edges], [{"w": e.weight, "n": e.node.name} for e in self.parents_edges], self.status, self.is_entry, self.is_exit)
 
     def has_child(self, child_task):
         return any(e.node is child_task for e in self.children_edges)
@@ -121,6 +122,7 @@ class Task:
             costs=[],
             runtime=blp.runtime,
             status=blp.status,
+            level=blp.level,
             files=None,
             children_names=blp.children_names,
             parents_names=blp.parents_names)

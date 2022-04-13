@@ -22,9 +22,9 @@ n_machines = 4
 network = 500
 
 # machines, workflows = ExampleGen.load_n(m_info=[8, 125 * 50], n_wfs=n_wfs)
-filename = "./data/generated_dags/100_0.4_0.8_0.2_1.dot"
+filename = "./data/generated_dags/50_0.4_0.8_0.2_1.dot"
 machines = Machine.load_n_static_machines(n_machines, network * 125)
-wf = Workflow(id_=0, file_path=filename, wf_type="random", machines=machines, add_dummies=True)
+wf = Workflow(id_=0, file_path=filename, wf_type="Random", machines=machines, add_dummies=True)
 
 # %%
 Scheduler.heft(wf.tasks, wf.machines)
@@ -33,7 +33,7 @@ print(filename)
 print(int(wf.wf_len))
 
 # %%
-rr = RuinRecreate(wf, machines, ruin_method="random")
+rr = RuinRecreate(wf, machines, ruin_method="level")
 
 # %%
 rr_wf, machines = rr.run()

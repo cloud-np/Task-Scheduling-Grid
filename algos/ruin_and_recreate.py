@@ -11,7 +11,7 @@ from classes.machine import Machine
 class RuinRecreate:
 
     RR_COUNTODOWN = 100
-    END_COUNTDOWN = 10_000
+    END_COUNTDOWN = 500
 
     def __init__(self, workflow: Workflow, machines: List[Machine], ruin_method="random"):
         self.og_workflow: Workflow = workflow
@@ -20,19 +20,20 @@ class RuinRecreate:
         self.rr_countdown: int = RuinRecreate.RR_COUNTODOWN
         self.end_countdown: int = RuinRecreate.END_COUNTDOWN
 
-        self.comp_srt: List[Workflow] = sorted(self.og_workflow.tasks, key=lambda t: t.avg_cost())
-        self.comm_srt: List[Workflow] = sorted(self.og_workflow.tasks, key=lambda t: sum(e.weight for e in t.children_edges))
-
-        # NOTE: To get the time_space dynamically we need to have the workflow length.
-        self.time_space = (20, 300)
-        self.ten_perc = int(len(workflow.tasks) * 10 / 100)
-        self.ruin_lb = 0
-        self.ruin_ub = self.ten_perc
+        self.ten_perc: int = int(len(workflow.tasks) * 10 / 100)
+        self.ruin_lb: int = 0
+        self.ruin_ub: int = self.ten_perc
 
         if self.ruin_method == "comp":
             self.sorted_tasks = sorted(workflow.tasks, key=lambda t: t.avg_cost())
         elif self.ruin_method == "comm":
-            self.sorted_tasks = sorted(workflow.tasks, key=lambda t: t.avg_comm_cost())
+            self.sorted_tasks = sorted(workflow.tasks, key=lambda t: t.avg_com_cost())
+        elif self.ruin_method == "level":
+            self.ruin_level: int = 0
+            _, self.max_level = Workflow.level_order(workflow.tasks)
+        elif self.ruin_method == "time":
+            # NOTE: To get the time_space dynamically we need to have the workflow length.
+            self.time_space: tuple[int] = (20, 300)
 
         # Find the part you want to ruin
 
@@ -75,6 +76,9 @@ class RuinRecreate:
         if self.ruin_method == "comp" or self.ruin_method == "comm":
             if self.ruin_ub >= len(wf.tasks):
                 return best_wf, True
+        if self.ruin_method == "level":
+            if self.ruin_level >= self.max_level:
+                return best_wf, True
         return best_wf, False
 
     def __ruin(self, workflow: Workflow):
@@ -82,10 +86,12 @@ class RuinRecreate:
             return [(t.id, t.machine_id) for t in workflow.tasks if random.randint(0, 10) < 2]
         if self.ruin_method == "comp" or self.ruin_method == "comm":
             # print(self.ruin_lb, self.ruin_ub)
-            data = [(t.id, t.machine_id) for t in self.sorted_tasks[self.ruin_lb:self.ruin_ub]]
+            ruin_ids = [(t.id, t.machine_id) for t in self.sorted_tasks[self.ruin_lb:self.ruin_ub]]
             self.ruin_lb = self.ruin_ub
             self.ruin_ub += self.ten_perc
-            return data
+            return ruin_ids
+        if self.ruin_method == "level":
+            return [(t.id, t.machine_id) for t in workflow.tasks if t.level == self.ruin_level]
         # elif self.ruin_method == "time-based":
         #     # NOTE this is not working yet
         #     # return [(t.id, t.machine_id) for t in workflow.tasks if self.time_space[0] < t.start < self.time_space[1]]

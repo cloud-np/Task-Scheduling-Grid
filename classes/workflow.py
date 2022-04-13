@@ -58,7 +58,7 @@ class Workflow:
         self.cp_info = {"critical_path": set(), "entry": None, "exit": None}
 
         # Calculate downward and upward ranks
-        calculate_upward_ranks(self.tasks)
+        # calculate_upward_ranks(self.tasks)
         # calculate_downward_ranks(self.tasks)
         # self.create_critical_path()
 
@@ -386,7 +386,7 @@ class Workflow:
                 visited.add(task)
             # print(task.str_colored(), task.level)
 
-        return filtered_levels
+        return filtered_levels, level
 
     def get_task_by_id(self, id_):
         return [t for t in self.tasks if t.id == id_][0]

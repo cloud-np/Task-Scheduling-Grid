@@ -42,9 +42,8 @@ class HeftGenerator:
 
         minalpha = 20
         maxalpha = 50
-        n = [10, 20, 30, 40, 50, 60, 70, 80, 90,
-             100, 150, 200, 250, 300, 350, 400]
-        fat = [0.1, 0.4, 0.8]
+        n = [50, 100, 200, 300, 400, 500, 600]
+        fat = [0.2, 0.4, 0.8]
         density = [0.2, 0.8]
         regularity = [0.2, 0.8]
         jump = [1, 2, 4]
@@ -61,7 +60,7 @@ class HeftGenerator:
             if os.path.isfile(filename):
                 continue
             param = dict(zip(keys, v))
-            os.system("~/daggen-master/daggen -n {} --fat {} --density {} --regular {} --jump {} --minalpha {} --maxalpha {} --dot -o {}".format(
+            os.system("./daggen/daggen -n {} --fat {} --density {} --regular {} --jump {} --minalpha {} --maxalpha {} --dot -o {}".format(
                 param['n'],
                 param['fat'],
                 param['density'],
@@ -130,7 +129,8 @@ def create_all_wfs():
 
 
 if __name__ == '__main__':
-    create_all_wfs()
+    # create_all_wfs()
+    HeftGenerator.gen_dags()
 # file_name = 'data/epigenomics-wf.json'
 # creating a Seismology workflow recipe based on the number
 # of pair of signals to estimate earthquake STFs
