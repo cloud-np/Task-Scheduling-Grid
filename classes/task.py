@@ -279,8 +279,7 @@ class Task:
         for child_edge in self.children_edges:
             if self.is_slowest_parent(child_edge.node):
                 # Update the child parent only if you are the slowest parent atm.
-                child_edge.node.slowest_parent = {
-                    'parent_task': self, 'communication_time': child_edge.weight}
+                child_edge.node.slowest_parent = {'parent_task': self, 'communication_time': child_edge.weight}
 
             if child_edge.node.parents_till_ready <= 0:
                 raise Exception(f"\nThe child: {child_edge.node} is already ready! "

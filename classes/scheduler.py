@@ -72,11 +72,12 @@ class Scheduler:
 
     # This function schedules the task and returns the new
     @staticmethod
-    def schedule_task(times, task, machine, hole=None):
+    def schedule_task(times, task, machine, hole=None, unsafe_scheduling=False):
         task.machine_id = machine.id
         task.start = times[0]
         task.end = times[1]
-        task.update_children_and_self_status()
+        if unsafe_scheduling is False:
+            task.update_children_and_self_status()
 
         if hole is None:
             machine.add_task(task)
