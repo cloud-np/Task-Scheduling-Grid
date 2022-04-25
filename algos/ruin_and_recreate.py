@@ -27,7 +27,7 @@ class RuinRecreate:
         if self.rr_method == "random":
             self.__ruin = self.random_ruin
             self.__recreate = self.std_recreate
-        if self.rr_method == "comm" or self.rr_method == "comp":
+        elif self.rr_method == "comm" or self.rr_method == "comp":
             self.sorted_tasks = sorted(workflow.tasks, key=lambda t: t.avg_cost()) if self.rr_method == "comp" else sorted(workflow.tasks, key=lambda t: t.avg_com_cost())
             self.__ruin = self.com_comp_ruin
             self.__recreate = self.std_recreate
