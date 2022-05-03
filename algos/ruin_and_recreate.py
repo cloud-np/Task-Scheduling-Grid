@@ -151,7 +151,7 @@ class RuinRecreate:
 
             # if no parent was scheduled we can start at the potensial start time and adjuct accordingly later on.
             if parent_edge is None or parent_edge.node.end is None:
-                return [potensial_start_time, potensial_start_time + task.costs[m_id]]
+                return potensial_start_time, potensial_start_time + task.costs[m_id]
             elif parent_edge.node.machine_id == m_id:
                 communication_time = 0
             else:
@@ -162,10 +162,14 @@ class RuinRecreate:
             return start, end
 
         for task in workflow.tasks:
-            all_times = [{"times": compute_exec_time(task, m.id, m.time_on_machine), "m": m} for m in machines]
-            s = min(all_times, key=lambda x: x['times'][0])
-            Scheduler.schedule_task(s['times'], task, s['m'], hole=None, unsafe_scheduling=False)
+            # all_times = [{"times": compute_exec_time(task, m.id, m.time_on_machine), "m": m} for m in machines]
+            # s = min(all_times, key=lambda x: x['times'][0])
+            start, end, machine, hole = Scheduler.find_hole_or_machine(task, machines, time_type=TimeType.EFT, fill_method=FillMethod.FASTEST_FIT)
+            Scheduler.schedule_task((start, end), task, machine, hole=hole, unsafe_scheduling=False)
             update_childen(task)
+            # update holes
+            for m in machines:
+                m.find_holes()
         workflow.set_scheduled(True)
 
     def __ruin(self, workflow: Workflow):

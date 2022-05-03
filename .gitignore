@@ -17,7 +17,7 @@ linux_env/
 sim_files/
 simulation_output/
 sim*.txt
-sim*.xlsx
+*.xlsx
 *.dot
 daggen
 heft_rr_sim.xlsx

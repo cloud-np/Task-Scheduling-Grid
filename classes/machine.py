@@ -36,7 +36,6 @@ class Hole:
         return f"gap: {round(self.gap, 3)} ({round(self.start, 2)} - {round(self.end, 2)})"
 
     def is_fillable(self, end):
-        # Check if the parent end interfere with the child start
         return end <= self.end
 
 
