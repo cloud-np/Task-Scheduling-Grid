@@ -1,6 +1,6 @@
 from classes.workflow import Workflow
 from classes.task import Task, TaskStatus
-from typing import List, Iterable
+from typing import List, Iterable, Tuple
 import random
 from helpers.examples.example_gen import ExampleGen
 from helpers.utils import find_perc_diff
@@ -34,11 +34,16 @@ class RuinRecreate:
         elif self.rr_method == "time":
             start = random.randint(0, int(workflow.wf_len))
             self.time_window: int = (start, start + int(workflow.wf_len * 10 / 100))
+            self.__ruin = self.time_ruin
+            # self.__recreate = self.time_recreate
             self.__recreate = self.std_recreate
-            self.__recreate = self.time_recreate
         elif self.rr_method == "order":
             self.__ruin = self.order_ruin
             self.__recreate = self.order_recreate
+        elif self.rr_method == "children":
+            self.children_threshhold = len(max(workflow.tasks, key=lambda t: len(t.children_edges)).children_edges) - 1
+            self.__ruin = self.children_ruin
+            self.__recreate = self.children_recreate
         elif self.rr_method == "level":
             self.ruin_level: int = 0
             _, self.max_level = Workflow.level_order(workflow.tasks)
@@ -63,8 +68,7 @@ class RuinRecreate:
 
         while not end_loop:
             # Refresh the data
-            workflows, machines = ExampleGen.re_create_example(
-                [best_scheduled_workflow], self.og_machines, reset_task_status=True)
+            workflows, machines = ExampleGen.re_create_example([best_scheduled_workflow], self.og_machines, reset_task_status=True)
             unscheduled_workflow = workflows[0]
 
             # Ruin part
@@ -97,7 +101,7 @@ class RuinRecreate:
                 return best_wf, True
         return best_wf, False
 
-    def com_comp_ruin(self, workflow: Workflow):
+    def com_comp_ruin(self, workflow: Workflow) -> List[Tuple[int, int]]:
         ruin_ids = [(t.id, t.machine_id) for t in self.sorted_tasks[self.ruin_lb:self.ruin_ub]]
         self.ruin_lb = self.ruin_ub
         self.ruin_ub += self.ten_perc
@@ -106,13 +110,13 @@ class RuinRecreate:
     def com_comp_recreate(self, workflow: Workflow, machines: List[Machine], ruined_mt_ids):
         ...
 
-    def random_ruin(self, workflow: Workflow):
+    def random_ruin(self, workflow: Workflow) -> List[Tuple[int, int]]:
         return [(t.id, t.machine_id) for t in workflow.tasks if random.randint(0, 10) < 2]
 
     def random_recreate(self, workflow: Workflow, machines: List[Machine], ruined_mt_ids):
         ...
 
-    def time_ruin(self, workflow: Workflow):
+    def time_ruin(self, workflow: Workflow) -> List[Tuple[int, int]]:
         ruin_ids = [(t.id, t.machine_id) for t in filter(lambda x: self.time_window[0] <= x.start <= self.time_window[1], workflow.tasks)]
         start = random.randint(0, int(workflow.wf_len))
         self.time_window: int = (start, start + int(workflow.wf_len * 10 / 100))
@@ -121,16 +125,29 @@ class RuinRecreate:
     def time_recreate(self, workflow: Workflow, machines: List[Machine], ruined_mt_ids):
         ...
 
-    def level_ruin(self, workflow: Workflow):
+    def level_ruin(self, workflow: Workflow) -> List[Tuple[int, int]]:
         ...
 
     def level_recreate(self, workflow: Workflow, machines: List[Machine], ruined_mt_ids):
         ...
 
-    def order_ruin(self, workflow: Workflow):
+    def order_ruin(self, workflow: Workflow) -> List[Task]:
         return random.shuffle([t for t in workflow.tasks])
 
-    def order_recreate(self, workflow: Workflow, machines: List[Machine], ruined_mt_ids):
+    def children_ruin(self, workflow: Workflow) -> List[Tuple[int, int]]:
+        new_order = []
+        for t in workflow.tasks:
+            if len(t.children_edges) >= self.children_threshhold:
+                new_order.insert(0, t)
+            else:
+                new_order.append(t)
+        return new_order
+
+    def children_recreate(self, workflow: Workflow, machines: List[Machine], ruined_mt_ids=None):
+        self.children_threshhold -= 1
+        return self.order_recreate(workflow, machines)
+
+    def order_recreate(self, workflow: Workflow, machines: List[Machine], ruined_mt_ids=None):
         def update_childen(task):
             if len(task.children_edges):
                 return
@@ -172,7 +189,7 @@ class RuinRecreate:
                 m.find_holes()
         workflow.set_scheduled(True)
 
-    def __ruin(self, workflow: Workflow):
+    def __ruin(self, workflow: Workflow) -> List[Tuple[int, int]]:
         if self.rr_method == "level":
             return [(t.id, t.machine_id) for t in workflow.tasks if t.level == self.ruin_level]
         # if self.ruin_method == "order":

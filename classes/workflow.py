@@ -6,7 +6,7 @@ from typing import Optional, List
 from helpers.data_parser import get_tasks_from_json_file
 from helpers.examples.example_data import NAMES_A, NAMES_B, COSTS_A, COSTS_B, \
     TASK_DAG_A, TASK_DAG_B, PARENTS_DAG_A, PARENTS_DAG_B
-from random import choice
+from random import choice, randint
 import networkx as nx
 
 # 'montage' not working properly
@@ -84,7 +84,7 @@ class Workflow:
                 elif t.end > self.wf_len:
                     self.wf_len = t.end
             self.scheduled = True
-            # workflow_checker(self)
+            workflow_checker(self)
         else:
             self.scheduled = False
 
@@ -400,7 +400,7 @@ class Workflow:
     def read_dag(self, ccr=0.5):
         import pydot
         import numpy as np
-        from random import randint, gauss
+        from random import gauss
 
         graph = pydot.graph_from_dot_file(self.file_path)[0]
 
@@ -425,6 +425,8 @@ class Workflow:
                 # print(s_task, d_task)
                 continue
             edge_w = abs(gauss(mu, mu / 4))
+            # edge_w = randint(int(mu / 4), int(mu * 2))
+            # print(abs(gauss(mu, mu / 4)), randint(int(mu / 4), int(mu * 2)))
             s_task.add_child(edge_w, d_task)
             d_task.add_parent(edge_w, s_task)
 

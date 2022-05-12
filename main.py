@@ -1,4 +1,3 @@
-from algos.paper_2011_algos.paper_method import Paper2011
 from helpers.examples.example_data import HOLE_METHOD_VARIATIONS
 from helpers.visuals.visualize import Visualizer
 from classes.workflow import Workflow
@@ -34,7 +33,7 @@ print(filename)
 print(int(wf.wf_len))
 
 # %%
-rr = RuinRecreate(wf, machines, ruin_method="order")
+rr = RuinRecreate(wf, machines, ruin_method="children")
 
 # %%
 rr_wf, machines = rr.run()
