@@ -33,7 +33,7 @@ print(filename)
 print(int(wf.wf_len))
 
 # %%
-rr = RuinRecreate(wf, machines, ruin_method="children")
+rr = RuinRecreate(wf, machines, ruin_method="time")
 
 # %%
 rr_wf, machines = rr.run()

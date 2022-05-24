@@ -8,6 +8,9 @@ from helpers.examples.example_data import NAMES_A, NAMES_B, COSTS_A, COSTS_B, \
     TASK_DAG_A, TASK_DAG_B, PARENTS_DAG_A, PARENTS_DAG_B
 from random import choice, randint
 import networkx as nx
+import pydot
+import numpy as np
+from random import gauss
 
 # 'montage' not working properly
 # 'soykbr' wfcommons 0.7 not working properly
@@ -110,8 +113,7 @@ class Workflow:
     # DO NOT CHANGE THE NAMING
     def __add_dummy_nodes(self):
         self.tasks.insert(0, ta.Task.make_dummy_node(0, self.id, "Dummy-In"))
-        self.tasks.append(ta.Task.make_dummy_node(
-            len(self.tasks), self.id, "Dummy-Out"))
+        self.tasks.append(ta.Task.make_dummy_node(len(self.tasks), self.id, "Dummy-Out"))
 
         dummy_in = self.tasks[0]
         dummy_out = self.tasks[len(self.tasks) - 1]
@@ -288,6 +290,17 @@ class Workflow:
         for wf in workflows:
             print(wf)
 
+    def save_blueprint(self):
+        lines = ["[\n", self.file_path, "\n"]
+        for t in self.tasks:
+            lines.append(
+                f'TaskBlueprint({t.id}, {t.wf_id}, {t.name}, {t.runtime}, {t.level}, {[{"w": e.weight, "n": e.node.name} for e in self.children_edges]}, {[{"w": e.weight, "n": e.node.name} for e in self.parents_edges]}, {t.status}, {t.is_entry}, {t.is_exit})\n'
+            )
+        lines.append("]")
+
+        with open("./data.py", "w") as f:
+            f.writelines(lines)
+
     @staticmethod
     def load_random_workflows(machines, n, path: str = './data'):
         num_tasks = [
@@ -391,17 +404,7 @@ class Workflow:
     def get_task_by_id(self, id_):
         return [t for t in self.tasks if t.id == id_][0]
 
-    def recipe(self):
-        return [{"id": task,
-                 "start": task.start,
-                 "end": task.end,
-                 "machine_id": task.machine_id} for task in self.tasks]
-
     def read_dag(self, ccr=0.5):
-        import pydot
-        import numpy as np
-        from random import gauss
-
         graph = pydot.graph_from_dot_file(self.file_path)[0]
 
         tasks = []

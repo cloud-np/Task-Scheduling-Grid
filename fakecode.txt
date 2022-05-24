@@ -1,0 +1,24 @@
+# Radnom Ruin
+for task in tasks:
+    if randint() > 0.5:
+        Ruin Task's machine
+        ruined_tasks.append(task)
+
+# Random Recreate
+for task in tasks:
+    if task in ruined_tasks:
+        Schedule Task to the next best machine.
+
+#######################################################
+
+# Time Ruin
+Dertimine a time range to ruin.
+for task in tasks:
+    if window_start < task.start < window_end:
+        Remove task from workflow.
+        ruined_tasks.append(task)
+
+# Recreate Ruin
+for task in tasks:
+    if task in ruined_tasks:
+        Schedule Task to the 

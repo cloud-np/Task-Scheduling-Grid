@@ -4,7 +4,7 @@ from typing import List, Iterable, Tuple
 import random
 from helpers.examples.example_gen import ExampleGen
 from helpers.utils import find_perc_diff
-from classes.scheduler import Scheduler, TimeType, FillMethod
+from classes.scheduler import Scheduler, TimeType, FillMethod, calculate_upward_ranks
 from classes.machine import Machine
 
 
@@ -76,8 +76,11 @@ class RuinRecreate:
 
             # Recreate part
             self.__recreate(unscheduled_workflow, machines, ruined_tasks_ids)
-            best_scheduled_workflow, end_loop = self.greedy_keep(
-                unscheduled_workflow, best_scheduled_workflow)
+            # print(f'Unscheduled: {id(unscheduled_workflow)}')
+            # for task in unscheduled_workflow.tasks:
+            #     if task.runtime == 0:
+            #         print(task)
+            best_scheduled_workflow, end_loop = self.greedy_keep(unscheduled_workflow, best_scheduled_workflow)
 
         return best_scheduled_workflow, machines
 
@@ -117,13 +120,75 @@ class RuinRecreate:
         ...
 
     def time_ruin(self, workflow: Workflow) -> List[Tuple[int, int]]:
-        ruin_ids = [(t.id, t.machine_id) for t in filter(lambda x: self.time_window[0] <= x.start <= self.time_window[1], workflow.tasks)]
+        ruin_ids = []
+        for t in filter(lambda x: self.time_window[0] <= x.start <= self.time_window[1], workflow.tasks):
+            # ruin_ids.append((t, [{"w": e.weight, "n": e.node.name} for e in t.children_edges], [{"w": e.weight, "n": e.node.name} for e in t.parents_edges]))
+            ruin_ids.append((t.id, t.machine_id))
+
         start = random.randint(0, int(workflow.wf_len))
         self.time_window: int = (start, start + int(workflow.wf_len * 10 / 100))
         return ruin_ids
 
-    def time_recreate(self, workflow: Workflow, machines: List[Machine], ruined_mt_ids):
-        ...
+    def time_recreate(self, workflow: Workflow, machines: List[Machine], ruined_ids):
+
+        def schedule_workflow(wf, machines, time_type, fill_method):
+            # counte = sum(t.runtime for t in wf.tasks)
+            # print(counte)
+            unscheduled = sorted(wf.get_ready_unscheduled_tasks(), key=lambda t: t.up_rank, reverse=True)
+            schedule_tasks(unscheduled, machines, time_type, fill_method)
+            wf.set_scheduled(True)
+
+        def schedule_tasks(unscheduled, machines, time_type, fill_method):
+            i = 0
+            while len(unscheduled) > 0:
+                if i >= len(unscheduled):
+                    i = 0
+                un_task = unscheduled[i]
+
+                if un_task.status == TaskStatus.READY:
+                    Scheduler.schedule_task_machine_or_hole(un_task, machines, time_type, fill_method)
+                    unscheduled.pop(i)
+                    i = 0
+                else:
+                    i += 1
+
+        def remove_task(task: Task):
+            # 'Remove' the task
+            task.costs = []
+            task.runtime = 0
+            for p in task.parents_edges:
+                p.weight = 0
+            for c in task.children_edges:
+                c.weight = 0
+
+        def restore_task(task: Task):
+            for tid in ruined_ids:
+                if tid[0] == task.id:
+                    task.runtime = tid[1]
+                    for p in task.parents_edges:
+                        for name in tid[2]:
+                            if p.node.name == name["n"]:
+                                p.weight = name["w"]
+                    for c in task.children_edges:
+                        for name in tid[3]:
+                            if c.node.name == name["n"]:
+                                c.weight = name["w"]
+                    for m in machines:
+                        task.costs.append(m.generate_cost_for_task(task.runtime))
+
+        # Schedule the workflow with the made tasks
+        calculate_upward_ranks(tasks=workflow.tasks)
+        schedule_workflow(workflow, machines, TimeType.EFT, FillMethod.FASTEST_FIT)
+        print(sum(1 if t.runtime == 0 else 0 for t in workflow.tasks), self.time_window)
+        workflows, machines = ExampleGen.re_create_example([workflow], machines, reset_task_status=True)
+        workflow = workflows[0]
+        # print(workflow.get_ready_unscheduled_tasks())
+        for t in workflow.tasks:
+            if t.runtime == 0:
+                print(t, t.runtime)
+            restore_task(t)
+            print(t, t.runtime)
+            Scheduler.schedule_task_machine_or_hole(t, machines, TimeType.EFT)
 
     def level_ruin(self, workflow: Workflow) -> List[Tuple[int, int]]:
         ...
@@ -189,9 +254,9 @@ class RuinRecreate:
                 m.find_holes()
         workflow.set_scheduled(True)
 
-    def __ruin(self, workflow: Workflow) -> List[Tuple[int, int]]:
-        if self.rr_method == "level":
-            return [(t.id, t.machine_id) for t in workflow.tasks if t.level == self.ruin_level]
+    # def __ruin(self, workflow: Workflow) -> List[Tuple[int, int]]:
+    #     if self.rr_method == "level":
+    #         return [(t.id, t.machine_id) for t in workflow.tasks if t.level == self.ruin_level]
         # if self.ruin_method == "order":
         #     return
         # elif self.ruin_method == "time-based":

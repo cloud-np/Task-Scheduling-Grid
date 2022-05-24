@@ -102,20 +102,6 @@ class Scheduler:
     def get_blueprint(self):
         return ScheduleBlueprint(self.name, [[t.get_blueprint() for t in wf.tasks] for wf in self.workflows], self.machines, self.priority_type, self.fill_method, self.time_types)
 
-    def save_blueprint(self):
-        blp_self = self.get_blueprint()
-
-        lines = [f"({m.id}, {m.name}, {m.n_cpu}, {m.speed}, {m.network_kbps})\n" for m in self.machines]
-        lines.insert(0, f"{self.priority_type}, {self.fill_method}, {self.time_types}\n")
-        for blp_tasks in blp_self.workflows:
-            lines.extend(
-                f'TaskBlueprint({bt.id_}, {bt.wf_id}, "{bt.name}", {bt.runtime}, {bt.children_names}, {bt.parents_names}, {1 if bt.is_entry else 0}, {bt.is_entry}, {bt.is_exit}),\n'
-                for bt in blp_tasks
-            )
-
-        with open(f"./{get_fill_method(self.fill_method)}.txt", "w") as f:
-            f.writelines(lines)
-
     def get_whole_idle_time(self):
         return sum(m.get_idle_time() for m in self.machines)
 
