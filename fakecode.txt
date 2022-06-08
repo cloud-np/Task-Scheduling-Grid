@@ -18,7 +18,18 @@ for task in tasks:
         Remove task from workflow.
         ruined_tasks.append(task)
 
-# Recreate Ruin
+# Time Recreate
 for task in tasks:
     if task in ruined_tasks:
         Schedule Task to the 
+
+#######################################################
+
+# Comp/com Ruin
+Sort tasks by computational/cummunication cost.
+Ruin the 10% of the tasks with the highest computational/cummunication cost.
+
+# Comp/com Recreate
+for task in tasks:
+    if task in ruined_tasks:
+        Schedule Task to the next best machine.
