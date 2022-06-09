@@ -76,15 +76,12 @@ class RuinRecreate:
 
             # Recreate part
             self.__recreate(unscheduled_workflow, machines, ruined_tasks_ids)
-            # print(f'Unscheduled: {id(unscheduled_workflow)}')
-            # for task in unscheduled_workflow.tasks:
-            #     if task.runtime == 0:
-            #         print(task)
-            best_scheduled_workflow, end_loop = self.greedy_keep(unscheduled_workflow, best_scheduled_workflow)
+            best_scheduled_workflow, end_loop = self.__keep_func(
+                unscheduled_workflow, best_scheduled_workflow)
 
         return best_scheduled_workflow, machines
 
-    def greedy_keep(self, wf, best_wf):
+    def __keep_func(self, wf, best_wf):
         self.rr_countdown -= 1
         self.end_countdown -= 1
 
