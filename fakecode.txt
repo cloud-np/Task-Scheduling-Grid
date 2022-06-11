@@ -33,3 +33,16 @@ Ruin the 10% of the tasks with the highest computational/cummunication cost.
 for task in tasks:
     if task in ruined_tasks:
         Schedule Task to the next best machine.
+
+#######################################################
+
+# Order Ruin
+shuffle_tasks_order(tasks)
+
+# Recreate Ruin
+for task in tasks:
+    if scheduling_task has children scheduled before it:
+        for child in scheduling_task.children_edges:
+            Recursivly update all children start time.
+
+#######################################################
