@@ -50,6 +50,7 @@ class MachineBlueprint:
 
 class Machine:
 
+    # TODO wtf is cpti? delete it later.
     def __init__(self, id_, name, n_cpu, network_kbps, speed=None, memory=None, cpti=None):
         self.time_on_machine = 0
         self.id: int = id_
@@ -112,6 +113,9 @@ class Machine:
         return (self.get_busy_time() / schedule_len) * 100
 
     def get_idle_perc(self):
+        # This can be considered as saving a whole machine...
+        if len(self.tasks) == 0:
+            return 0
         return (self.get_idle_time() / self.time_on_machine) * 100
 
     @staticmethod
@@ -189,7 +193,7 @@ class Machine:
 
     @staticmethod
     def load_n_static_machines(n: int, network):
-        cpus = [2, 1, 4, 2,  # 4
+        cpus = [4, 4, 4, 4,  # 4
                 1, 4, 2, 3,  # 8
                 2, 1, 4, 2,
                 3, 4, 2, 3,  # 16

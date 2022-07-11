@@ -43,7 +43,7 @@ class HeftGenerator:
         minalpha = 20
         maxalpha = 50
         n = [50, 100, 200, 300, 400, 500, 600]
-        fat = [0.2, 0.4, 0.8]
+        fat = [0.1, 0.6]
         density = [0.2, 0.8]
         regularity = [0.2, 0.8]
         jump = [1, 2, 4]
@@ -103,7 +103,7 @@ def create_wfs(wf_type: str, i: int, path: str, num_tasks: int):
     if wf_type not in WF_TYPES:
         raise Exception('Not a valid name for a recipe!')
 
-    file_name = f'{path}/{wf_type}/{wf_type}_{num_tasks}'
+    file_name = f'{path}/{wf_type}/{wf_type}_{num_tasks}_{i}'
 
     # If the file exists already just return.
     if isfile(f'{file_name}.json'):
@@ -119,18 +119,18 @@ def create_all_wfs():
     # for n_tasks in NUM_TASKS:
     #     for w_type in WF_TYPES:
     #         create_wfs(wf_type=w_type, num_tasks=n_tasks)
-    for i in [0, 1, 2]:
-        for n_tasks in [10, 20, 50]:
+    for i in range(10):
+        for n_tasks in [50, 100, 200, 300, 400, 500]:
             for w_type in WF_TYPES:
-                create_wfs(wf_type=w_type, i=i, num_tasks=n_tasks)
-    # for n_tasks in [300, 1000]:
+                create_wfs(wf_type=w_type, i=i, path='./data', num_tasks=n_tasks)
+    # for n_tasks in [400]:
     #     for w_type in WF_TYPES:
     #         create_wfs(wf_type=w_type, path='./data', num_tasks=n_tasks)
 
 
 if __name__ == '__main__':
-    # create_all_wfs()
-    HeftGenerator.gen_dags()
+    create_all_wfs()
+    # HeftGenerator.gen_dags()
 # file_name = 'data/epigenomics-wf.json'
 # creating a Seismology workflow recipe based on the number
 # of pair of signals to estimate earthquake STFs

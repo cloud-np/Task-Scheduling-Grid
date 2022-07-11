@@ -151,7 +151,7 @@ class Scheduler:
         m_id = slowest_machine.str_id()
         schedule_len = slowest_machine.str_schedule_len()
 
-        return [method_info, f"Holes Filled {self.get_holes_filled()}", add_nl(time_saved), add_nl(m_id), add_nl(schedule_len)]
+        return [method_info, self.get_holes_filled(), add_nl(time_saved), add_nl(m_id), add_nl(schedule_len)]
 
     def get_holes_time_saved(self):
         return sum(m.holes_saved_time for m in self.machines)
@@ -283,6 +283,16 @@ class Scheduler:
             else:
                 i += 1
 
+    @staticmethod
+    def heft_with_holes(tasks, machines, fill_method=FillMethod.NO_FILL):
+        # Phase 1
+        calculate_upward_ranks(tasks)
+        # We sort the tasks based of their up_rank
+        tasks.sort(key=lambda task: task.up_rank, reverse=True)
+        # Phase 2
+        for task in tasks:
+            Scheduler.schedule_task_machine_or_hole(task, machines, TimeType.EFT, fill_method)
+
     def holes2011(self):
         def __schedule_workflows(wf, priority_type):
             # 1. Sort tasks in workflows based on the priority_type
@@ -344,7 +354,8 @@ class Scheduler:
         for task in unscheduled:
             Scheduler.schedule_task_machine(task, machines, TimeType.EFT)
 
-    def schedule_tasks_cpop(self, queue, critical_info):
+    @staticmethod
+    def schedule_tasks_cpop(machines, queue, critical_info):
         critical_path = critical_info[0]
         critical_machine_id = critical_info[1]
 
@@ -358,10 +369,10 @@ class Scheduler:
                     break
             if mpt in critical_path:
                 # Here we send on purpose only the critical_machine
-                Scheduler.schedule_tasks_heft([mpt], [self.machines[critical_machine_id]])
+                Scheduler.schedule_tasks_heft([mpt], [machines[critical_machine_id]])
             else:
                 # You run schedule_tasks and you simply send just one task so it works fine.
-                Scheduler.schedule_tasks_heft([mpt], self.machines)
+                Scheduler.schedule_tasks_heft([mpt], machines)
             for child_edge in mpt.children_edges:
                 child = child_edge.node
                 # The status of the child gets updated by the parent. In more details the every task

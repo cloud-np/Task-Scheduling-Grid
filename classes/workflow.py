@@ -1,5 +1,5 @@
 import classes.task as ta
-from algos.calc_task_ranks import calculate_upward_ranks
+from algos.calc_task_ranks import calculate_upward_ranks, calculate_downward_ranks
 from colorama import Fore, Back
 from helpers.checker import workflow_checker
 from typing import Optional, List
@@ -61,9 +61,9 @@ class Workflow:
         self.cp_info = {"critical_path": set(), "entry": None, "exit": None}
 
         # Calculate downward and upward ranks
-        # calculate_upward_ranks(self.tasks)
-        # calculate_downward_ranks(self.tasks)
-        # self.create_critical_path()
+        calculate_upward_ranks(self.tasks)
+        calculate_downward_ranks(self.tasks)
+        self.create_critical_path()
 
         # Calc ccr which means also the avg_comp and avg_com costs
         self.ccr = self.calc_ccr()
@@ -82,8 +82,9 @@ class Workflow:
             # though by theory it would still be O(n)
             for t in self.tasks:
                 if t.status != ta.TaskStatus.SCHEDULED:
-                    raise Exception(
-                        "Workflow can't be scheduled if all of his tasks haven't ended.")
+                    raise Exception("Workflow can't be scheduled if all of his tasks haven't ended.")
+                elif not t.name.startswith("Dummy") and (t.end == 0 or t.runtime == 0):
+                    raise Exception("A task's runtime got modified T", t.id)
                 elif t.end > self.wf_len:
                     self.wf_len = t.end
             self.scheduled = True
@@ -143,11 +144,13 @@ class Workflow:
         for wf in workflows:
             for task in wf.tasks:
                 if task.is_entry:
+                    dummy_in.down_rank = 0
                     dummy_in.add_child(0, task)
                     task.add_parent(0, dummy_in)
                     task.is_entry = False
                     task.status = ta.TaskStatus.UNSCHEDULED
                 if task.is_exit:
+                    dummy_out.up_rank = 0
                     dummy_out.add_parent(0, task)
                     task.add_child(0, dummy_out)
                     task.is_exit = False

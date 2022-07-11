@@ -17,7 +17,8 @@ RUN apt-get update && \
     apt-get autoremove -y && \
     apt-get clean \
     apt-get zsh \
-    apt-get vim
+    apt-get vim \
+    apt install graphviz-dev
 
 # Default powerline10k theme, no plugins installed
 RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/v1.1.2/zsh-in-docker.sh)"

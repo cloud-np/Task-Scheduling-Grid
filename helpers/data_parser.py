@@ -13,12 +13,18 @@ def get_tasks_from_json_file(file_name, wf_id, network_kbps):
         # create_csv_file_to_visualize_graph(data['workflow']['jobs'])
         data = json.load(f)
 
+        # This changed because WfCommons changed the naming in their generated workflows.
+        if data['workflow'].get('jobs'):
+            tasks_json = data['workflow'].get('jobs')
+        else:
+            tasks_json = data['workflow'].get('tasks')
         # n_tasks = len(data['workflow']['jobs'])
         # 1) Parse first the machines you have to do the workflow. ( we create our machines )
         # 2) Parse the data for the tasks in the: data['workflow']['jobs'] ---> job['files']
         #       For the above dictionary you should sum the file sizes together
         #       to get the overall communication cost.
-        for job in data['workflow']['jobs']:
+
+        for job in tasks_json:
             # Name & id
             # job['name'] <- This can and should be used as an id right away
             job_id = get_id_from_name(job['name'])
