@@ -129,8 +129,8 @@ def create_all_wfs():
 
 
 if __name__ == '__main__':
-    create_all_wfs()
-    # HeftGenerator.gen_dags()
+    # create_all_wfs()
+    HeftGenerator.gen_dags()
 # file_name = 'data/epigenomics-wf.json'
 # creating a Seismology workflow recipe based on the number
 # of pair of signals to estimate earthquake STFs
